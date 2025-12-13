@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+  <meta charset="UTF-8" />
+  <title>№4 Алға орта мектебі – Қатысым</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body data-lang="kk">
+<header class="top-header">
+  <div class="top-header-inner">
+    <div class="logo-block">
+      <img src="img/logo.png" alt="Мектеп логотипі" class="school-logo" />
+      <div id="schoolTitles" class="school-title">
+        <span data-lang="kk">№4 Алға орта мектебі</span>
+        <span data-lang="ru" style="display:none">СШ №4 г. Алга</span>
+      </div>
+    </div>
+
+    <nav class="main-nav">
+      <a href="#banner" id="navHome">Басты бет</a>
+      <a href="#attendance" id="navAttendance">Қатысым</a>
+      <a href="#stats" id="navStats">Статистика</a>
+    </nav>
+
+    <button id="langToggle" class="lang-toggle">KZ / RU</button>
+  </div>
+</header>
+
+<main class="page-main">
+  <section id="banner" class="banner-section">
+    <div class="banner-content">
+      <h1 id="bannerTitle">Сабаққа қатысу мониторингі</h1>
+      <p id="bannerSubtitle">
+        Оқушылардың сабаққа қатысуын, кешігуді және себепсіз қалуды<br />
+        күнделікті бақылауға арналған мектепішілік жүйе.
+      </p>
+      <a href="#attendance" class="primary-btn" id="bannerButton">Қатысым белгілеу</a>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section id="stats" class="card">
+    <h2 id="statsTitle">Статистика және рейтинг</h2>
+
+    <div class="filters-row">
+      <div class="filter-item">
+        <label for="periodType" id="periodTypeLabel">Уақыт кезеңі</label>
+        <select id="periodType">
+          <option value="all" id="optAll">Барлығы</option>
+          <option value="month" id="optMonth">Айлық</option>
+          <option value="quarter" id="optQuarter">Тоқсандық</option>
+          <option value="year" id="optYear">Жылдық</option>
+          <option value="custom" id="optCustom">Еркін мерзім</option>
+        </select>
+      </div>
+
+      <div class="filter-item period-control" id="monthControl">
+        <label for="monthInput" id="monthLabel">Ай</label>
+        <input type="month" id="monthInput" />
+      </div>
+
+      <div class="filter-item period-control" id="quarterControl">
+        <label for="quarterInput" id="quarterLabel">Тоқсан</label>
+        <select id="quarterInput">
+          <option value="1" id="q1">I тоқсан</option>
+          <option value="2" id="q2">II тоқсан</option>
+          <option value="3" id="q3">III тоқсан</option>
+          <option value="4" id="q4">IV тоқсан</option>
+        </select>
+        <input type="number" id="quarterYearInput" placeholder="Жыл" min="2020" max="2100" />
+      </div>
+
+      <div class="filter-item period-control" id="yearControl">
+        <label for="yearInput" id="yearLabel">Жыл</label>
+        <input type="number" id="yearInput" min="2020" max="2100" />
+      </div>
+
+      <div class="filter-item period-control" id="customControl">
+        <label id="customLabel">Күн аралығы</label>
+        <div class="custom-range">
+          <input type="date" id="customStart" />
+          <span>–</span>
+          <input type="date" id="customEnd" />
+        </div>
+      </div>
+
+      <!-- НОВОЕ: фильтр по классу для отчета -->
+      <div class="filter-item">
+        <label for="reportClass" id="reportClassLabel">Сынып (есеп)</label>
+        <select id="reportClass">
+          <option value="ALL">ALL</option>
+        </select>
+      </div>
+
+      <div class="filter-item">
+        <button class="primary-btn" id="updateStatsBtn">🔄 Статистиканы жаңарту</button>
+      </div>
+
+      <div class="filter-item">
+        <button class="secondary-btn" id="exportCsvBtn">📥 CSV экспорт</button>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label" id="totalLessonsLabel">Барлық белгіленген</div>
+        <div class="stat-value" id="totalLessons">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label" id="totalPresentLabel">Қатысқандар</div>
+        <div class="stat-value" id="totalPresent">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label" id="totalUnexcusedLabel">Себепсіз</div>
+        <div class="stat-value" id="totalUnexcused">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label" id="totalLateLabel">Кешіккендер</div>
+        <div class="stat-value" id="totalLate">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label" id="totalSickLabel">Ауырғандар</div>
+        <div class="stat-value" id="totalSick">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label" id="totalExcusedLabel">Себепті</div>
+        <div class="stat-value" id="totalExcused">0</div>
+      </div>
+    </div>
+
+    <div class="tables-two-cols">
+      <div class="table-wrapper small">
+        <h3 id="topLateTitle">TOP кешіккен оқушылар</h3>
+        <table id="topLateTable">
+          <thead>
+          <tr>
+            <th>№</th><th id="topLateName">Оқушы</th><th id="topLateClass">Сынып</th><th id="topLateCount">Саны</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="table-wrapper small">
+        <h3 id="topUnexcusedTitle">TOP себепсіз қалған оқушылар</h3>
+        <table id="topUnexcusedTable">
+          <thead>
+          <tr>
+            <th>№</th><th id="topUnexcusedName">Оқушы</th><th id="topUnexcusedClass">Сынып</th><th id="topUnexcusedCount">Саны</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ATTENDANCE -->
+  <section id="attendance" class="card">
+    <h2 id="attendanceTitle">Қатысым белгілеу</h2>
+
+    <div class="filters-row">
+      <div class="filter-item">
+        <label for="attendanceDate" id="attendanceDateLabel">Күні</label>
+        <input type="date" id="attendanceDate" />
+      </div>
+
+      <div class="filter-item">
+        <label for="classSelect" id="attendanceClassLabel">Сынып</label>
+        <select id="classSelect">
+          <option value="">Сыныпты таңдаңыз</option>
+        </select>
+      </div>
+
+      <div class="filter-item">
+        <label for="searchInput" id="attendanceSearchLabel">ФИО бойынша іздеу</label>
+        <input type="text" id="searchInput" placeholder="Оқушының аты-жөнін жазыңыз..." />
+      </div>
+    </div>
+
+    <div class="legend-row">
+      <span><span class="legend-box present"></span> ✔ <span id="legendPresentText">Қатысты</span></span>
+      <span><span class="legend-box sick"></span> 🤒 <span id="legendSickText">Ауырды</span></span>
+      <span><span class="legend-box late"></span> 🕒 <span id="legendLateText">Кешікті</span></span>
+      <span><span class="legend-box excused"></span> 📄 <span id="legendExcusedText">Себепті</span></span>
+      <span><span class="legend-box absent"></span> ❌ <span id="legendUnexcusedText">Себепсіз</span></span>
+    </div>
+
+    <div class="table-wrapper">
+      <table id="attendanceTable">
+        <thead>
+        <tr>
+          <th id="thIdx">№</th>
+          <th id="thName">Оқушының аты-жөні</th>
+          <th id="thClass">Сынып</th>
+          <th id="thStatus">Статус</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="actions-row">
+      <button class="primary-btn" id="saveAttendanceBtn">✅ Сақтау</button>
+      <span id="saveStatus" class="save-status"></span>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  №4 Алға орта мектебі – Сабаққа қатысым жүйесі · 2025
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
