@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<title>Сабаққа қатысуды белгілеу</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body { font-family: Arial; margin:0; background:#f5f7ff }
+header{background:#0047a7;color:#fff;padding:14px;font-size:20px;font-weight:700;text-align:center}
+.container{max-width:800px;margin:25px auto;background:#fff;padding:20px;border-radius:12px;box-shadow:0 0 12px #0001}
+
+select,button{
+  padding:8px 12px;margin-top:8px;font-size:14px;border-radius:6px;border:1px solid #bbb}
+.list{margin-top:15px}
+.student-row{
+ display:flex;justify-content:space-between;padding:10px;border-bottom:1px solid #eee
+}
+.status select{padding:5px;font-size:13px;border-radius:4px}
+.save-btn{
+ background:#0077ff;color:#fff;width:100%;padding:10px;margin-top:15px;
+ font-size:16px;border:none;border-radius:8px;cursor:pointer}
+.save-btn:hover{background:#0059c9}
+</style>
+</head>
+
+<body>
+
+<header>📘 Сабаққа қатысуды белгілеу</header>
+
+<div class="container">
+
+<label>Сыныпты таңда:</label><br>
+<select id="classSelect">
+  <option value="">Таңда…</option>
+  <option>1А</option><option>1Ә</option><option>2А</option>
+  <option>5Ә</option><option>7Б</option>
+</select>
+
+<div id="studentsList" class="list"></div>
+
+<button class="save-btn" onclick="saveAttendance()">Сақтау ✔</button>
+
+</div>
+
+<script>
+// 🔹 Оқушылар тізімі (бұл index.html-дағы students–пен бірдей болуы керек)
+const students = [
+{ name: "Айғара Амелия Әнесқызы", class:"1А"},
+{ name: "Айдос Абылхайыр Ерікұлы", class:"1А"},
+{ name: "Алмагамбетова Азалия", class:"1Ә"},
+{ name: "Аманжолова Азиза", class:"2А"},
+{ name: "Абдурахманова Акниет", class:"5А"},
+{ name: "Асемаев Фархад", class:"5Ә"},
+{ name: "Аскат Ассым", class:"7Б"},
+{ name: "Сагиткерей Арсен", class:"7Б"},
+];
+
+// ▶ Сынып таңдалғанда оқушылар шығуы
+document.getElementById("classSelect").onchange = () =>{
+ let cls = classSelect.value;
+ let list = students.filter(s=>s.class==cls);
+
+ studentsList.innerHTML = ""; //тазалау
+
+ list.forEach(s=>{
+   studentsList.innerHTML+=`
+   <div class="student-row">
+     <div>${s.name}</div>
+     <div class="status">
+       <select data-student="${s.name}">
+         <option value="katysty">Қатысты ✔</option>
+         <option value="keshikti">Кешікті</option>
+         <option value="sebep">Себепті</option>
+         <option value="sebsez">Себепсіз❗</option>
+         <option value="auyrdy">Ауырды 🤒</option>
+       </select>
+     </div>
+   </div>
+   `;
+ });
+};
+
+// ▶ Белгілеуді сақтау (LocalStorage → автоматты түрде база)
+function saveAttendance(){
+ let selects=document.querySelectorAll("select[data-student]");
+ let today=new Date().toLocaleDateString("kk-KZ");
+ let log=JSON.parse(localStorage.getItem("attendance")||"[]");
+
+ selects.forEach(sel=>{
+   log.push({
+     name:sel.dataset.student,
+     status:sel.value,
+     date:today
+   });
+ });
+
+ localStorage.setItem("attendance",JSON.stringify(log));
+ alert("Сақталды ✔");
+}
+</script>
+</body>
+</html>
