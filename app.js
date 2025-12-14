@@ -1,7 +1,7 @@
 // ============================
 // SETTINGS (ӨЗІҢІЗДІКІН ҚОЙЫҢЫЗ)
 // ============================
-const WEBAPP_URL = "PASTE_YOUR_WEBAPP_EXEC_URL_HERE";
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbybwO1f-AnhloW8H_yLqNPL5TcKJaCiyxFFoAGWfepka99XI1e8TfnzVJ8cHvCQ6Fp-hw/exec";
 const API_KEY = "school2025";
 
 // ============================
@@ -519,3 +519,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     exportCsv().catch(e => alert(I18N_UI[currentLang].apiErr + " " + e.message));
   });
 });
+
