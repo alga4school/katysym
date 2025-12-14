@@ -42,8 +42,8 @@ const I18N_UI = {
     attendanceHint: "Ескерту: барлығы әдепкіде «Қатысты». Тек қажет болса ғана «Ауырды / Себепті / Себепсіз / Кешікті» таңдаңыз.",
     reportHint: "Ескерту: Есептер деректері Google Script арқылы алынады.",
     periodLabel: "Кезең",
-    fromLabel: "Күн бойынша",
-    toLabel: "Күн бойынша",
+    fromLabel: "Басталу күні",
+    toLabel: "Аяқталу күні",
     monthLabel: "Ай",
     quarterLabel: "Тоқсан",
     yearLabel: "Жыл",
@@ -53,8 +53,8 @@ const I18N_UI = {
     pQuarter: "Тоқсан",
     pYear: "Жыл",
     pAll: "Барлығы",
-    btnUpdate: "Жазбаларды қарау",
-    btnExport: "Құжатты жүктеп алу CSV",
+    btnUpdate: "Көрсету",
+    btnExport: "CSV жүктеу",
     kpiTotal: "Барлық белгі",
     kpiPresent: "Қатысты",
     kpiLate: "Кешікті",
@@ -577,6 +577,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
