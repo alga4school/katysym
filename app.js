@@ -151,7 +151,8 @@ async function apiPost(body) {
     headers: { "Content-Type": "application/json" },// ✅ МІНЕ ОСЫ
     body: JSON.stringify(body),
   });
-  const data = await r.json();
+  const text = await r.text();
+const data = JSON.parse(text);
   if (!data.ok) throw new Error(data.error || "API error");
   return data;
 }
@@ -640,6 +641,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Apply initial i18n once DOM ready
   applyI18n();
 });
+
 
 
 
