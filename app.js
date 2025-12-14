@@ -1,7 +1,7 @@
 // ============================
 // SETTINGS (СІЗДІҢ URL / KEY)
 // ============================
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbybwO1f-AnhloW8H_yLqNPL5TcKJaCiyxFFoAGWfepka99XI1e8TfnzVJ8cHvCQ6Fp-hw/exec";
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzyXEHGUXLvr4XlwiJk5Tg9dFvH7xoJBbY894JrXbxSyoFh1ifZHa6bW8SfrmGESBt5Fw/exec";
 const API_KEY = "school2025";
 
 // ============================
@@ -566,3 +566,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
