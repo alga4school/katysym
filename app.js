@@ -641,3 +641,4 @@ document.addEventListener("DOMContentLoaded", async () => {
   applyI18n();
 });
 
+
