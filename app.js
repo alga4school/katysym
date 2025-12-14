@@ -1,9 +1,8 @@
 // ============================
 // SETTINGS (ВПИШИТЕ СВОЁ)
 // ============================
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx6JJQ05oRy2gC8ENiRVYwWGVVfS76VUAoJ6QDZUgKMdFwbrGJgHtSrBOYQ8f_mHjs/exec";
-const API_KEY = "school2025"; // как у вас в Script properties
-
+const WEBAPP_URL = "https://broken-paper-fdf4.alga4school.workers.dev";
+const API_KEY = "school2025";
 // ============================
 // STATUS CONFIG (3 поля)
 // ============================
@@ -487,3 +486,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (type === "custom") document.getElementById("customControl").style.display = "flex";
   });
 });
+
