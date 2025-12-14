@@ -158,11 +158,6 @@ async function apiPost(body) {
   if (!data.ok) throw new Error(data.error || "API error");
   return data;
 }
-
-}
-
-}
-
 // ============================
 // STATE
 // ============================
@@ -645,6 +640,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Apply initial i18n once DOM ready
   applyI18n();
 });
+
 
 
 
