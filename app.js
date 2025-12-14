@@ -1,7 +1,7 @@
 // ============================
 // SETTINGS (ВПИШИТЕ СВОЁ)
 // ============================
-const WEBAPP_URL = "https://broken-paper-fdf4.alga4school.workers.dev/";
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwu6x6Njht7HTojiIL40YwoWg3WDABKQBC8Hw0W0584u0eJkxjmkd_ityK9ZyPuk5DRwg/exec";
 const API_KEY = "school2025";
 // ============================
 // STATUS CONFIG (3 поля)
@@ -486,5 +486,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (type === "custom") document.getElementById("customControl").style.display = "flex";
   });
 });
+
 
 
