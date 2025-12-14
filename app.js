@@ -40,20 +40,20 @@ const I18N_UI = {
     colStatus: "Белгі",
     colCount: "Саны",
     attendanceHint: "Ескерту: барлығы әдепкіде «Қатысты». Тек қажет болса ғана «Ауырды / Себепті / Себепсіз / Кешікті» таңдаңыз.",
-    reportHint: "Ескерту: Отчёт деректері Google Script арқылы алынады.",
-    periodLabel: "Период",
-    fromLabel: "От даты",
-    toLabel: "До даты",
-    monthLabel: "Месяц",
-    quarterLabel: "Квартал",
-    yearLabel: "Год",
-    pDay: "День",
-    pWeek: "Неделя",
-    pMonth: "Месяц",
-    pQuarter: "Квартал",
+    reportHint: "Ескерту: Есептер деректері Google Script арқылы алынады.",
+    periodLabel: "Кезең",
+    fromLabel: "Күн бойынша",
+    toLabel: "Күн бойынша",
+    monthLabel: "Ай",
+    quarterLabel: "Тоқсан",
+    yearLabel: "Жыл",
+    pDay: "Күні",
+    pWeek: "Апта",
+    pMonth: "Ай",
+    pQuarter: "Тоқсан",
     pYear: "Жыл",
     pAll: "Барлығы",
-    btnUpdate: "Көру",
+    btnUpdate: "Жазбаларды қарау",
     btnExport: "Құжатты жүктеп алу CSV",
     kpiTotal: "Барлық белгі",
     kpiPresent: "Қатысты",
@@ -67,7 +67,7 @@ const I18N_UI = {
   ru: {
     schoolName: 'КГУ "Алгинская средняя школа №4" ГУ "Отдел образования Алгинского района Управления образования Актюбинской области"',
     bannerTitle: "Журнал посещаемости",
-    bannerText: "Внутришкольная система для ежедневного контроля посещаемости,\nопозданий и пропусков без причины.",
+    bannerText: "Внутишкольная система для ежедневного контроля посещаемости,\nопозданий и пропусков без причины.",
     btnAttendance: "Журнал посещаемости",
     btnReports: "Отчёты и статистика",
     backHome: "Главная",
@@ -577,6 +577,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
