@@ -26,11 +26,11 @@ const I18N_UI = {
     schoolName: 'Ақтөбе облысының білім басқармасы Алға ауданының білім бөлімі" ММ "№4 Алға орта мектебі" КММ',
     bannerTitle: "Қатысу журналы",
     bannerText: "Оқушылардың сабаққа қатысуын, кешігуді және себепсіз қалуды\nкүнделікті бақылауға арналған мектепішілік жүйе.",
-    btnAttendance: "Журнал посещаемости",
-    btnReports: "Отчёты и статистика",
+    btnAttendance: "Қатысуды белгілеу",
+    btnReports: "Есептер мен статистика",
     backHome: "Басты бет",
     attendanceTitle: "Қатысу журналы",
-    reportsTitle: "Отчёты и статистика",
+    reportsTitle: "Есептер мен статистика",
     dateLabel: "Күні",
     classLabel: "Сынып",
     searchLabel: "Іздеу",
@@ -51,18 +51,18 @@ const I18N_UI = {
     pWeek: "Неделя",
     pMonth: "Месяц",
     pQuarter: "Квартал",
-    pYear: "Год",
-    pAll: "Все",
-    btnUpdate: "Показать",
-    btnExport: "Экспорт CSV",
+    pYear: "Жыл",
+    pAll: "Барлығы",
+    btnUpdate: "Көру",
+    btnExport: "Құжатты жүктеп алу CSV",
     kpiTotal: "Барлық белгі",
     kpiPresent: "Қатысты",
     kpiLate: "Кешікті",
     kpiSick: "Ауырды",
     kpiExcused: "Себепті",
     kpiUnexcused: "Себепсіз",
-    topLate: "Кешігу көп (TOP)",
-    topUnexcused: "Себепсіз көп (TOP)",
+    topLate: "Көп кешігу  (TOP)",
+    topUnexcused: "Көп себепсіз (TOP)",
   },
   ru: {
     schoolName: 'КГУ "Алгинская средняя школа №4" ГУ "Отдел образования Алгинского района Управления образования Актюбинской области"',
@@ -577,5 +577,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
