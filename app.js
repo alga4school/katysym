@@ -194,6 +194,12 @@ function applyI18n() {
   document.querySelectorAll("[data-i18n]").forEach((el) => {
     const key = el.getAttribute("data-i18n");
     if (dict[key] != null) el.textContent = dict[key];
+      // ✅ School name only one language
+  const schoolEl = document.getElementById("schoolNameText");
+  if (schoolEl) {
+    schoolEl.textContent = dict.schoolName; // kk болса kk, ru болса ru
+  }
+
   });
 
   const search = document.getElementById("searchInput");
@@ -641,4 +647,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   // apply i18n once
   applyI18n();
 });
+
 
