@@ -8,16 +8,14 @@
 </head>
 
 <body data-lang="kk">
+  <!-- TOP BAR -->
   <header class="topbar">
     <div class="brand">
-      <!-- LOGO -->
-      <div class="logo">
-        <img src="img/logo.png" alt="School logo" />
-      </div>
-
-      <!-- SCHOOL NAME (auto KK/RU) -->
+      <img class="logo-img" src="img/logo.png" alt="School logo" />
       <div class="brand-text">
-        <div class="school-name" id="schoolNameText"></div>
+        <div class="school-name" data-i18n="schoolName">
+          Ақтөбе облысының білім басқармасы Алға ауданының білім бөлімі" ММ "№4 Алға орта мектебі" КММ
+        </div>
       </div>
     </div>
 
@@ -35,14 +33,19 @@
           <div class="banner-overlay">
             <h1 class="banner-title" data-i18n="bannerTitle">Қатысу журналы</h1>
             <p class="banner-text" data-i18n="bannerText">
-              Оқушылардың сабаққа қатысуын, кешігуді және себепсіз қалуды күнделікті бақылауға арналған мектепішілік жүйе.
+              Оқушылардың сабаққа қатысуын, кешігуді және себепсіз қалуды
+              күнделікті бақылауға арналған мектепішілік жүйе.
             </p>
           </div>
         </div>
 
         <div class="home-actions">
-          <button id="goAttendance" class="btn primary" type="button">📚 <span data-i18n="btnAttendance">Журнал посещаемости</span></button>
-          <button id="goReports" class="btn ghost" type="button">📊 <span data-i18n="btnReports">Отчёты и статистика</span></button>
+          <button id="goAttendance" class="btn primary" type="button">
+            📚 <span data-i18n="btnAttendance">Журнал посещаемости</span>
+          </button>
+          <button id="goReports" class="btn ghost" type="button">
+            📊 <span data-i18n="btnReports">Отчёты и статистика</span>
+          </button>
         </div>
       </div>
     </section>
@@ -71,7 +74,9 @@
             <input id="searchInput" type="text" placeholder="..." />
           </label>
 
-          <button id="saveAttendanceBtn" class="btn primary" type="button">💾 <span data-i18n="saveBtn">Сақтау</span></button>
+          <button id="saveAttendanceBtn" class="btn primary" type="button">
+            💾 <span data-i18n="saveBtn">Сақтау</span>
+          </button>
         </div>
 
         <div id="saveStatus" class="save-status" aria-live="polite"></div>
@@ -83,7 +88,7 @@
                 <th style="width:60px;">№</th>
                 <th data-i18n="colStudent">Оқушы</th>
                 <th style="width:110px;" data-i18n="colClass">Сынып</th>
-                <th style="width:280px;" data-i18n="colStatus">Белгі</th>
+                <th style="width:320px;" data-i18n="colStatus">Белгі</th>
               </tr>
             </thead>
             <tbody></tbody>
@@ -157,7 +162,7 @@
             </div>
 
             <label class="field">
-              <span class="label" data-i18n="classLabel">Сынып</span>
+              <span class="label" data-i18n="classLabel">Класс</span>
               <select id="reportClass"></select>
             </label>
 
