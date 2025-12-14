@@ -6,15 +6,17 @@
   <title>Мектепішілік қатысу жүйесі</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-
 <body data-lang="kk">
-  <!-- TOP BAR -->
+  <!-- Top bar -->
   <header class="topbar">
     <div class="brand">
-      <img class="logo-img" src="img/logo.png" alt="School logo" />
+      <img class="logo-img" src="img/logo.png" alt="Мектеп логотипі" />
       <div class="brand-text">
         <div class="school-name" data-i18n="schoolName">
           Ақтөбе облысының білім басқармасы Алға ауданының білім бөлімі" ММ "№4 Алға орта мектебі" КММ
+        </div>
+        <div class="school-name-sub" data-i18n="schoolNameRu">
+          КГУ "Алгинская средняя школа №4" ГУ "Отдел образования Алгинского района Управления образования Актюбинской области"
         </div>
       </div>
     </div>
@@ -25,7 +27,6 @@
   </header>
 
   <main class="app">
-
     <!-- HOME -->
     <section id="viewHome" class="view active">
       <div class="home-card">
@@ -40,12 +41,8 @@
         </div>
 
         <div class="home-actions">
-          <button id="goAttendance" class="btn primary" type="button">
-            📚 <span data-i18n="btnAttendance">Журнал посещаемости</span>
-          </button>
-          <button id="goReports" class="btn ghost" type="button">
-            📊 <span data-i18n="btnReports">Отчёты и статистика</span>
-          </button>
+          <button id="goAttendance" class="btn primary" type="button">📚 <span data-i18n="btnAttendance">Журнал посещаемости</span></button>
+          <button id="goReports" class="btn ghost" type="button">📊 <span data-i18n="btnReports">Отчёты и статистика</span></button>
         </div>
       </div>
     </section>
@@ -71,12 +68,10 @@
 
           <label class="field grow">
             <span class="label" data-i18n="searchLabel">Іздеу</span>
-            <input id="searchInput" type="text" placeholder="..." />
+            <input id="searchInput" type="text" placeholder="ФИО..." />
           </label>
 
-          <button id="saveAttendanceBtn" class="btn primary" type="button">
-            💾 <span data-i18n="saveBtn">Сақтау</span>
-          </button>
+          <button id="saveAttendanceBtn" class="btn primary" type="button">💾 <span data-i18n="saveBtn">Сақтау</span></button>
         </div>
 
         <div id="saveStatus" class="save-status" aria-live="polite"></div>
@@ -101,7 +96,7 @@
       </div>
     </section>
 
-    <!-- REPORTS -->
+    <!-- REPORTS / STATS -->
     <section id="viewReports" class="view reports-bg">
       <div class="view-head reports-head">
         <button class="btn link light" id="backHome2" type="button">← <span data-i18n="backHome">Басты бет</span></button>
@@ -204,7 +199,6 @@
         </div>
       </div>
     </section>
-
   </main>
 
   <script src="app.js"></script>
