@@ -148,12 +148,14 @@ async function apiGet(mode, params = {}) {
 async function apiPost(body) {
   const r = await fetch(WEBAPP_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "text/plain;charset=utf-8" }, // ✅ МІНЕ ОСЫ
     body: JSON.stringify(body),
   });
   const data = await r.json();
   if (!data.ok) throw new Error(data.error || "API error");
   return data;
+}
+
 }
 
 // ============================
@@ -638,3 +640,4 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Apply initial i18n once DOM ready
   applyI18n();
 });
+
