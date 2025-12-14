@@ -1,19 +1,11 @@
 // ============================
-// SETTINGS (ӨЗІҢІЗДІКІН ҚОЙЫҢЫЗ)
+// SETTINGS (СІЗДІҢ URL / KEY)
 // ============================
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzyXEHGUXLvr4XlwiJk5Tg9dFvH7xoJBbY894JrXbxSyoFh1ifZHa6bW8SfrmGESBt5Fw/exec";
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbybwO1f-AnhloW8H_yLqNPL5TcKJaCiyxFFoAGWfepka99XI1e8TfnzVJ8cHvCQ6Fp-hw/exec";
 const API_KEY = "school2025";
 
 // ============================
-// SCHOOL NAME (KK/RU)
-// ============================
-const SCHOOL_NAME = {
-  kk: 'Ақтөбе облысының білім басқармасы Алға ауданының білім бөлімі "ММ" "№4 Алға орта мектебі" КММ',
-  ru: 'КГУ "Алгинская средняя школа №4" ГУ "Отдел образования Алгинского района Управления образования Актюбинской области"',
-};
-
-// ============================
-// STATUS CONFIG
+// STATUS
 // ============================
 const STATUS = {
   katysty: { kk: "Қатысты", ru: "Присутствовал(а)" }, // default
@@ -25,14 +17,15 @@ const STATUS = {
 const EXCEPTIONS = ["auyrdy", "sebep", "sebsez", "keshikti"];
 
 // ============================
-// UI i18n
+// I18N
 // ============================
 let currentLang = document.body.dataset.lang || "kk";
 
 const I18N_UI = {
   kk: {
+    schoolName: 'Ақтөбе облысының білім басқармасы Алға ауданының білім бөлімі" ММ "№4 Алға орта мектебі" КММ',
     bannerTitle: "Қатысу журналы",
-    bannerText: "Оқушылардың сабаққа қатысуын, кешігуді және себепсіз қалуды күнделікті бақылауға арналған мектепішілік жүйе.",
+    bannerText: "Оқушылардың сабаққа қатысуын, кешігуді және себепсіз қалуды\nкүнделікті бақылауға арналған мектепішілік жүйе.",
     btnAttendance: "Журнал посещаемости",
     btnReports: "Отчёты и статистика",
     backHome: "Басты бет",
@@ -45,7 +38,9 @@ const I18N_UI = {
     colStudent: "Оқушы",
     colClass: "Сынып",
     colStatus: "Белгі",
-    attendanceHint: "Ескерту: барлығы әдепкіде «Қатысты». Тек қажет болса ғана таңдаңыз.",
+    colCount: "Саны",
+    attendanceHint: "Ескерту: барлығы әдепкіде «Қатысты». Тек қажет болса ғана «Ауырды / Себепті / Себепсіз / Кешікті» таңдаңыз.",
+    reportHint: "Ескерту: Отчёт деректері Google Script арқылы алынады.",
     periodLabel: "Период",
     fromLabel: "От даты",
     toLabel: "До даты",
@@ -68,19 +63,14 @@ const I18N_UI = {
     kpiUnexcused: "Себепсіз",
     topLate: "Кешігу көп (TOP)",
     topUnexcused: "Себепсіз көп (TOP)",
-    reportHint: "Ескерту: Отчёт деректері Google Script арқылы алынады.",
-    apiErr: "API қате:",
-    saveOk: "✅ Сақталды:",
-    saveErr: "❌ Қате:",
-    needClass: "Сыныпты таңдаңыз",
-    needDate: "Күнді таңдаңыз",
   },
   ru: {
+    schoolName: 'КГУ "Алгинская средняя школа №4" ГУ "Отдел образования Алгинского района Управления образования Актюбинской области"',
     bannerTitle: "Журнал посещаемости",
-    bannerText: "Система для ежедневного контроля посещаемости, опозданий и пропусков без причины.",
+    bannerText: "Внутришкольная система для ежедневного контроля посещаемости,\nопозданий и пропусков без причины.",
     btnAttendance: "Журнал посещаемости",
     btnReports: "Отчёты и статистика",
-    backHome: "На главную",
+    backHome: "Главная",
     attendanceTitle: "Журнал посещаемости",
     reportsTitle: "Отчёты и статистика",
     dateLabel: "Дата",
@@ -89,8 +79,10 @@ const I18N_UI = {
     saveBtn: "Сохранить",
     colStudent: "Ученик",
     colClass: "Класс",
-    colStatus: "Отметка",
-    attendanceHint: "Примечание: по умолчанию все «Присутствовал(а)». Меняйте только при необходимости.",
+    colStatus: "Статус",
+    colCount: "Кол-во",
+    attendanceHint: "Подсказка: по умолчанию все «Присутствовал(а)». Выбирайте «Болел(а) / По уважит. / Без уважит. / Опоздал(а)» только при необходимости.",
+    reportHint: "Подсказка: данные отчёта берутся через Google Script.",
     periodLabel: "Период",
     fromLabel: "От даты",
     toLabel: "До даты",
@@ -113,12 +105,25 @@ const I18N_UI = {
     kpiUnexcused: "Без уважит.",
     topLate: "Часто опаздывают (TOP)",
     topUnexcused: "Много без причины (TOP)",
-    reportHint: "Примечание: данные отчёта берутся через Google Script.",
-    apiErr: "Ошибка API:",
+  }
+};
+
+const I18N_MSG = {
+  kk: {
+    saveOk: "✅ Сақталды:",
+    saveErr: "❌ Қате:",
+    needClass: "Сыныпты таңдаңыз",
+    needDate: "Күнді таңдаңыз",
+    chooseException: "Тек қажет болса таңдаңыз",
+    needPeriod: "Кезеңді таңдаңыз",
+  },
+  ru: {
     saveOk: "✅ Сохранено:",
     saveErr: "❌ Ошибка:",
     needClass: "Выберите класс",
     needDate: "Выберите дату",
+    chooseException: "Выбирайте только при необходимости",
+    needPeriod: "Укажите период",
   }
 };
 
@@ -130,7 +135,6 @@ async function apiGet(mode, params = {}) {
   url.searchParams.set("mode", mode);
   url.searchParams.set("key", API_KEY);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-
   const r = await fetch(url.toString(), { method: "GET" });
   const data = await r.json();
   if (!data.ok) throw new Error(data.error || "API error");
@@ -138,15 +142,12 @@ async function apiGet(mode, params = {}) {
 }
 
 async function apiPost(body) {
-  // CORS “preflight” шықпау үшін text/plain
   const r = await fetch(WEBAPP_URL, {
     method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-
-  const text = await r.text();
-  const data = JSON.parse(text);
+  const data = await r.json();
   if (!data.ok) throw new Error(data.error || "API error");
   return data;
 }
@@ -158,319 +159,372 @@ let allStudents = [];
 let statusMap = new Map();
 
 // ============================
-// HELPERS UI
+// VIEW SWITCH
 // ============================
-function showView(id) {
+function showView(id){
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
   document.getElementById(id)?.classList.add("active");
+  window.scrollTo({top:0, behavior:"smooth"});
 }
 
-function applyI18n() {
-  // school name
-  const schoolEl = document.getElementById("schoolNameText");
-  if (schoolEl) schoolEl.textContent = SCHOOL_NAME[currentLang] || SCHOOL_NAME.kk;
+// ============================
+// I18N APPLY
+// ============================
+function setLang(lang){
+  currentLang = lang;
+  document.body.dataset.lang = lang;
+  applyI18n();
+}
 
-  // data-i18n
+function applyI18n(){
+  const dict = I18N_UI[currentLang] || I18N_UI.kk;
+
   document.querySelectorAll("[data-i18n]").forEach(el => {
-    const k = el.getAttribute("data-i18n");
-    if (I18N_UI[currentLang][k] != null) el.textContent = I18N_UI[currentLang][k];
+    const key = el.getAttribute("data-i18n");
+    if (dict[key] != null) el.textContent = dict[key];
   });
 
-  document.body.dataset.lang = currentLang;
-}
+  const search = document.getElementById("searchInput");
+  if (search) search.placeholder = currentLang === "ru" ? "ФИО..." : "Аты-жөні...";
 
-function setLang(lang) {
-  currentLang = lang;
-  applyI18n();
+  const period = document.getElementById("periodType");
+  if (period) {
+    [...period.options].forEach(opt => {
+      const k = opt.getAttribute("data-i18n");
+      if (k && dict[k] != null) opt.textContent = dict[k];
+    });
+  }
+
+  if (window.__classesLoaded) {
+    renderClassesTo(document.getElementById("classSelect"), window.__classList, false);
+    renderClassesTo(document.getElementById("reportClass"), window.__classList, true);
+  }
+
   renderAttendanceTable();
 }
 
-function renderClassesTo(selectEl, classes, withAll) {
+function statusLabel(code){
+  const item = STATUS[code] || STATUS.katysty;
+  return currentLang === "ru" ? item.ru : item.kk;
+}
+
+function rowClassColor(code){
+  if (code === "katysty") return "present";
+  if (code === "auyrdy") return "sick";
+  if (code === "keshikti") return "late";
+  if (code === "sebep") return "excused";
+  if (code === "sebsez") return "absent";
+  return "";
+}
+
+function renderClassesTo(selectEl, classList, includeAll=false){
   if (!selectEl) return;
   selectEl.innerHTML = "";
-  if (withAll) {
+
+  if (includeAll) {
     const opt = document.createElement("option");
     opt.value = "ALL";
-    opt.textContent = "ALL";
+    opt.textContent = currentLang === "ru" ? "Все классы" : "Барлық сынып";
     selectEl.appendChild(opt);
+  } else {
+    const opt0 = document.createElement("option");
+    opt0.value = "";
+    opt0.textContent = currentLang === "ru" ? "Выберите класс" : "Сыныпты таңдаңыз";
+    selectEl.appendChild(opt0);
   }
-  classes.forEach(c => {
-    const g = String(parseInt(c, 10));
-    const l = c.replace(String(parseInt(c,10)), "");
+
+  classList.forEach(cls => {
     const opt = document.createElement("option");
-    opt.value = c;
-    opt.textContent = c;
-    opt.dataset.grade = g;
-    opt.dataset.letter = l;
+    opt.value = cls;
+    opt.textContent = cls;
     selectEl.appendChild(opt);
   });
 }
 
-function getSelectedClass(selectEl) {
-  const v = selectEl?.value || "";
-  if (!v || v === "ALL") return null;
-  const grade = String(parseInt(v,10));
-  const class_letter = v.replace(String(parseInt(v,10)), "");
-  return { grade, class_letter };
+function parseClass(cls){
+  const grade = String(parseInt(cls, 10));
+  const letter = cls.replace(grade, "");
+  return { grade, letter };
 }
 
-function renderAttendanceTable() {
+function buildStatusCell(studentId){
+  const wrap = document.createElement("div");
+  wrap.className = "status-cell";
+
+  const text = document.createElement("div");
+  text.className = "status-text";
+  text.textContent = statusLabel(statusMap.get(studentId) || "katysty");
+
+  const sel = document.createElement("select");
+  sel.className = "status-select";
+
+  const hint = document.createElement("option");
+  hint.value = "";
+  hint.textContent = I18N_MSG[currentLang].chooseException;
+  sel.appendChild(hint);
+
+  EXCEPTIONS.forEach(code => {
+    const o = document.createElement("option");
+    o.value = code;
+    o.textContent = currentLang === "ru" ? STATUS[code].ru : STATUS[code].kk;
+    sel.appendChild(o);
+  });
+
+  sel.addEventListener("change", () => {
+    const pick = sel.value;
+    if (!pick) return;
+    statusMap.set(studentId, pick);
+    text.textContent = statusLabel(pick);
+    sel.value = "";
+    const tr = wrap.closest("tr");
+    if (tr) tr.className = rowClassColor(pick);
+  });
+
+  wrap.appendChild(text);
+  wrap.appendChild(sel);
+  return wrap;
+}
+
+function renderAttendanceTable(){
   const tbody = document.querySelector("#attendanceTable tbody");
   if (!tbody) return;
 
   const classSelect = document.getElementById("classSelect");
-  const search = (document.getElementById("searchInput")?.value || "").toLowerCase().trim();
+  const searchInput = document.getElementById("searchInput");
 
-  const cls = getSelectedClass(classSelect);
+  const selectedClass = classSelect?.value || "";
+  const q = (searchInput?.value || "").trim().toLowerCase();
+
+  let filtered = allStudents.slice();
+
+  if (selectedClass) {
+    const { grade, letter } = parseClass(selectedClass);
+    filtered = filtered.filter(s => String(s.grade) === grade && String(s.class_letter) === letter);
+  } else {
+    filtered = []; // класс таңдалмайынша тізім шықпасын
+  }
+
+  if (q) filtered = filtered.filter(s => String(s.full_name).toLowerCase().includes(q));
+
   tbody.innerHTML = "";
-
-  if (!cls) return;
-
-  const list = allStudents
-    .filter(s => String(s.grade) === cls.grade && String(s.class_letter) === cls.class_letter)
-    .filter(s => !search || String(s.full_name).toLowerCase().includes(search));
-
-  list.forEach((s, i) => {
+  filtered.forEach((s, i) => {
     const tr = document.createElement("tr");
+    const code = statusMap.get(s.id) || "katysty";
+    tr.className = rowClassColor(code);
 
-    const td1 = document.createElement("td");
-    td1.textContent = String(i + 1);
-
-    const td2 = document.createElement("td");
-    td2.textContent = s.full_name;
-
-    const td3 = document.createElement("td");
-    td3.textContent = `${s.grade}${s.class_letter}`;
-
-    const td4 = document.createElement("td");
-    const sel = document.createElement("select");
-    sel.dataset.studentId = s.id;
-
-    // default
-    const defaultOpt = document.createElement("option");
-    defaultOpt.value = "katysty";
-    defaultOpt.textContent = (currentLang === "kk")
-      ? `✔ ${STATUS.katysty.kk}`
-      : `✔ ${STATUS.katysty.ru}`;
-    sel.appendChild(defaultOpt);
-
-    EXCEPTIONS.forEach(code => {
-      const o = document.createElement("option");
-      o.value = code;
-      o.textContent = (currentLang === "kk")
-        ? STATUS[code].kk
-        : STATUS[code].ru;
-      sel.appendChild(o);
-    });
-
-    sel.value = statusMap.get(s.id) || "katysty";
-    sel.addEventListener("change", () => statusMap.set(s.id, sel.value));
-
-    td4.appendChild(sel);
-
-    tr.appendChild(td1);
-    tr.appendChild(td2);
-    tr.appendChild(td3);
-    tr.appendChild(td4);
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${s.full_name}</td>
+      <td>${s.grade}${s.class_letter}</td>
+      <td></td>
+    `;
+    tr.children[3].appendChild(buildStatusCell(s.id));
     tbody.appendChild(tr);
   });
 }
 
-async function saveAttendance() {
-  const cls = getSelectedClass(document.getElementById("classSelect"));
-  const date = document.getElementById("attendanceDate")?.value;
-  const statusEl = document.getElementById("saveStatus");
+// ============================
+// SAVE
+// ============================
+async function saveAttendance(){
+  const dateEl = document.getElementById("attendanceDate");
+  const classSelect = document.getElementById("classSelect");
+  const saveStatus = document.getElementById("saveStatus");
 
-  if (!cls) return alert(I18N_UI[currentLang].needClass);
-  if (!date) return alert(I18N_UI[currentLang].needDate);
+  const date = dateEl?.value;
+  const cls = classSelect?.value;
 
-  const records = allStudents
-    .filter(s => String(s.grade) === cls.grade && String(s.class_letter) === cls.class_letter)
-    .map(s => ({
-      student_id: s.id,
-      status_code: statusMap.get(s.id) || "katysty"
-    }));
+  if (!date) return alert(I18N_MSG[currentLang].needDate);
+  if (!cls) return alert(I18N_MSG[currentLang].needClass);
+
+  const { grade, letter } = parseClass(cls);
+  const students = allStudents.filter(s => String(s.grade) === grade && String(s.class_letter) === letter);
+
+  const records = students.map(s => ({
+    student_id: s.id,
+    status_code: statusMap.get(s.id) || "katysty"
+  }));
+
+  saveStatus.textContent = "⏳ ...";
 
   try {
-    const res = await apiPost({
-      key: API_KEY,
-      date,
-      grade: cls.grade,
-      class_letter: cls.class_letter,
-      records
-    });
-
-    if (statusEl) statusEl.textContent = `${I18N_UI[currentLang].saveOk} ${res.saved}`;
+    const res = await apiPost({ key: API_KEY, date, grade, class_letter: letter, records });
+    saveStatus.textContent = `${I18N_MSG[currentLang].saveOk} ${res.saved}`;
   } catch (e) {
-    if (statusEl) statusEl.textContent = `${I18N_UI[currentLang].saveErr} ${e.message}`;
+    saveStatus.textContent = `${I18N_MSG[currentLang].saveErr} ${e.message}`;
   }
 }
 
-function calcRangeFromPeriod() {
-  const type = document.getElementById("periodType")?.value || "custom";
+// ============================
+// REPORTS
+// ============================
+function getRangeFromPeriod(){
+  const type = document.getElementById("periodType").value;
   const today = new Date();
-  const isoToday = today.toISOString().slice(0,10);
+  const toISO = (d) => d.toISOString().slice(0, 10);
 
-  if (type === "all") return { from: "2000-01-01", to: "2100-12-31" };
-  if (type === "custom" || type === "day" || type === "week") {
-    const from = document.getElementById("customStart")?.value || isoToday;
-    const to = document.getElementById("customEnd")?.value || isoToday;
-    return { from, to };
+  if (type === "custom" || type === "week") {
+    const s = document.getElementById("customStart").value;
+    const e = document.getElementById("customEnd").value;
+    if (!s || !e) return null;
+    return { from: s, to: e };
   }
+  if (type === "all") return { from:"2000-01-01", to:"2100-01-01" };
+
   if (type === "month") {
-    const m = document.getElementById("monthInput")?.value || isoToday.slice(0,7);
-    const from = `${m}-01`;
-    const to = `${m}-31`;
-    return { from, to };
+    const mi = document.getElementById("monthInput").value;
+    if (!mi) return null;
+    const [y,m] = mi.split("-").map(Number);
+    const start = new Date(y, m-1, 1);
+    const end = new Date(y, m, 0);
+    return { from: toISO(start), to: toISO(end) };
   }
-  if (type === "quarter") {
-    const q = parseInt(document.getElementById("quarterInput")?.value || "1", 10);
-    const y = parseInt(document.getElementById("quarterYearInput")?.value || String(today.getFullYear()), 10);
-    const startMonth = (q-1)*3 + 1;
-    const endMonth = startMonth + 2;
-    const from = `${y}-${String(startMonth).padStart(2,"0")}-01`;
-    const to = `${y}-${String(endMonth).padStart(2,"0")}-31`;
-    return { from, to };
-  }
+
   if (type === "year") {
-    const y = parseInt(document.getElementById("yearInput")?.value || String(today.getFullYear()), 10);
+    const y = Number(document.getElementById("yearInput").value || today.getFullYear());
     return { from: `${y}-01-01`, to: `${y}-12-31` };
   }
-  return { from: isoToday, to: isoToday };
+
+  if (type === "quarter") {
+    const q = Number(document.getElementById("quarterInput").value || 1);
+    const y = Number(document.getElementById("quarterYearInput").value || today.getFullYear());
+    const startMonth = (q - 1) * 3;
+    const start = new Date(y, startMonth, 1);
+    const end = new Date(y, startMonth + 3, 0);
+    return { from: toISO(start), to: toISO(end) };
+  }
+
+  return null;
 }
 
-async function updateStats() {
-  const clsVal = document.getElementById("reportClass")?.value || "ALL";
-  const { from, to } = calcRangeFromPeriod();
-
-  const grade = (clsVal === "ALL") ? "ALL" : String(parseInt(clsVal,10));
-  const class_letter = (clsVal === "ALL") ? "ALL" : clsVal.replace(String(parseInt(clsVal,10)), "");
-
-  const data = await apiGet("report", { from, to, grade, class_letter });
-
-  // totals (sum)
-  let total = 0, present = 0, late = 0, sick = 0, excused = 0, unexcused = 0;
-
-  Object.values(data.totals || {}).forEach(t => {
-    present += (t.katysty || 0);
-    late += (t.keshikti || 0);
-    sick += (t.auyrdy || 0);
-    excused += (t.sebep || 0);
-    unexcused += (t.sebsez || 0);
-  });
-  total = present + late + sick + excused + unexcused;
-
-  document.getElementById("totalLessons").textContent = total;
-  document.getElementById("totalPresent").textContent = present;
-  document.getElementById("totalLate").textContent = late;
-  document.getElementById("totalSick").textContent = sick;
-  document.getElementById("totalExcused").textContent = excused;
-  document.getElementById("totalUnexcused").textContent = unexcused;
-
-  // TOP tables
-  const studentsMap = new Map((data.students || []).map(s => [s.id, s]));
-  const lateArr = [];
-  const unexcArr = [];
-
-  Object.entries(data.totals || {}).forEach(([sid, t]) => {
-    const s = studentsMap.get(sid);
-    if (!s) return;
-    lateArr.push({ sid, n: t.keshikti || 0, name: s.full_name, cls: `${s.grade}${s.class_letter}` });
-    unexcArr.push({ sid, n: t.sebsez || 0, name: s.full_name, cls: `${s.grade}${s.class_letter}` });
-  });
-
-  lateArr.sort((a,b)=>b.n-a.n);
-  unexcArr.sort((a,b)=>b.n-a.n);
-
-  const lateBody = document.querySelector("#topLateTable tbody");
-  const unexcBody = document.querySelector("#topUnexcusedTable tbody");
-  lateBody.innerHTML = "";
-  unexcBody.innerHTML = "";
-
-  lateArr.slice(0,10).forEach((x,i)=>{
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${i+1}</td><td>${x.name}</td><td>${x.cls}</td><td>${x.n}</td>`;
-    lateBody.appendChild(tr);
-  });
-
-  unexcArr.slice(0,10).forEach((x,i)=>{
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${i+1}</td><td>${x.name}</td><td>${x.cls}</td><td>${x.n}</td>`;
-    unexcBody.appendChild(tr);
-  });
-}
-
-async function exportCsv() {
-  const clsVal = document.getElementById("reportClass")?.value || "ALL";
-  const { from, to } = calcRangeFromPeriod();
-  const grade = (clsVal === "ALL") ? "ALL" : String(parseInt(clsVal,10));
-  const class_letter = (clsVal === "ALL") ? "ALL" : clsVal.replace(String(parseInt(clsVal,10)), "");
-
-  const data = await apiGet("report", { from, to, grade, class_letter });
-
-  // Excel үшін ыңғайлы болсын деп ";" қолданамыз
-  const SEP = ";";
-  const header = ["date","student","class","status_code","status_kk","status_ru"].join(SEP);
-
-  const studentsMap = new Map((data.students || []).map(s => [s.id, s]));
-  const dates = Object.keys(data.daily || {}).sort();
-
-  const rows = [];
-  dates.forEach(d => {
-    const day = data.daily[d] || {};
-    Object.entries(day).forEach(([sid, st]) => {
-      const s = studentsMap.get(sid);
-      if (!s) return;
-      rows.push([
-        d,
-        s.full_name,
-        `${s.grade}${s.class_letter}`,
-        st.status_code,
-        st.status_kk,
-        st.status_ru
-      ].map(v => `"${String(v ?? "").replace(/"/g,'""')}"`).join(SEP));
+function sumTotals(report){
+  const totals = { total:0, katysty:0, keshikti:0, sebep:0, sebsez:0, auyrdy:0 };
+  Object.values(report.totals || {}).forEach(t => {
+    ["katysty","keshikti","sebep","sebsez","auyrdy"].forEach(k => {
+      totals[k] += Number(t[k] || 0);
+      totals.total += Number(t[k] || 0);
     });
   });
+  return totals;
+}
 
-  const csv = [header, ...rows].join("\n");
+function buildTop(report, code, limit=10){
+  const arr = (report.students || []).map(s => ({
+    id:s.id,
+    name:s.full_name,
+    cls:`${s.grade}${s.class_letter}`,
+    count:Number(report.totals?.[s.id]?.[code] || 0)
+  })).filter(x => x.count > 0);
+  arr.sort((a,b)=>b.count-a.count);
+  return arr.slice(0, limit);
+}
 
-  // BOM (Excel кириллица дұрыс көрсін)
-  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "attendance_report.csv";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+function fillTable(tableId, rows){
+  const tbody = document.querySelector(`#${tableId} tbody`);
+  if (!tbody) return;
+  tbody.innerHTML = "";
+  rows.forEach((r,i)=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${i+1}</td><td>${r.name}</td><td>${r.cls}</td><td>${r.count}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+async function updateStats(){
+  const range = getRangeFromPeriod();
+  if (!range) return alert(I18N_MSG[currentLang].needPeriod);
+
+  const reportClass = document.getElementById("reportClass").value || "ALL";
+  let grade="ALL", class_letter="ALL";
+  if (reportClass !== "ALL") {
+    const p = parseClass(reportClass);
+    grade = p.grade;
+    class_letter = p.letter;
+  }
+
+  const report = await apiGet("report", { from: range.from, to: range.to, grade, class_letter });
+  const t = sumTotals(report);
+
+  document.getElementById("totalLessons").textContent = t.total;
+  document.getElementById("totalPresent").textContent = t.katysty;
+  document.getElementById("totalLate").textContent = t.keshikti;
+  document.getElementById("totalSick").textContent = t.auyrdy;
+  document.getElementById("totalExcused").textContent = t.sebep;
+  document.getElementById("totalUnexcused").textContent = t.sebsez;
+
+  fillTable("topLateTable", buildTop(report, "keshikti"));
+  fillTable("topUnexcusedTable", buildTop(report, "sebsez"));
+}
+
+function exportCsv(){
+  const range = getRangeFromPeriod();
+  if (!range) return alert(I18N_MSG[currentLang].needPeriod);
+
+  const reportClass = document.getElementById("reportClass").value || "ALL";
+  let grade="ALL", class_letter="ALL";
+  if (reportClass !== "ALL") {
+    const p = parseClass(reportClass);
+    grade = p.grade;
+    class_letter = p.letter;
+  }
+
+  apiGet("report", { from: range.from, to: range.to, grade, class_letter })
+    .then(report => {
+      const header = ["date","student","class","status_code","status_kk","status_ru"];
+      const rows = [];
+
+      Object.entries(report.daily || {}).forEach(([date, map]) => {
+        Object.entries(map).forEach(([sid, st]) => {
+          const s = (report.students || []).find(x => x.id === sid);
+          rows.push([date, s ? s.full_name : sid, s ? `${s.grade}${s.class_letter}` : "", st.status_code, st.status_kk, st.status_ru]);
+        });
+      });
+
+      const csv = [header, ...rows]
+        .map(r => r.map(x => {
+          const v = String(x ?? "");
+          return (v.includes(",") || v.includes('"') || v.includes("\n")) ? `"${v.replace(/"/g,'""')}"` : v;
+        }).join(","))
+        .join("\n");
+
+      const blob = new Blob([csv], { type:"text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "attendance_report.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    })
+    .catch(err => alert(err.message));
 }
 
 // ============================
 // INIT
 // ============================
 document.addEventListener("DOMContentLoaded", async () => {
-  // NAV
+  // navigation
   document.getElementById("goAttendance")?.addEventListener("click", () => showView("viewAttendance"));
   document.getElementById("goReports")?.addEventListener("click", () => showView("viewReports"));
   document.getElementById("backHome1")?.addEventListener("click", () => showView("viewHome"));
   document.getElementById("backHome2")?.addEventListener("click", () => showView("viewHome"));
 
-  // Default dates
-  const today = new Date().toISOString().slice(0,10);
-  const attendanceDate = document.getElementById("attendanceDate");
-  if (attendanceDate) attendanceDate.value = today;
-  const cs = document.getElementById("customStart");
-  const ce = document.getElementById("customEnd");
-  if (cs) cs.value = today;
-  if (ce) ce.value = today;
-
-  // Lang
+  // language
   document.getElementById("langToggle")?.addEventListener("click", () => {
     setLang(currentLang === "kk" ? "ru" : "kk");
   });
 
-  // Period controls show/hide
+  // set today
+  const today = new Date();
+  const iso = today.toISOString().slice(0,10);
+  document.getElementById("attendanceDate").value = iso;
+  document.getElementById("customStart").value = iso;
+  document.getElementById("customEnd").value = iso;
+  document.getElementById("yearInput").value = today.getFullYear();
+  document.getElementById("quarterYearInput").value = today.getFullYear();
+
+  // period controls show/hide
   document.getElementById("periodType")?.addEventListener("change", () => {
     const type = document.getElementById("periodType").value;
     ["monthControl","quarterControl","yearControl","customControl"].forEach(id => {
@@ -480,43 +534,35 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (type === "month") document.getElementById("monthControl").style.display = "flex";
     if (type === "quarter") document.getElementById("quarterControl").style.display = "flex";
     if (type === "year") document.getElementById("yearControl").style.display = "flex";
-    if (type === "custom" || type === "week" || type === "day") document.getElementById("customControl").style.display = "flex";
+    if (type === "custom" || type === "week") document.getElementById("customControl").style.display = "flex";
   });
 
-  // Apply i18n
-  applyI18n();
+  // buttons
+  document.getElementById("saveAttendanceBtn")?.addEventListener("click", saveAttendance);
+  document.getElementById("updateStatsBtn")?.addEventListener("click", updateStats);
+  document.getElementById("exportCsvBtn")?.addEventListener("click", exportCsv);
+  document.getElementById("searchInput")?.addEventListener("input", renderAttendanceTable);
 
-  // Load classes + students
+  // load classes + students
   try {
     const cls = await apiGet("classes");
-    renderClassesTo(document.getElementById("classSelect"), cls.classes || [], false);
-    renderClassesTo(document.getElementById("reportClass"), cls.classes || [], true);
+    window.__classesLoaded = true;
+    window.__classList = cls.classes || [];
+    renderClassesTo(document.getElementById("classSelect"), window.__classList, false);
+    renderClassesTo(document.getElementById("reportClass"), window.__classList, true);
 
     const st = await apiGet("students");
     allStudents = st.students || [];
     allStudents.forEach(s => statusMap.set(s.id, "katysty"));
+
+    document.getElementById("classSelect")?.addEventListener("change", () => {
+      allStudents.forEach(s => statusMap.set(s.id, "katysty"));
+      renderAttendanceTable();
+    });
+
+    applyI18n();
     renderAttendanceTable();
   } catch (e) {
-    console.error(e);
-    alert(I18N_UI[currentLang].apiErr + " " + e.message);
+    alert("API error: " + e.message);
   }
-
-  // Events
-  document.getElementById("classSelect")?.addEventListener("change", () => {
-    // әр сынып ауысқанда default қайта қоямыз
-    allStudents.forEach(s => statusMap.set(s.id, "katysty"));
-    renderAttendanceTable();
-  });
-
-  document.getElementById("searchInput")?.addEventListener("input", renderAttendanceTable);
-  document.getElementById("saveAttendanceBtn")?.addEventListener("click", saveAttendance);
-
-  document.getElementById("updateStatsBtn")?.addEventListener("click", () => {
-    updateStats().catch(e => alert(I18N_UI[currentLang].apiErr + " " + e.message));
-  });
-
-  document.getElementById("exportCsvBtn")?.addEventListener("click", () => {
-    exportCsv().catch(e => alert(I18N_UI[currentLang].apiErr + " " + e.message));
-  });
 });
-
