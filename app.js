@@ -430,30 +430,41 @@ function fillTable(tableId, rows){
   });
 }
 
-async function updateStats(){
+async function updateStats() {
   const range = getRangeFromPeriod();
-  if (!range) return alert(I18N_MSG[currentLang].needPeriod);
+  if (!range) return alert(currentLang === "ru" ? "Укажите период" : "Кезеңді таңдаңыз");
 
   const reportClass = document.getElementById("reportClass").value || "ALL";
-  let grade="ALL", class_letter="ALL";
+  let grade = "ALL", class_letter = "ALL";
   if (reportClass !== "ALL") {
     const p = parseClass(reportClass);
     grade = p.grade;
     class_letter = p.letter;
   }
 
-  const report = await apiGet("report", { from: range.from, to: range.to, grade, class_letter });
-  const t = sumTotals(report);
+  try {
+    const report = await apiGet("report", {
+      from: range.from,
+      to: range.to,
+      grade,
+      class_letter
+    });
 
-  document.getElementById("totalLessons").textContent = t.total;
-  document.getElementById("totalPresent").textContent = t.katysty;
-  document.getElementById("totalLate").textContent = t.keshikti;
-  document.getElementById("totalSick").textContent = t.auyrdy;
-  document.getElementById("totalExcused").textContent = t.sebep;
-  document.getElementById("totalUnexcused").textContent = t.sebsez;
+    const t = sumTotals(report);
 
-  fillTable("topLateTable", buildTop(report, "keshikti"));
-  fillTable("topUnexcusedTable", buildTop(report, "sebsez"));
+    document.getElementById("totalLessons").textContent = t.total;
+    document.getElementById("totalPresent").textContent = t.katysty;
+    document.getElementById("totalLate").textContent = t.keshikti;
+    document.getElementById("totalSick").textContent = t.auyrdy;
+    document.getElementById("totalExcused").textContent = t.sebep;
+    document.getElementById("totalUnexcused").textContent = t.sebsez;
+
+    fillTable("topLateTable", buildTop(report, "keshikti"));
+    fillTable("topUnexcusedTable", buildTop(report, "sebsez"));
+
+  } catch (e) {
+    alert((currentLang === "ru" ? "Ошибка отчёта: " : "Отчет қатесі: ") + e.message);
+  }
 }
 
 function exportCsv(){
@@ -566,4 +577,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
