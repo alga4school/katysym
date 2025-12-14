@@ -8,103 +8,200 @@
 </head>
 
 <body data-lang="kk">
+  <header class="topbar">
+    <div class="brand">
+      <!-- LOGO -->
+      <div class="logo">
+        <img src="img/logo.png" alt="School logo" />
+      </div>
 
-<header class="topbar">
-  <div class="brand">
-    <img src="img/logo.png" class="logo" alt="School logo">
-    <div class="school-title">
-      <span id="schoolNameText"></span>
-    </div>
-  </div>
-
-  <button id="langToggle" class="lang-toggle" type="button">
-    KK / RU
-  </button>
-</header>
-
-<main class="app">
-
-<!-- ================= HOME ================= -->
-<section id="viewHome" class="view active">
-  <div class="home-card">
-    <div class="banner">
-      <div class="banner-overlay">
-        <h1 data-i18n="bannerTitle">Қатысу журналы</h1>
-        <p data-i18n="bannerText">
-          Оқушылардың сабаққа қатысуын, кешігуді және себепсіз қалуды
-          күнделікті бақылауға арналған мектепішілік жүйе.
-        </p>
+      <!-- SCHOOL NAME (auto KK/RU) -->
+      <div class="brand-text">
+        <div class="school-name" id="schoolNameText"></div>
       </div>
     </div>
 
-    <div class="home-actions">
-      <button id="goAttendance" class="btn primary">📚 <span data-i18n="btnAttendance">Журнал посещаемости</span></button>
-      <button id="goReports" class="btn ghost">📊 <span data-i18n="btnReports">Отчёты и статистика</span></button>
-    </div>
-  </div>
-</section>
+    <button id="langToggle" class="lang-toggle" type="button" aria-label="Switch language">
+      <span class="pill">KK / RU</span>
+    </button>
+  </header>
 
-<!-- ================= ATTENDANCE ================= -->
-<section id="viewAttendance" class="view">
-  <button id="backHome1" class="btn link">← <span data-i18n="backHome">Басты бет</span></button>
-  <h2>📚 <span data-i18n="attendanceTitle">Қатысу журналы</span></h2>
+  <main class="app">
 
-  <div class="panel">
-    <label>Күні <input id="attendanceDate" type="date"></label>
-    <label>Сынып <select id="classSelect"></select></label>
-    <label>Іздеу <input id="searchInput" type="text"></label>
+    <!-- HOME -->
+    <section id="viewHome" class="view active">
+      <div class="home-card">
+        <div class="banner">
+          <div class="banner-overlay">
+            <h1 class="banner-title" data-i18n="bannerTitle">Қатысу журналы</h1>
+            <p class="banner-text" data-i18n="bannerText">
+              Оқушылардың сабаққа қатысуын, кешігуді және себепсіз қалуды күнделікті бақылауға арналған мектепішілік жүйе.
+            </p>
+          </div>
+        </div>
 
-    <button id="saveAttendanceBtn" class="btn primary">💾 <span data-i18n="saveBtn">Сақтау</span></button>
-    <div id="saveStatus"></div>
+        <div class="home-actions">
+          <button id="goAttendance" class="btn primary" type="button">📚 <span data-i18n="btnAttendance">Журнал посещаемости</span></button>
+          <button id="goReports" class="btn ghost" type="button">📊 <span data-i18n="btnReports">Отчёты и статистика</span></button>
+        </div>
+      </div>
+    </section>
 
-    <table id="attendanceTable">
-      <thead>
-        <tr>
-          <th>№</th>
-          <th data-i18n="colStudent">Оқушы</th>
-          <th data-i18n="colClass">Сынып</th>
-          <th data-i18n="colStatus">Белгі</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-</section>
+    <!-- ATTENDANCE -->
+    <section id="viewAttendance" class="view">
+      <div class="view-head">
+        <button class="btn link" id="backHome1" type="button">← <span data-i18n="backHome">Басты бет</span></button>
+        <h2 class="view-title">📚 <span data-i18n="attendanceTitle">Қатысу журналы</span></h2>
+      </div>
 
-<!-- ================= REPORTS ================= -->
-<section id="viewReports" class="view reports-bg">
-  <button id="backHome2" class="btn link light">← <span data-i18n="backHome">Басты бет</span></button>
-  <h2>📊 <span data-i18n="reportsTitle">Отчёты и статистика</span></h2>
+      <div class="panel">
+        <div class="controls">
+          <label class="field">
+            <span class="label" data-i18n="dateLabel">Күні</span>
+            <input id="attendanceDate" type="date" />
+          </label>
 
-  <label>Период
-    <select id="periodType">
-      <option value="custom">День</option>
-      <option value="month">Месяц</option>
-      <option value="year">Год</option>
-      <option value="all">Все</option>
-    </select>
-  </label>
+          <label class="field">
+            <span class="label" data-i18n="classLabel">Сынып</span>
+            <select id="classSelect"></select>
+          </label>
 
-  <input id="customStart" type="date">
-  <input id="customEnd" type="date">
+          <label class="field grow">
+            <span class="label" data-i18n="searchLabel">Іздеу</span>
+            <input id="searchInput" type="text" placeholder="..." />
+          </label>
 
-  <label>Сынып <select id="reportClass"></select></label>
+          <button id="saveAttendanceBtn" class="btn primary" type="button">💾 <span data-i18n="saveBtn">Сақтау</span></button>
+        </div>
 
-  <button id="updateStatsBtn" class="btn primary">Показать</button>
-  <button id="exportCsvBtn" class="btn ghost">CSV</button>
+        <div id="saveStatus" class="save-status" aria-live="polite"></div>
 
-  <div class="kpis">
-    <div>Барлығы: <span id="totalLessons">0</span></div>
-    <div>Қатысты: <span id="totalPresent">0</span></div>
-    <div>Кешікті: <span id="totalLate">0</span></div>
-    <div>Ауырды: <span id="totalSick">0</span></div>
-    <div>Себепті: <span id="totalExcused">0</span></div>
-    <div>Себепсіз: <span id="totalUnexcused">0</span></div>
-  </div>
-</section>
+        <div class="table-wrap">
+          <table id="attendanceTable" class="table">
+            <thead>
+              <tr>
+                <th style="width:60px;">№</th>
+                <th data-i18n="colStudent">Оқушы</th>
+                <th style="width:110px;" data-i18n="colClass">Сынып</th>
+                <th style="width:280px;" data-i18n="colStatus">Белгі</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
 
-</main>
+        <div class="hint" data-i18n="attendanceHint">
+          Ескерту: барлығы әдепкіде «Қатысты». Тек қажет болса ғана «Ауырды / Себепті / Себепсіз / Кешікті» таңдаңыз.
+        </div>
+      </div>
+    </section>
 
-<script src="app.js"></script>
+    <!-- REPORTS -->
+    <section id="viewReports" class="view reports-bg">
+      <div class="view-head reports-head">
+        <button class="btn link light" id="backHome2" type="button">← <span data-i18n="backHome">Басты бет</span></button>
+        <h2 class="view-title light">📊 <span data-i18n="reportsTitle">Отчёты и статистика</span></h2>
+      </div>
+
+      <div class="reports-shell">
+        <div class="reports-card">
+          <div class="report-controls">
+            <label class="field">
+              <span class="label" data-i18n="periodLabel">Период</span>
+              <select id="periodType">
+                <option value="custom" selected data-i18n="pDay">День</option>
+                <option value="week" data-i18n="pWeek">Неделя</option>
+                <option value="month" data-i18n="pMonth">Месяц</option>
+                <option value="quarter" data-i18n="pQuarter">Квартал</option>
+                <option value="year" data-i18n="pYear">Год</option>
+                <option value="all" data-i18n="pAll">Все</option>
+              </select>
+            </label>
+
+            <div id="customControl" class="subcontrols">
+              <label class="field">
+                <span class="label" data-i18n="fromLabel">От даты</span>
+                <input id="customStart" type="date" />
+              </label>
+              <label class="field">
+                <span class="label" data-i18n="toLabel">До даты</span>
+                <input id="customEnd" type="date" />
+              </label>
+            </div>
+
+            <div id="monthControl" class="subcontrols" style="display:none">
+              <label class="field">
+                <span class="label" data-i18n="monthLabel">Месяц</span>
+                <input id="monthInput" type="month" />
+              </label>
+            </div>
+
+            <div id="quarterControl" class="subcontrols" style="display:none">
+              <label class="field">
+                <span class="label" data-i18n="quarterLabel">Квартал</span>
+                <select id="quarterInput">
+                  <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
+                </select>
+              </label>
+              <label class="field">
+                <span class="label" data-i18n="yearLabel">Год</span>
+                <input id="quarterYearInput" type="number" min="2000" max="2100" />
+              </label>
+            </div>
+
+            <div id="yearControl" class="subcontrols" style="display:none">
+              <label class="field">
+                <span class="label" data-i18n="yearLabel">Год</span>
+                <input id="yearInput" type="number" min="2000" max="2100" />
+              </label>
+            </div>
+
+            <label class="field">
+              <span class="label" data-i18n="classLabel">Сынып</span>
+              <select id="reportClass"></select>
+            </label>
+
+            <div class="report-actions">
+              <button id="updateStatsBtn" class="btn primary" type="button">📈 <span data-i18n="btnUpdate">Показать</span></button>
+              <button id="exportCsvBtn" class="btn ghost" type="button">⬇️ <span data-i18n="btnExport">Экспорт CSV</span></button>
+            </div>
+          </div>
+
+          <div class="kpis">
+            <div class="kpi"><div class="kpi-label" data-i18n="kpiTotal">Барлық белгі</div><div class="kpi-val" id="totalLessons">0</div></div>
+            <div class="kpi"><div class="kpi-label" data-i18n="kpiPresent">Қатысты</div><div class="kpi-val" id="totalPresent">0</div></div>
+            <div class="kpi"><div class="kpi-label" data-i18n="kpiLate">Кешікті</div><div class="kpi-val" id="totalLate">0</div></div>
+            <div class="kpi"><div class="kpi-label" data-i18n="kpiSick">Ауырды</div><div class="kpi-val" id="totalSick">0</div></div>
+            <div class="kpi"><div class="kpi-label" data-i18n="kpiExcused">Себепті</div><div class="kpi-val" id="totalExcused">0</div></div>
+            <div class="kpi"><div class="kpi-label" data-i18n="kpiUnexcused">Себепсіз</div><div class="kpi-val" id="totalUnexcused">0</div></div>
+          </div>
+
+          <div class="tables-grid">
+            <div class="mini-card">
+              <h3 class="mini-title" data-i18n="topLate">Кешігу көп (TOP)</h3>
+              <table id="topLateTable" class="table mini">
+                <thead><tr><th>№</th><th data-i18n="colStudent">Оқушы</th><th data-i18n="colClass">Сынып</th><th data-i18n="colCount">Саны</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="mini-card">
+              <h3 class="mini-title" data-i18n="topUnexcused">Себепсіз көп (TOP)</h3>
+              <table id="topUnexcusedTable" class="table mini">
+                <thead><tr><th>№</th><th data-i18n="colStudent">Оқушы</th><th data-i18n="colClass">Сынып</th><th data-i18n="colCount">Саны</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="hint light" data-i18n="reportHint">
+            Ескерту: Отчёт деректері Google Script арқылы алынады.
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
 </body>
 </html>
