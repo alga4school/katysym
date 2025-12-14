@@ -1,437 +1,279 @@
-/* Негізгі стильдер */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* Base */
+:root{
+  --bg:#f6f7fb;
+  --card:#ffffff;
+  --text:#0f172a;
+  --muted:#64748b;
+  --line:#e5e7eb;
+  --primary:#2563eb;
+  --primary2:#1d4ed8;
+  --shadow:0 10px 30px rgba(2,6,23,.10);
+  --radius:18px;
 }
 
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: #222;
-  background: url("img/school.jpg") center/cover fixed no-repeat;
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
 }
 
-/* Мәтін жақсы көріну үшін жеңіл фон */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.92);
-  z-index: -1;
+a{color:inherit}
+button,select,input{font:inherit}
+
+/* Top bar */
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:10;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 16px;
+  background:rgba(255,255,255,.85);
+  backdrop-filter: blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.logo{
+  width:44px;height:44px;border-radius:14px;
+  display:grid;place-items:center;
+  background:linear-gradient(135deg,#e0f2fe,#ddd6fe);
+  box-shadow:0 6px 14px rgba(2,6,23,.08);
+  flex:0 0 auto;
+}
+.brand-text{min-width:0}
+.school-name,.school-name-ru{
+  font-size:12px;
+  line-height:1.25;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.school-name{font-weight:700}
+.school-name-ru{color:var(--muted)}
+
+.lang-toggle{
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius:999px;
+  padding:6px 10px;
+  cursor:pointer;
+}
+.lang-toggle .pill{font-weight:700;font-size:12px}
+
+/* Views */
+.app{padding:18px;max-width:1100px;margin:0 auto}
+.view{display:none}
+.view.active{display:block}
+
+.home-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.banner{
+  height:240px;
+  background:
+    radial-gradient(1200px 400px at 20% 0%, rgba(37,99,235,.35), transparent 60%),
+    radial-gradient(800px 400px at 80% 20%, rgba(168,85,247,.30), transparent 55%),
+    linear-gradient(135deg, #0ea5e9, #7c3aed);
+  position:relative;
+}
+.banner-overlay{
+  position:absolute;inset:0;
+  padding:26px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  color:white;
+}
+.banner-title{margin:0 0 10px 0;font-size:26px}
+.banner-text{margin:0;max-width:820px;opacity:.95}
+
+.home-actions{
+  display:flex;
+  gap:12px;
+  padding:16px;
+  flex-wrap:wrap;
 }
 
-.top-header {
-  background: #0056b8;
-  color: #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+/* Panels */
+.panel{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:14px;
+}
+.view-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+}
+.view-title{margin:0;font-size:20px}
+
+.controls{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:flex-end;
+  margin-bottom:10px;
+}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.grow{flex:1 1 260px}
+.label{font-size:12px;color:var(--muted);font-weight:700}
+input,select{
+  height:40px;
+  padding:0 12px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#fff;
+}
+.save-status{min-height:24px;color:var(--muted);padding:6px 0}
+
+.btn{
+  height:40px;
+  padding:0 14px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background:#fff;
+  cursor:pointer;
+  display:inline-flex;
+  gap:8px;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+}
+.btn.primary{
+  background:var(--primary);
+  border-color:var(--primary);
+  color:white;
+}
+.btn.primary:hover{background:var(--primary2);border-color:var(--primary2)}
+.btn.ghost{background:#fff}
+.btn.link{
+  border:none;
+  background:transparent;
+  padding:0;
+  height:auto;
+  color:var(--primary2);
+}
+.btn.link.light{color:#fff}
+
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px}
+.table{
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+}
+.table th,.table td{
+  padding:10px 12px;
+  border-bottom:1px solid var(--line);
+  text-align:left;
+  vertical-align:top;
+}
+.table thead th{
+  background:#f8fafc;
+  font-size:12px;
+  color:var(--muted);
+  text-transform:none;
+  position:sticky;top:0;
+}
+.table.mini th,.table.mini td{padding:8px 10px}
+.table tr:last-child td{border-bottom:none}
+
+.status-cell{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.status-text{font-weight:800}
+.status-select{min-width:240px}
+
+/* Row meaning colors (subtle) */
+tr.present{background:rgba(34,197,94,.06)}
+tr.sick{background:rgba(14,165,233,.06)}
+tr.late{background:rgba(245,158,11,.08)}
+tr.excused{background:rgba(99,102,241,.06)}
+tr.absent{background:rgba(239,68,68,.06)}
+
+.hint{
+  margin-top:10px;
+  color:var(--muted);
+  font-size:13px;
 }
 
-.top-header-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 10px 16px 6px;
+/* Reports background like screenshot */
+.reports-bg{
+  background:linear-gradient(135deg,#6d28d9,#4c1d95);
+  border-radius:22px;
+  padding:18px;
+}
+.reports-head{margin-bottom:10px}
+.reports-shell{max-width:1100px;margin:0 auto}
+.reports-card{
+  background:rgba(255,255,255,.95);
+  border:1px solid rgba(255,255,255,.25);
+  border-radius:22px;
+  box-shadow:0 20px 60px rgba(0,0,0,.18);
+  padding:14px;
 }
 
-.logo-block {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
+.report-controls{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  align-items:flex-end;
+  padding:10px 10px 14px 10px;
+  border-radius:18px;
+  background:rgba(15,23,42,.03);
 }
+.subcontrols{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.report-actions{display:flex;gap:10px;flex-wrap:wrap}
 
-.school-logo {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: #fff;
-  padding: 4px;
+.kpis{
+  display:grid;
+  grid-template-columns:repeat(6, minmax(120px,1fr));
+  gap:10px;
+  margin:12px 0;
 }
-
-.school-names {
-  font-size: 13px;
-  line-height: 1.35;
+.kpi{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:10px 12px;
 }
+.kpi-label{font-size:12px;color:var(--muted);font-weight:800}
+.kpi-val{font-size:22px;font-weight:900;margin-top:4px}
 
-.school-name-kz {
-  font-weight: 600;
+.tables-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
 }
-
-.school-name-ru {
-  margin-top: 4px;
-  font-size: 12px;
-  opacity: 0.9;
+.mini-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:10px;
 }
+.mini-title{margin:0 0 8px 0;font-size:14px}
 
-/* Көк меню */
-.main-nav {
-  margin-top: 8px;
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
+.light{color:#fff}
+.hint.light{color:rgba(255,255,255,.85)}
+
+@media (max-width: 980px){
+  .kpis{grid-template-columns:repeat(3, minmax(120px,1fr))}
+  .tables-grid{grid-template-columns:1fr}
 }
-
-.main-nav a {
-  color: #e6f0ff;
-  text-decoration: none;
-  padding: 6px 14px;
-  border-radius: 99px;
-  font-size: 14px;
-  transition: background 0.2s, color 0.2s;
+@media (max-width: 560px){
+  .app{padding:12px}
+  .banner{height:220px}
+  .banner-title{font-size:22px}
+  .kpis{grid-template-columns:repeat(2, minmax(120px,1fr))}
+  .status-select{min-width:200px}
 }
-
-.main-nav a:hover {
-  background: #e6f0ff;
-  color: #00408b;
-}
-
-/* Баннер – қыздар фото */
-.banner {
-  position: relative;
-  height: 260px;
-  background-image:
-    linear-gradient(to right, rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.35)),
-    url("img/girls.jpg");
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: left;
-  color: #fff;
-}
-
-.banner-overlay {
-  display: none;
-}
-
-.banner-content {
-  max-width: 1200px;
-  width: 100%;
-  padding: 32px 16px;
-}
-
-.banner h1 {
-  font-size: 32px;
-  margin-bottom: 10px;
-}
-
-.banner p {
-  font-size: 16px;
-  margin-bottom: 20px;
-  max-width: 520px;
-}
-
-.primary-btn,
-.secondary-btn {
-  border: none;
-  border-radius: 999px;
-  padding: 10px 22px;
-  font-size: 14px;
-  cursor: pointer;
-  font-weight: 500;
-}
-
-.primary-btn {
-  background: #ffcc00;
-  color: #202020;
-}
-
-.primary-btn:hover {
-  background: #ffdf4d;
-}
-
-.secondary-btn {
-  background: #ffffff;
-  color: #0056b8;
-}
-
-.secondary-btn:hover {
-  background: #e8f0ff;
-}
-
-/* Негізгі контент */
-.page-content {
-  max-width: 1200px;
-  margin: 20px auto 40px;
-  padding: 0 16px 20px;
-}
-
-.card {
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  padding: 20px 18px 22px;
-  margin-bottom: 20px;
-}
-
-.card h2 {
-  font-size: 22px;
-  margin-bottom: 16px;
-}
-
-/* Фильтр жолы */
-.filters-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  margin-bottom: 18px;
-}
-
-.filter-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 150px;
-}
-
-.filter-item label {
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.filter-item input,
-.filter-item select {
-  padding: 7px 9px;
-  border-radius: 8px;
-  border: 1px solid #c3c7d0;
-  font-size: 14px;
-}
-
-.filter-item input:focus,
-.filter-item select:focus {
-  outline: 2px solid #0056b8;
-  outline-offset: 1px;
-  border-color: #0056b8;
-}
-
-/* Уақыт период контролдары */
-.period-control {
-  display: none;
-}
-
-/* Легенда */
-.legend-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  font-size: 13px;
-  margin-bottom: 10px;
-}
-
-.legend-box {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  border-radius: 4px;
-  margin-right: 4px;
-}
-
-.legend-box.present {
-  background: #d1f4d7;
-}
-
-.legend-box.absent {
-  background: #ffd6d6;
-}
-
-.legend-box.late {
-  background: #ffe9b8;
-}
-
-.legend-box.sick {
-  background: #d9ecff;
-}
-
-/* Кестелер */
-.table-wrapper {
-  width: 100%;
-  overflow-x: auto;
-  border-radius: 10px;
-  border: 1px solid #e0e3eb;
-  background: #fafbff;
-}
-
-.table-wrapper.small {
-  margin-top: 8px;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
-
-th,
-td {
-  padding: 8px 10px;
-  border-bottom: 1px solid #e0e3eb;
-}
-
-th {
-  background: #eef3ff;
-  text-align: left;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-tbody tr:nth-child(even) {
-  background: #ffffff;
-}
-
-tbody tr:nth-child(odd) {
-  background: #f8f9ff;
-}
-
-/* Посещаемость select */
-.status-select {
-  width: 100%;
-  padding: 6px 7px;
-  border-radius: 8px;
-  border: 1px solid #c3c7d0;
-  font-size: 13px;
-}
-
-/* Төменгі батырмалар */
-.actions-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 14px;
-}
-
-.save-status {
-  font-size: 13px;
-}
-
-/* Статистика карточкалар */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 12px;
-  margin-top: 8px;
-}
-
-.stat-card {
-  background: #f5f7ff;
-  border-radius: 10px;
-  padding: 10px 12px;
-}
-
-.stat-label {
-  font-size: 12px;
-  opacity: 0.8;
-}
-
-.stat-value {
-  font-size: 20px;
-  font-weight: 700;
-  margin-top: 4px;
-}
-
-/* Екі кесте */
-.tables-two-cols {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 16px;
-  margin-top: 20px;
-}
-
-/* Футер */
-.site-footer {
-  text-align: center;
-  font-size: 12px;
-  padding: 10px;
-  background: rgba(0, 0, 0, 0.04);
-}
-
-/* Адаптив */
-@media (max-width: 768px) {
-  .banner {
-    height: auto;
-  }
-
-  .banner-content {
-    padding: 20px 16px 24px;
-  }
-
-  .banner h1 {
-    font-size: 24px;
-  }
-
-  .banner p {
-    font-size: 14px;
-  }
-}
-.lang-btn {
-  margin-left: auto;
-  border: 1px solid #e6f0ff;
-  background: #ffffff;
-  color: #00408b;
-  border-radius: 999px;
-  padding: 6px 14px;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.lang-btn:hover {
-  background: #e6f0ff;
-}
-.school-title {
-  text-align:center;
-  font-size:15px;
-  font-weight:600;
-  margin-top:15px;
-  color:#004a91;
-}
-/* Мектеп атауын тілге қарай көрсету */
-#schoolTitles [data-lang="kk"],
-#schoolTitles [data-lang="ru"] {
-  display: inline;
-}
-
-/* Қазақша режим: орысша мәтінді жасырамыз */
-/* Мектеп атауын тілге қарай көрсету */
-#schoolTitles [data-lang="kk"],
-#schoolTitles [data-lang="ru"] {
-  display: inline;
-}
-
-/* Қазақша режим: орысша мәтінді жасырамыз */
-body[data-lang="kk"] #schoolTitles [data-lang="kk"] { display: inline; }
-body[data-lang="kk"] #schoolTitles [data-lang="ru"] { display: none; }
-
-/* Орысша режим: қазақша мәтінді жасырамыз */
-body[data-lang="ru"] #schoolTitles [data-lang="kk"] { display: none; }
-body[data-lang="ru"] #schoolTitles [data-lang="ru"] { display: inline; }
-
-
-/* ҚАЗАҚша режим: орысша мәтінді жасырамыз */
-body[data-lang="kk"] #schoolTitles [data-lang="ru"] {
-  display: none;
-}
-
-/* ОРЫСша режим: қазақша мәтінді жасырамыз */
-body[data-lang="ru"] #schoolTitles [data-lang="kk"] {
-  display: none;
-}
-/* Мектеп атауы анық көрінуі үшін */
-#schoolTitles span {
-    font-size: 20px;
-    font-weight: 600;
-    color: white;     /* ↔ басты шешім */
-    display: none;    /* екеуі бірге шықпас үшін */
-}
-.status-wrap{ position:relative; display:inline-block; }
-.status-btn{ padding:6px 10px; border-radius:10px; border:1px solid #cfd; cursor:pointer; }
-.status-menu{ position:absolute; top:38px; left:0; background:#fff; border:1px solid #ddd; border-radius:12px; padding:6px; display:flex; gap:6px; z-index:50; }
-.status-menu.hidden{ display:none; }
-.status-menu button{ padding:6px 10px; border-radius:10px; border:1px solid #ddd; cursor:pointer; }
-/* подсветка строк в таблице по статусу */
-tr.present td { background: #f1fff3; }
-tr.absent td { background: #fff1f1; }
-tr.late td { background: #fff8e6; }
-tr.sick td { background: #eef6ff; }
-tr.excused td { background: #f7f3ff; }
-
-.status-cell { display:flex; flex-direction:column; gap:6px; }
-.status-text { font-weight:600; font-size:13px; }
