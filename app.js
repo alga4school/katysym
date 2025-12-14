@@ -2,7 +2,7 @@
 // SETTINGS (ВПИШИТЕ СВОЁ)
 // ============================
 const WEBAPP_URL =
-  "https://script.google.com/macros/s/AKfycbwu6x6Njht7HTojiIL40YwoWg3WDABKQBC8Hw0W0584u0eJkxjmkd_ityK9ZyPuk5DRwg/exec"; // <-- сіздің /exec
+  "https://script.google.com/macros/s/AKfycbybwO1f-AnhloW8H_yLqNPL5TcKJaCiyxFFoAGWfepka99XI1e8TfnzVJ8cHvCQ6Fp-hw/exec"; // <-- сіздің /exec
 const API_KEY = "school2025";
 
 // ============================
@@ -641,3 +641,4 @@ document.addEventListener("DOMContentLoaded", async () => {
   // apply i18n once
   applyI18n();
 });
+
