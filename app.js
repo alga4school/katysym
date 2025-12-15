@@ -395,14 +395,23 @@ function getRangeFromPeriod(){
     return { from: `${y}-01-01`, to: `${y}-12-31` };
   }
 
-  if (type === "quarter") {
-    const q = Number(document.getElementById("quarterInput").value || 1);
-    const y = Number(document.getElementById("quarterYearInput").value || today.getFullYear());
-    const startMonth = (q - 1) * 3;
-    const start = new Date(y, startMonth, 1);
-    const end = new Date(y, startMonth + 3, 0);
-    return { from: toISO(start), to: toISO(end) };
-  }
+ if (type === "quarter") {
+  const q = Number(document.getElementById("quarterInput").value || 1);
+  const y = Number(document.getElementById("quarterYearInput").value || today.getFullYear());
+
+  // ШКОЛЬНЫЕ ЧЕТВЕРТИ 2025-2026 (по твоему календарю с каникулами)
+  // Осенние каникулы: 27–31.10.2025 → четверть 1 до 26.10, четверть 2 с 01.11
+  // Зимние: 29–31.12.2025 и 01–06.01.2026 → четверть 2 до 28.12, четверть 3 с 07.01
+  // Весенние: 23–29.03.2026 → четверть 3 до 22.03, четверть 4 с 30.03
+  const Q = {
+    1: { from: `${y}-09-01`, to: `${y}-10-26` },
+    2: { from: `${y}-11-01`, to: `${y}-12-28` },
+    3: { from: `${y+1}-01-07`, to: `${y+1}-03-22` },
+    4: { from: `${y+1}-03-30`, to: `${y+1}-05-31` }, // если у вас учеба до 25/30 мая — скажи, поменяю
+  };
+
+  return Q[q] || Q[1];
+}
 
   return null;
 }
@@ -586,4 +595,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
