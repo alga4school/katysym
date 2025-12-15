@@ -20,7 +20,8 @@ const EXCEPTIONS = ["auyrdy", "sebep", "sebsez", "keshikti"];
 // I18N
 // ============================
 let currentLang = document.body.dataset.lang || "kk";
-const I18N_UI = { 
+
+const I18N_UI = {
   kk: {
     schoolName: 'Ақтөбе облысының білім басқармасы Алға ауданының білім бөлімі" ММ "№4 Алға орта мектебі" КММ',
     bannerTitle: "Қатысу журналы",
@@ -60,13 +61,13 @@ const I18N_UI = {
     kpiSick: "Ауырды",
     kpiExcused: "Себепті",
     kpiUnexcused: "Себепсіз",
-    topLate: "Көп кешігу  (TOP)",
+    topLate: "Көп кешігу (TOP)",
     topUnexcused: "Көп себепсіз (TOP)",
   },
   ru: {
     schoolName: 'КГУ "Алгинская средняя школа №4" ГУ "Отдел образования Алгинского района Управления образования Актюбинской области"',
     bannerTitle: "Журнал посещаемости",
-    bannerText: "Внутишкольная система для ежедневного контроля посещаемости,\nопозданий и пропусков без причины.",
+    bannerText: "Внутришкольная система для ежедневного контроля посещаемости,\nопозданий и пропусков без причины.",
     btnAttendance: "Журнал посещаемости",
     btnReports: "Отчёты и статистика",
     backHome: "Главная",
@@ -134,6 +135,7 @@ async function apiGet(mode, params = {}) {
   url.searchParams.set("mode", mode);
   url.searchParams.set("key", API_KEY);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+
   const r = await fetch(url.toString(), { method: "GET" });
   const data = await r.json();
   if (!data.ok) throw new Error(data.error || "API error");
@@ -300,7 +302,7 @@ function renderAttendanceTable(){
     const { grade, letter } = parseClass(selectedClass);
     filtered = filtered.filter(s => String(s.grade) === grade && String(s.class_letter) === letter);
   } else {
-    filtered = []; // класс таңдалмайынша тізім шықпасын
+    filtered = [];
   }
 
   if (q) filtered = filtered.filter(s => String(s.full_name).toLowerCase().includes(q));
@@ -362,12 +364,21 @@ function getRangeFromPeriod(){
   const today = new Date();
   const toISO = (d) => d.toISOString().slice(0, 10);
 
-  if (type === "custom" || type === "week") {
+  if (type === "custom") {
     const s = document.getElementById("customStart").value;
     const e = document.getElementById("customEnd").value;
     if (!s || !e) return null;
     return { from: s, to: e };
   }
+
+  if (type === "week") {
+    // автомат: соңғы 7 күн
+    const end = new Date(today);
+    const start = new Date(today);
+    start.setDate(start.getDate() - 6);
+    return { from: toISO(start), to: toISO(end) };
+  }
+
   if (type === "all") return { from:"2000-01-01", to:"2100-01-01" };
 
   if (type === "month") {
@@ -431,7 +442,7 @@ function fillTable(tableId, rows){
 
 async function updateStats() {
   const range = getRangeFromPeriod();
-  if (!range) return alert(currentLang === "ru" ? "Укажите период" : "Кезеңді таңдаңыз");
+  if (!range) return alert(I18N_MSG[currentLang].needPeriod);
 
   const reportClass = document.getElementById("reportClass").value || "ALL";
   let grade = "ALL", class_letter = "ALL";
@@ -514,18 +525,15 @@ function exportCsv(){
 // INIT
 // ============================
 document.addEventListener("DOMContentLoaded", async () => {
-  // navigation
   document.getElementById("goAttendance")?.addEventListener("click", () => showView("viewAttendance"));
   document.getElementById("goReports")?.addEventListener("click", () => showView("viewReports"));
   document.getElementById("backHome1")?.addEventListener("click", () => showView("viewHome"));
   document.getElementById("backHome2")?.addEventListener("click", () => showView("viewHome"));
 
-  // language
   document.getElementById("langToggle")?.addEventListener("click", () => {
     setLang(currentLang === "kk" ? "ru" : "kk");
   });
 
-  // set today
   const today = new Date();
   const iso = today.toISOString().slice(0,10);
   document.getElementById("attendanceDate").value = iso;
@@ -534,7 +542,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("yearInput").value = today.getFullYear();
   document.getElementById("quarterYearInput").value = today.getFullYear();
 
-  // period controls show/hide
   document.getElementById("periodType")?.addEventListener("change", () => {
     const type = document.getElementById("periodType").value;
     ["monthControl","quarterControl","yearControl","customControl"].forEach(id => {
@@ -544,16 +551,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (type === "month") document.getElementById("monthControl").style.display = "flex";
     if (type === "quarter") document.getElementById("quarterControl").style.display = "flex";
     if (type === "year") document.getElementById("yearControl").style.display = "flex";
-    if (type === "custom" || type === "week") document.getElementById("customControl").style.display = "flex";
+    if (type === "custom") document.getElementById("customControl").style.display = "flex";
+    if (type === "week") document.getElementById("customControl").style.display = "none";
   });
 
-  // buttons
   document.getElementById("saveAttendanceBtn")?.addEventListener("click", saveAttendance);
   document.getElementById("updateStatsBtn")?.addEventListener("click", updateStats);
   document.getElementById("exportCsvBtn")?.addEventListener("click", exportCsv);
   document.getElementById("searchInput")?.addEventListener("input", renderAttendanceTable);
 
-  // load classes + students
   try {
     const cls = await apiGet("classes");
     window.__classesLoaded = true;
@@ -576,23 +582,3 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
