@@ -496,17 +496,21 @@ function exportCsv(){
 
       Object.entries(report.daily || {}).forEach(([date, map]) => {
         Object.entries(map).forEach(([sid, st]) => {
-          const s = (report.students || []).find(x => x.id === sid);
+          const s = (report.students || []).find(x => String(x.id) === String(sid));
           rows.push([date, s ? s.full_name : sid, s ? `${s.grade}${s.class_letter}` : "", st.status_code, st.status_kk, st.status_ru]);
         });
       });
 
-      const csv = [header, ...rows]
-        .map(r => r.map(x => {
-          const v = String(x ?? "");
-          return (v.includes(",") || v.includes('"') || v.includes("\n")) ? `"${v.replace(/"/g,'""')}"` : v;
-        }).join(","))
-        .join("\n");
+      const sep = ";";
+const csv = "\ufeff" + [header, ...rows]
+  .map(r => r.map(x => {
+    const v = String(x ?? "");
+    return (v.includes(sep) || v.includes('"') || v.includes("\n"))
+      ? `"${v.replace(/"/g,'""')}"`
+      : v;
+  }).join(sep))
+  .join("\n");
+
 
       const blob = new Blob([csv], { type:"text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
@@ -582,3 +586,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
