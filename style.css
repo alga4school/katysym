@@ -8,6 +8,17 @@
   --shadow: 0 14px 40px rgba(17,24,39,.10);
   --r:18px;
 }
+.holidayTag{
+  display:inline-block;
+  padding:4px 8px;
+  border:1px solid #ddd;
+  border-radius:10px;
+  margin:2px 4px 2px 0;
+}
+.holidayTag button{
+  margin-left:6px;
+  cursor:pointer;
+}
 
 *{box-sizing:border-box}
 body{
@@ -275,3 +286,4 @@ input, select{
   .tables-grid{grid-template-columns:1fr}
   .report-actions{margin-left:0}
 }
+
