@@ -551,6 +551,7 @@ function fillTable(tableId, rows){
 
 async function updateStats() {
   const range = getRangeFromPeriod();
+  updateSchoolDaysUI();
   if (!range) return alert(I18N_MSG[currentLang].needPeriod);
 
   const reportClass = document.getElementById("reportClass").value || "ALL";
@@ -560,7 +561,6 @@ async function updateStats() {
     grade = p.grade;
     class_letter = p.letter;
   }
-
   try {
     const report = await apiGet("report", {
       from: range.from,
@@ -585,6 +585,11 @@ fillTable("topUnexcusedTable", buildTop(report, "sebsez", 10, 4));
     alert((currentLang === "ru" ? "Ошибка отчёта: " : "Отчет қатесі: ") + e.message);
   }
 }
+//
+document.addEventListener("DOMContentLoaded", () => {
+  initHolidayUI();
+  updateSchoolDaysUI();
+});
 
 function exportCsv(){
   const range = getRangeFromPeriod();
@@ -695,6 +700,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
