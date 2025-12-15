@@ -1,7 +1,7 @@
 // ============================
 // SETTINGS (СІЗДІҢ URL / KEY)
 // ============================
-const WEBAPP_URL = "https://odd-surf-39a4.alga4school.workers.dev/";
+const WEBAPP_URL = "odd-surf-39a4.alga4school.workers.dev";
 const API_KEY = "school2025";
 
 // ============================
@@ -577,6 +577,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
