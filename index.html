@@ -39,20 +39,13 @@
           </div>
         </div>
 
-     <div class="home-actions">
-  <button id="goAttendance" class="btn primary" type="button">
-    📚 <span data-i18n="btnAttendance">Журнал посещаемости</span>
-  </button>
+        <div class="home-actions">
+          <button id="goAttendance" class="btn primary" type="button">
+            📚 <span data-i18n="btnAttendance">Қатысуды белгілеу</span>
+          </button>
 
-  <button id="goReports" class="btn ghost" type="button">
-    📊 <span data-i18n="btnReports">Отчёты и статистика</span>
-  </button>
-</div>
-
-
-<!-- Reports беті -->
-
-
+          <button id="goReports" class="btn ghost" type="button">
+            📊 <span data-i18n="btnReports">Есептер мен статистика</span>
           </button>
         </div>
       </div>
@@ -113,70 +106,70 @@
     <section id="viewReports" class="view reports-bg">
       <div class="view-head reports-head">
         <button class="btn link light" id="backHome2" type="button">← <span data-i18n="backHome">Басты бет</span></button>
-        <h2 class="view-title light">📊 <span data-i18n="reportsTitle">Отчёты и статистика</span></h2>
+        <h2 class="view-title light">📊 <span data-i18n="reportsTitle">Есептер мен статистика</span></h2>
       </div>
 
       <div class="reports-shell">
         <div class="reports-card">
           <div class="report-controls">
             <label class="field">
-              <span class="label" data-i18n="periodLabel">Период</span>
+              <span class="label" data-i18n="periodLabel">Кезең</span>
               <select id="periodType">
-                <option value="custom" selected data-i18n="pDay">День</option>
-                <option value="week" data-i18n="pWeek">Неделя</option>
-                <option value="month" data-i18n="pMonth">Месяц</option>
-                <option value="quarter" data-i18n="pQuarter">Квартал</option>
-                <option value="year" data-i18n="pYear">Год</option>
-                <option value="all" data-i18n="pAll">Все</option>
+                <option value="custom" selected data-i18n="pDay">Күні</option>
+                <option value="week" data-i18n="pWeek">Апта</option>
+                <option value="month" data-i18n="pMonth">Ай</option>
+                <option value="quarter" data-i18n="pQuarter">Тоқсан</option>
+                <option value="year" data-i18n="pYear">Жыл</option>
+                <option value="all" data-i18n="pAll">Барлығы</option>
               </select>
             </label>
 
             <div id="customControl" class="subcontrols">
               <label class="field">
-                <span class="label" data-i18n="fromLabel">От даты</span>
+                <span class="label" data-i18n="fromLabel">Басталу күні</span>
                 <input id="customStart" type="date" />
               </label>
               <label class="field">
-                <span class="label" data-i18n="toLabel">До даты</span>
+                <span class="label" data-i18n="toLabel">Аяқталу күні</span>
                 <input id="customEnd" type="date" />
               </label>
             </div>
 
             <div id="monthControl" class="subcontrols" style="display:none">
               <label class="field">
-                <span class="label" data-i18n="monthLabel">Месяц</span>
+                <span class="label" data-i18n="monthLabel">Ай</span>
                 <input id="monthInput" type="month" />
               </label>
             </div>
 
             <div id="quarterControl" class="subcontrols" style="display:none">
               <label class="field">
-                <span class="label" data-i18n="quarterLabel">Квартал</span>
+                <span class="label" data-i18n="quarterLabel">Тоқсан</span>
                 <select id="quarterInput">
                   <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
                 </select>
               </label>
               <label class="field">
-                <span class="label" data-i18n="yearLabel">Год</span>
+                <span class="label" data-i18n="yearLabel">Жыл</span>
                 <input id="quarterYearInput" type="number" min="2000" max="2100" />
               </label>
             </div>
 
             <div id="yearControl" class="subcontrols" style="display:none">
               <label class="field">
-                <span class="label" data-i18n="yearLabel">Год</span>
+                <span class="label" data-i18n="yearLabel">Жыл</span>
                 <input id="yearInput" type="number" min="2000" max="2100" />
               </label>
             </div>
 
             <label class="field">
-              <span class="label" data-i18n="classLabel">Класс</span>
+              <span class="label" data-i18n="classLabel">Сынып</span>
               <select id="reportClass"></select>
             </label>
 
             <div class="report-actions">
-              <button id="updateStatsBtn" class="btn primary" type="button">📈 <span data-i18n="btnUpdate">Показать</span></button>
-              <button id="exportCsvBtn" class="btn ghost" type="button">⬇️ <span data-i18n="btnExport">Экспорт CSV</span></button>
+              <button id="updateStatsBtn" class="btn primary" type="button">📈 <span data-i18n="btnUpdate">Көрсету</span></button>
+              <button id="exportCsvBtn" class="btn ghost" type="button">⬇️ <span data-i18n="btnExport">CSV жүктеу</span></button>
             </div>
           </div>
 
@@ -191,14 +184,14 @@
 
           <div class="tables-grid">
             <div class="mini-card">
-              <h3 class="mini-title" data-i18n="topLate">Кешігу көп (TOP)</h3>
+              <h3 class="mini-title" data-i18n="topLate">Көп кешігу (TOP)</h3>
               <table id="topLateTable" class="table mini">
                 <thead><tr><th>№</th><th data-i18n="colStudent">Оқушы</th><th data-i18n="colClass">Сынып</th><th data-i18n="colCount">Саны</th></tr></thead>
                 <tbody></tbody>
               </table>
             </div>
             <div class="mini-card">
-              <h3 class="mini-title" data-i18n="topUnexcused">Себепсіз көп (TOP)</h3>
+              <h3 class="mini-title" data-i18n="topUnexcused">Көп себепсіз (TOP)</h3>
               <table id="topUnexcusedTable" class="table mini">
                 <thead><tr><th>№</th><th data-i18n="colStudent">Оқушы</th><th data-i18n="colClass">Сынып</th><th data-i18n="colCount">Саны</th></tr></thead>
                 <tbody></tbody>
@@ -207,7 +200,7 @@
           </div>
 
           <div class="hint light" data-i18n="reportHint">
-            Ескерту: Отчёт деректері Google Script арқылы алынады.
+            Ескерту: Есептер деректері Google Script арқылы алынады.
           </div>
         </div>
       </div>
@@ -218,5 +211,3 @@
   <script src="app.js"></script>
 </body>
 </html>
-
-
