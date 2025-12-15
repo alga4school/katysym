@@ -427,14 +427,17 @@ function sumTotals(report){
   return totals;
 }
 
-function buildTop(report, code, limit=10){
+function buildTop(report, code, limit = 10, threshold = 4) {
   const arr = (report.students || []).map(s => ({
-    id:s.id,
-    name:s.full_name,
-    cls:`${s.grade}${s.class_letter}`,
-    count:Number(report.totals?.[s.id]?.[code] || 0)
-  })).filter(x => x.count > 0);
-  arr.sort((a,b)=>b.count-a.count);
+    id: s.id,
+    name: s.full_name,
+    cls: `${s.grade}${s.class_letter}`,
+    count: Number(report.totals?.[String(s.id)]?.[code] || 0)
+  }))
+  // ✅ тек 4-тен ЖОҒАРЫ (яғни >=5) көрсетіледі
+  .filter(x => x.count > threshold);
+
+  arr.sort((a, b) => b.count - a.count);
   return arr.slice(0, limit);
 }
 
@@ -478,8 +481,8 @@ async function updateStats() {
     document.getElementById("totalExcused").textContent = t.sebep;
     document.getElementById("totalUnexcused").textContent = t.sebsez;
 
-    fillTable("topLateTable", buildTop(report, "keshikti"));
-    fillTable("topUnexcusedTable", buildTop(report, "sebsez"));
+   fillTable("topLateTable", buildTop(report, "keshikti", 10, 4));
+fillTable("topUnexcusedTable", buildTop(report, "sebsez", 10, 4));
 
   } catch (e) {
     alert((currentLang === "ru" ? "Ошибка отчёта: " : "Отчет қатесі: ") + e.message);
@@ -595,5 +598,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
