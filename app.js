@@ -20,6 +20,28 @@ const EXCEPTIONS = ["auyrdy", "sebep", "sebsez", "keshikti"];
 // I18N
 // ============================
 let currentLang = document.body.dataset.lang || "kk";
+const I18N = {
+  kk: {
+    btnAttendance: "Қатысу журналы",
+    btnReports: "Есептер мен статистика",
+    periodLabel: "Кезең",
+    pDay: "Күн",
+    fromLabel: "Басталу күні",
+    toLabel: "Аяқталу күні",
+    btnUpdate: "Көрсету",
+    btnExport: "CSV жүктеу",
+  },
+  ru: {
+    btnAttendance: "Журнал посещаемости",
+    btnReports: "Отчёты и статистика",
+    periodLabel: "Период",
+    pDay: "День",
+    fromLabel: "От даты",
+    toLabel: "До даты",
+    btnUpdate: "Показать",
+    btnExport: "Экспорт CSV",
+  }
+};
 
 const I18N_UI = {
   kk: {
@@ -577,6 +599,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
