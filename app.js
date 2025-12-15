@@ -107,6 +107,103 @@ const I18N_UI = {
     topUnexcused: "Много без причины (TOP)",
   }
 };
+const HOLIDAYS_KEY = "katysym_holidays_v1";
+const WEEKEND_DAYS = new Set([5, 6]); // Пт+Сб выходные (как ты сказала)
+
+function loadHolidays() {
+  try { return new Set(JSON.parse(localStorage.getItem(HOLIDAYS_KEY) || "[]")); }
+  catch { return new Set(); }
+}
+function saveHolidays(set) {
+  localStorage.setItem(HOLIDAYS_KEY, JSON.stringify([...set].sort()));
+}
+
+let HOLIDAYS = loadHolidays();
+
+function renderHolidays() {
+  const el = document.getElementById("holidaysList");
+  if (!el) return;
+
+  const arr = [...HOLIDAYS].sort();
+  if (!arr.length) {
+    el.innerHTML = "<em>Не выбрано</em>";
+    return;
+  }
+
+  el.innerHTML = arr.map(d => `
+    <span class="holidayTag">
+      ${d}
+      <button type="button" data-date="${d}" class="delHolidayBtn">×</button>
+    </span>
+  `).join(" ");
+
+  el.querySelectorAll(".delHolidayBtn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      HOLIDAYS.delete(btn.dataset.date);
+      saveHolidays(HOLIDAYS);
+      renderHolidays();
+      updateSchoolDaysUI(); // пересчёт
+    });
+  });
+}
+
+function initHolidayUI() {
+  const addBtn = document.getElementById("addHolidayBtn");
+  const clearBtn = document.getElementById("clearHolidaysBtn");
+  const pick = document.getElementById("holidayPick");
+
+  if (addBtn && pick) {
+    addBtn.addEventListener("click", () => {
+      const v = pick.value;
+      if (!v) return;
+      HOLIDAYS.add(v);
+      saveHolidays(HOLIDAYS);
+      renderHolidays();
+      pick.value = "";
+      updateSchoolDaysUI();
+    });
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      HOLIDAYS = new Set();
+      saveHolidays(HOLIDAYS);
+      renderHolidays();
+      updateSchoolDaysUI();
+    });
+  }
+
+  renderHolidays();
+}
+
+function isSchoolDayISO(iso) {
+  if (HOLIDAYS.has(iso)) return false;
+
+  const d = new Date(iso + "T00:00:00");
+  const dow = d.getDay();
+  if (WEEKEND_DAYS.has(dow)) return false;
+
+  return true;
+}
+
+function countSchoolDays(fromISO, toISO) {
+  const from = new Date(fromISO + "T00:00:00");
+  const to = new Date(toISO + "T00:00:00");
+  let c = 0;
+  for (let d = new Date(from); d <= to; d.setDate(d.getDate() + 1)) {
+    const iso = d.toISOString().slice(0,10);
+    if (isSchoolDayISO(iso)) c++;
+  }
+  return c;
+}
+
+function updateSchoolDaysUI() {
+  const el = document.getElementById("schoolDaysCount");
+  if (!el) return;
+  const range = getRangeFromPeriod();
+  if (!range) { el.textContent = "0"; return; }
+  el.textContent = String(countSchoolDays(range.from, range.to));
+}
 
 const I18N_MSG = {
   kk: {
@@ -598,6 +695,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
