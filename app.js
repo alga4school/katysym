@@ -21,6 +21,7 @@ const EXCEPTIONS = ["auyrdy", "sebep", "sebsez", "keshikti"];
 // ============================
 let currentLang = document.body.dataset.lang || "kk";
 const I18N_UI = { 
+};
   kk: {
     schoolName: 'Ақтөбе облысының білім басқармасы Алға ауданының білім бөлімі" ММ "№4 Алға орта мектебі" КММ',
     bannerTitle: "Қатысу журналы",
@@ -576,6 +577,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
