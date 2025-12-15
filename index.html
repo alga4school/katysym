@@ -172,6 +172,18 @@
               <button id="exportCsvBtn" class="btn ghost" type="button">⬇️ <span data-i18n="btnExport">CSV жүктеу</span></button>
             </div>
           </div>
+<div class="holidayBox">
+  <label>Неучебные дни (праздники/каникулы):</label>
+  <input type="date" id="holidayPick">
+  <button type="button" id="addHolidayBtn">Добавить</button>
+  <button type="button" id="clearHolidaysBtn">Очистить</button>
+
+  <div id="holidaysList" style="margin-top:8px;"></div>
+
+  <div style="margin-top:10px;">
+    <b>Учебных дней в периоде:</b> <span id="schoolDaysCount">0</span>
+  </div>
+</div>
 
           <div class="kpis">
             <div class="kpi"><div class="kpi-label" data-i18n="kpiTotal">Барлық белгі</div><div class="kpi-val" id="totalLessons">0</div></div>
@@ -211,3 +223,4 @@
   <script src="app.js"></script>
 </body>
 </html>
+
