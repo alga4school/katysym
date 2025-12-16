@@ -631,8 +631,8 @@ fillTable("topUnexcusedTable", buildTop(report, "sebsez", 10, 4));
     alert((currentLang === "ru" ? "Ошибка отчёта: " : "Отчет қатесі: ") + e.message);
   }
 }
-//
-document.addEventListener("DOMContentLoaded", () => {
+/* ================== INIT ================== */
+document.addEventListener("DOMContentLoaded",()=>{
   initHolidayUI();
   updateSchoolDaysUI();
 });
@@ -720,6 +720,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
