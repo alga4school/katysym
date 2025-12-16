@@ -81,8 +81,8 @@ function getStudents_(p) {
     class_letter: head.indexOf("class_letter"),
   };
 
-  const grade = String(p.grade || "ALL");
-  const letter = String(p.class_letter || "ALL");
+  const grade = String(r[iGrade] ?? "").trim();
+const class_letter = String(r[iLet] ?? "").trim();
 
   return values
     .filter(r => r[idx.id] !== "" && r[idx.id] != null)
@@ -108,6 +108,11 @@ function handleSave_(data) {
   if (!date) return bad("missing_date");
   if (!grade) return bad("missing_grade");
   if (!class_letter) return bad("missing_class_letter");
+
+// === BLOCK повторной отметки (1 класс 1 раз в день) ===
+if (isClassAlreadyMarked_(date, grade, class_letter)) {
+  return bad("already_marked", { date, grade, class_letter });
+}
 
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   const sh = ss.getSheetByName(SHEET_ATT);
