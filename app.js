@@ -185,6 +185,44 @@ function isSchoolDayISO(iso) {
 
   return true;
 }
+function renderDayList(report, dateISO) {
+  const box = document.getElementById("dayListBox");
+  const tbody = document.querySelector("#dayListTable tbody");
+  if (!box || !tbody) return;
+
+  // Тек 1 күнге арналған map
+  const map = (report.daily && report.daily[dateISO]) ? report.daily[dateISO] : null;
+
+  // Егер дерек жоқ болса да — сыныптағы оқушыларды “Қатысты” деп шығарып қоямыз
+  const students = report.students || [];
+
+  tbody.innerHTML = "";
+
+  students.forEach((s, i) => {
+    const sid = String(s.id);
+    const st = map && map[sid] ? map[sid] : null;
+
+    const statusText =
+      st ? (st.status_kk || st.status_ru || st.status_code)
+         : "Қатысты"; // егер жазба жоқ болса
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${s.full_name || ""}</td>
+      <td>${(s.grade || "")}${(s.class_letter || "")}</td>
+      <td>${statusText}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  box.style.display = "block";
+}
+
+function hideDayList() {
+  const box = document.getElementById("dayListBox");
+  if (box) box.style.display = "none";
+}
 
 function countSchoolDays(fromISO, toISO) {
   const from = new Date(fromISO + "T00:00:00");
@@ -700,6 +738,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
