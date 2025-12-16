@@ -562,12 +562,14 @@ async function updateStats() {
       grade,
       class_letter
     });
-    
-    if (document.getElementById("periodType").value === "custom" && range.from === range.to) {
+  if ( document.getElementById("periodType").value === "custom" &&
+  range.from === range.to
+) {
   renderDayIssues(report, range.from);
 } else {
- hideDayIssues();
+  hideDayIssues();
 }
+
 const periodType = document.getElementById("periodType").value;
 const reportClass = document.getElementById("reportClass").value || "ALL";
 
@@ -705,6 +707,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
