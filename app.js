@@ -606,6 +606,15 @@ async function updateStats() {
       grade,
       class_letter
     });
+const periodType = document.getElementById("periodType").value;
+const reportClass = document.getElementById("reportClass").value || "ALL";
+
+// Тек "Күні" және нақты сынып таңдалса ғана тізім көрсетеміз
+if (periodType === "custom" && reportClass !== "ALL" && range.from === range.to) {
+  renderDayList(report, range.from);
+} else {
+  hideDayList();
+}
 
     const t = sumTotals(report);
 
@@ -738,6 +747,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
