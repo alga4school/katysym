@@ -73,10 +73,10 @@ const I18N_UI = {
     schoolName: 'КГУ "Алгинская средняя школа №4" ГУ "Отдел образования Алгинского района Управления образования Актюбинской области"',
     bannerTitle: "",
     bannerText: "Автоматизированная система учёта посещаемости учебных занятий",
-    btnAttendance: "Журнал посещаемости",
+    btnAttendance: "Отметить посещаемость",
     btnReports: "Отчёты и статистика",
     backHome: "Главная",
-    attendanceTitle: "Журнал посещаемости",
+    attendanceTitle: "Ежедневный контроль",
     reportsTitle: "Отчёты и статистика",
     dateLabel: "Дата",
     classLabel: "Класс",
@@ -754,6 +754,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
