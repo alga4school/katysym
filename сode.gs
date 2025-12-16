@@ -108,16 +108,14 @@ function handleSave_(data) {
   if (!date) return bad("missing_date");
   if (!grade) return bad("missing_grade");
   if (!class_letter) return bad("missing_class_letter");
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sh = ss.getSheetByName(SHEET_ATT);
+  if (!sh) throw new Error("Sheet attendance not found");
 
 // === BLOCK повторной отметки (1 класс 1 раз в день) ===
 if (isClassAlreadyMarked_(date, grade, class_letter)) {
   return bad("already_marked", { date, grade, class_letter });
 }
-
-  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const sh = ss.getSheetByName(SHEET_ATT);
-  if (!sh) throw new Error("Sheet attendance not found");
-
   // гарантируем шапку
   if (sh.getLastRow() === 0) {
     sh.appendRow(["date","student_id","status_code","status_kk","status_ru","grade","class_letter","ts"]);
