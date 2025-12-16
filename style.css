@@ -236,7 +236,6 @@ input, select{
   box-shadow: var(--shadow);
   padding:16px;
 }
-
 .report-controls{
   display:flex;
   flex-wrap:wrap;
@@ -295,4 +294,36 @@ input, select{
 .reportButtons button{margin-right:10px;margin-top:10px}
 .schoolDaysInfo{margin-top:8px}
 
+
+
+/* Daily issues block (reports, 1 day) */
+.dayIssuesBox{
+  margin-top:18px;
+  padding:14px;
+  border:1px solid rgba(0,0,0,.08);
+  border-radius:16px;
+  background:#fff;
+}
+.dayIssuesTitle{ margin:0 0 10px 0; font-size:18px; }
+.dayIssuesGrid{
+  display:grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap:12px;
+}
+@media (max-width: 980px){
+  .dayIssuesGrid{ grid-template-columns: repeat(2, minmax(180px, 1fr)); }
+}
+@media (max-width: 520px){
+  .dayIssuesGrid{ grid-template-columns: 1fr; }
+}
+.dayIssueCard{
+  border:1px solid rgba(0,0,0,.08);
+  border-radius:14px;
+  padding:10px;
+  background:#fafafa;
+}
+.dayIssueHead{ font-weight:700; margin-bottom:8px; }
+.miniTable{ width:100%; border-collapse:collapse; font-size:13px; }
+.miniTable th,.miniTable td{ padding:6px 8px; border-bottom:1px solid rgba(0,0,0,.06); }
+.dayIssuesNote{ margin-top:10px; font-size:13px; opacity:.8; }
 
