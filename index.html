@@ -112,6 +112,7 @@
       <div class="reports-shell">
         <div class="reports-card">
           <div class="report-controls">
+            
             <!-- 1 күндік сынып тізімі -->
 <div id="dayListBox" style="display:none; margin-top:14px;">
   <h3 style="margin:6px 0;">Сынып тізімі (1 күн)</h3>
@@ -271,6 +272,33 @@
               </table>
             </div>
           </div>
+<div id="dayIssuesBox" style="display:none; margin-top:20px">
+  <h3>📌 Сабақтан қалғандар (күндік)</h3>
+
+  <h4>⏰ Кешіккендер</h4>
+  <table id="tblLate">
+    <thead><tr><th>№</th><th>Оқушы</th><th>Сынып</th></tr></thead>
+    <tbody></tbody>
+  </table>
+
+  <h4>🤒 Ауырғандар</h4>
+  <table id="tblSick">
+    <thead><tr><th>№</th><th>Оқушы</th><th>Сынып</th></tr></thead>
+    <tbody></tbody>
+  </table>
+
+  <h4>📄 Себепті</h4>
+  <table id="tblExcused">
+    <thead><tr><th>№</th><th>Оқушы</th><th>Сынып</th></tr></thead>
+    <tbody></tbody>
+  </table>
+
+  <h4>❌ Себепсіз</h4>
+  <table id="tblUnexcused">
+    <thead><tr><th>№</th><th>Оқушы</th><th>Сынып</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
 
           <div class="hint light" data-i18n="reportHint">
             Ескерту: Есептер деректері Google Script арқылы алынады.
@@ -284,6 +312,7 @@
   <script src="app.js"></script>
 </body>
 </html>
+
 
 
 
