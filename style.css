@@ -287,3 +287,10 @@ input, select{
   .report-actions{margin-left:0}
 }
 
+.reportBox{border:1px solid #ddd;padding:15px;border-radius:10px}
+.holidayBox{margin-top:15px;padding:10px;border:1px dashed #aaa}
+.holidayTag{display:inline-block;margin:4px;padding:4px 8px;border:1px solid #ccc;border-radius:12px}
+.holidayTag button{margin-left:6px;cursor:pointer}
+.reportButtons button{margin-right:10px;margin-top:10px}
+.schoolDaysInfo{margin-top:8px}
+
