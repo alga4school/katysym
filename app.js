@@ -562,38 +562,62 @@ function hideDayIssues() {
   });
 }
 
-function renderDayIssues(report, dateISO) {
+function hideDayIssues(){
+  const box = document.getElementById("dayIssuesBox");
+  if (box) box.style.display = "none";
+}
+
+function fill3(tableId, rows){
+  const tb = document.querySelector(`#${tableId} tbody`);
+  if (!tb) return;
+  tb.innerHTML = "";
+  rows.forEach((r,i)=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${i+1}</td><td>${r.name}</td><td>${r.cls}</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+function renderDayIssues(report, dateISO){
   const box = document.getElementById("dayIssuesBox");
   if (!box) return;
 
-  const dailyMap = report.daily?.[dateISO] || {}; // {studentId: {status_code,...}}
-  const students = report.students || [];
+  const stById = new Map((report.students || []).map(s => [String(s.id), s]));
+  const dailyMap = (report.daily && report.daily[dateISO]) ? report.daily[dateISO] : null;
 
-  const late = [];
-  const sick = [];
-  const excused = [];
-  const unexcused = [];
+  if (!dailyMap) { hideDayIssues(); return; }
+
+  const late=[], sick=[], exc=[], unex=[];
 
   Object.entries(dailyMap).forEach(([sid, st]) => {
-    const s = students.find(x => String(x.id) === String(sid));
-    const name = s ? s.full_name : sid;
-    const cls = s ? `${s.grade}${s.class_letter}` : "";
     const code = st?.status_code;
+    if (!code || code === "katysty") return;
 
-    if (code === "keshikti") late.push({ name, cls });
-    else if (code === "auyrdy") sick.push({ name, cls });
-    else if (code === "sebep") excused.push({ name, cls });
-    else if (code === "sebsez") unexcused.push({ name, cls });
-    // "katysty" көрсетпейміз
+    const s = stById.get(String(sid));
+    const name = s ? s.full_name : String(sid);
+    const cls  = s ? `${s.grade}${s.class_letter}` : "";
+
+    const row = { name, cls };
+
+    if (code === "keshikti") late.push(row);
+    if (code === "auyrdy")   sick.push(row);
+    if (code === "sebep")    exc.push(row);
+    if (code === "sebsez")   unex.push(row);
   });
 
-  fillSimpleTable("tblLate", late);
-  fillSimpleTable("tblSick", sick);
-  fillSimpleTable("tblExcused", excused);
-  fillSimpleTable("tblUnexcused", unexcused);
+  if (!(late.length || sick.length || exc.length || unex.length)) {
+    hideDayIssues();
+    return;
+  }
+
+  fill3("tblLate", late);
+  fill3("tblSick", sick);
+  fill3("tblExcused", exc);
+  fill3("tblUnexcused", unex);
 
   box.style.display = "block";
 }
+
 
 async function updateStats() {
   const range = getRangeFromPeriod();
@@ -726,6 +750,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
