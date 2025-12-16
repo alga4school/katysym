@@ -166,6 +166,23 @@
               <span class="label" data-i18n="classLabel">Сынып</span>
               <select id="reportClass"></select>
             </label>
+<!-- 1 күндік сынып тізімі -->
+<div id="dayListBox" style="display:none; margin-top:14px;">
+  <h3 style="margin:6px 0;">Сынып тізімі (1 күн)</h3>
+  <div style="overflow:auto;">
+    <table id="dayListTable" class="table">
+      <thead>
+        <tr>
+          <th>№</th>
+          <th>Оқушы</th>
+          <th>Сынып</th>
+          <th>Статус</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
 
             <div class="report-actions">
               <button id="updateStatsBtn" class="btn primary" type="button">📈 <span data-i18n="btnUpdate">Көрсету</span></button>
@@ -223,4 +240,5 @@
   <script src="app.js"></script>
 </body>
 </html>
+
 
