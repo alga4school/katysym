@@ -557,7 +557,7 @@ const reportClass = document.getElementById("reportClass").value || "ALL";
 if (periodType === "custom" && reportClass !== "ALL" && range.from === range.to) {
   renderDayList(report, range.from);
 } else {
-  hideDayList();
+  hideDayIssues();
 }
 
     const t = sumTotals(report);
@@ -665,6 +665,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
+function hideDayIssues(){
+  const box = document.getElementById("dayIssuesBox");
+  if (box) box.style.display = "none";
+}
 
 
 
