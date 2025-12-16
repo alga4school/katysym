@@ -236,6 +236,7 @@ input, select{
   box-shadow: var(--shadow);
   padding:16px;
 }
+
 .report-controls{
   display:flex;
   flex-wrap:wrap;
@@ -293,4 +294,5 @@ input, select{
 .holidayTag button{margin-left:6px;cursor:pointer}
 .reportButtons button{margin-right:10px;margin-top:10px}
 .schoolDaysInfo{margin-top:8px}
+
 
