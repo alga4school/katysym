@@ -24,8 +24,8 @@ let currentLang = document.body.dataset.lang || "kk";
 const I18N_UI = {
   kk: {
     schoolName: 'Ақтөбе облысының білім басқармасы Алға ауданының білім бөлімі" ММ "№4 Алға орта мектебі" КММ',
-    bannerTitle: "Оқушылардың қатысуын бақылаудың автоматтандырылған жүйесі",
-    bannerText: "",
+    bannerTitle: "",
+    bannerText: "Оқушылардың қатысуын бақылаудың автоматтандырылған жүйесі",
     btnAttendance: "Сабаққа қатысуды белгілеу",
     btnReports: "Есептер мен статистика",
     backHome: "Басты бет",
@@ -837,6 +837,7 @@ function isClassAlreadyMarked_(dateISO, grade, class_letter) {
   }
   return false;
 }
+
 
 
 
