@@ -633,6 +633,11 @@ async function updateStats() {
     class_letter = p.letter;
   }
 
+  if (document.getElementById("periodType").value === "custom" && range.from === range.to) {
+  renderDayIssues(report, range.from);
+} else {
+  hideDayIssues();
+}
   try {
     const report = await apiGet("report", { from: range.from, to: range.to, grade, class_letter });
 
@@ -750,6 +755,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
