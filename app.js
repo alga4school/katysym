@@ -107,12 +107,18 @@ const I18N_UI = {
     topUnexcused: "Много без причины (TOP)",
   }
 };
-const HOLIDAYS_KEY = "katysym_holidays_v1";
-const WEEKEND_DAYS = new Set([5, 6]); // Пт+Сб выходные (как ты сказала)
 
+/* ================== НАСТРОЙКИ ================== */
+const WEEKEND_DAYS = new Set([5, 6]); // Пятница + Суббота
+const HOLIDAYS_KEY = "katysym_holidays_v1";
+
+/* ================== HOLIDAYS ================== */
 function loadHolidays() {
-  try { return new Set(JSON.parse(localStorage.getItem(HOLIDAYS_KEY) || "[]")); }
-  catch { return new Set(); }
+  try {
+    return new Set(JSON.parse(localStorage.getItem(HOLIDAYS_KEY) || "[]"));
+  } catch {
+    return new Set();
+  }
 }
 function saveHolidays(set) {
   localStorage.setItem(HOLIDAYS_KEY, JSON.stringify([...set].sort()));
@@ -124,123 +130,65 @@ function renderHolidays() {
   const el = document.getElementById("holidaysList");
   if (!el) return;
 
-  const arr = [...HOLIDAYS].sort();
-  if (!arr.length) {
-    el.innerHTML = "<em>Не выбрано</em>";
+  if (!HOLIDAYS.size) {
+    el.innerHTML = "<em>Таңдалмаған</em>";
     return;
   }
 
-  el.innerHTML = arr.map(d => `
-    <span class="holidayTag">
-      ${d}
-      <button type="button" data-date="${d}" class="delHolidayBtn">×</button>
+  el.innerHTML = [...HOLIDAYS].map(d => `
+    <span class="holidayTag">${d}
+      <button data-date="${d}" class="delHolidayBtn">×</button>
     </span>
   `).join(" ");
 
   el.querySelectorAll(".delHolidayBtn").forEach(btn => {
-    btn.addEventListener("click", () => {
+    btn.onclick = () => {
       HOLIDAYS.delete(btn.dataset.date);
       saveHolidays(HOLIDAYS);
       renderHolidays();
-      updateSchoolDaysUI(); // пересчёт
-    });
+      updateSchoolDaysUI();
+    };
   });
 }
 
 function initHolidayUI() {
-  const addBtn = document.getElementById("addHolidayBtn");
-  const clearBtn = document.getElementById("clearHolidaysBtn");
-  const pick = document.getElementById("holidayPick");
+  document.getElementById("addHolidayBtn").onclick = () => {
+    const d = document.getElementById("holidayPick").value;
+    if (!d) return;
+    HOLIDAYS.add(d);
+    saveHolidays(HOLIDAYS);
+    renderHolidays();
+    updateSchoolDaysUI();
+  };
 
-  if (addBtn && pick) {
-    addBtn.addEventListener("click", () => {
-      const v = pick.value;
-      if (!v) return;
-      HOLIDAYS.add(v);
-      saveHolidays(HOLIDAYS);
-      renderHolidays();
-      pick.value = "";
-      updateSchoolDaysUI();
-    });
-  }
-
-  if (clearBtn) {
-    clearBtn.addEventListener("click", () => {
-      HOLIDAYS = new Set();
-      saveHolidays(HOLIDAYS);
-      renderHolidays();
-      updateSchoolDaysUI();
-    });
-  }
+  document.getElementById("clearHolidaysBtn").onclick = () => {
+    HOLIDAYS.clear();
+    saveHolidays(HOLIDAYS);
+    renderHolidays();
+    updateSchoolDaysUI();
+  };
 
   renderHolidays();
 }
 
 function isSchoolDayISO(iso) {
   if (HOLIDAYS.has(iso)) return false;
-
   const d = new Date(iso + "T00:00:00");
-  const dow = d.getDay();
-  if (WEEKEND_DAYS.has(dow)) return false;
-
-  return true;
-}
-function renderDayList(report, dateISO) {
-  const box = document.getElementById("dayListBox");
-  const tbody = document.querySelector("#dayListTable tbody");
-  if (!box || !tbody) return;
-
-  // Тек 1 күнге арналған map
-  const map = (report.daily && report.daily[dateISO]) ? report.daily[dateISO] : null;
-
-  // Егер дерек жоқ болса да — сыныптағы оқушыларды “Қатысты” деп шығарып қоямыз
-  const students = report.students || [];
-
-  tbody.innerHTML = "";
-
-  students.forEach((s, i) => {
-    const sid = String(s.id);
-    const st = map && map[sid] ? map[sid] : null;
-
-    const statusText =
-      st ? (st.status_kk || st.status_ru || st.status_code)
-         : "Қатысты"; // егер жазба жоқ болса
-
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${i + 1}</td>
-      <td>${s.full_name || ""}</td>
-      <td>${(s.grade || "")}${(s.class_letter || "")}</td>
-      <td>${statusText}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  box.style.display = "block";
+  return !WEEKEND_DAYS.has(d.getDay());
 }
 
-function hideDayList() {
-  const box = document.getElementById("dayListBox");
-  if (box) box.style.display = "none";
-}
-
-function countSchoolDays(fromISO, toISO) {
-  const from = new Date(fromISO + "T00:00:00");
-  const to = new Date(toISO + "T00:00:00");
+function countSchoolDays(from, to) {
   let c = 0;
-  for (let d = new Date(from); d <= to; d.setDate(d.getDate() + 1)) {
-    const iso = d.toISOString().slice(0,10);
-    if (isSchoolDayISO(iso)) c++;
+  for (let d = new Date(from); d <= new Date(to); d.setDate(d.getDate() + 1)) {
+    if (isSchoolDayISO(d.toISOString().slice(0,10))) c++;
   }
   return c;
 }
 
 function updateSchoolDaysUI() {
   const el = document.getElementById("schoolDaysCount");
-  if (!el) return;
-  const range = getRangeFromPeriod();
-  if (!range) { el.textContent = "0"; return; }
-  el.textContent = String(countSchoolDays(range.from, range.to));
+  const r = getRangeFromPeriod();
+  el.textContent = r ? countSchoolDays(r.from, r.to) : 0;
 }
 
 const I18N_MSG = {
@@ -491,65 +439,57 @@ async function saveAttendance(){
   }
 }
 
-// ============================
-// REPORTS
-// ============================
-function getRangeFromPeriod(){
+/* ================== ПЕРИОД ================== */
+function getRangeFromPeriod() {
   const type = document.getElementById("periodType").value;
   const today = new Date();
-  const toISO = (d) => d.toISOString().slice(0, 10);
+  const toISO = d => d.toISOString().slice(0,10);
 
   if (type === "custom") {
-    const s = document.getElementById("customStart").value;
-    const e = document.getElementById("customEnd").value;
+    const s = customStart.value, e = customEnd.value;
     if (!s || !e) return null;
-    return { from: s, to: e };
+    return { from:s, to:e };
   }
 
   if (type === "week") {
-    // автомат: соңғы 7 күн
-    const end = new Date(today);
-    const start = new Date(today);
+    const end = today, start = new Date();
     start.setDate(start.getDate() - 6);
-    return { from: toISO(start), to: toISO(end) };
+    return { from:toISO(start), to:toISO(end) };
   }
 
-  if (type === "all") return { from:"2000-01-01", to:"2100-01-01" };
-
   if (type === "month") {
-    const mi = document.getElementById("monthInput").value;
-    if (!mi) return null;
-    const [y,m] = mi.split("-").map(Number);
-    const start = new Date(y, m-1, 1);
-    const end = new Date(y, m, 0);
-    return { from: toISO(start), to: toISO(end) };
+    const [y,m] = monthInput.value.split("-");
+    return { from:`${y}-${m}-01`, to:toISO(new Date(y,m,0)) };
   }
 
   if (type === "year") {
-    const y = Number(document.getElementById("yearInput").value || today.getFullYear());
-    return { from: `${y}-01-01`, to: `${y}-12-31` };
+    const y = quarterYearInput.value || today.getFullYear();
+    return { from:`${y}-01-01`, to:`${y}-12-31` };
   }
 
- if (type === "quarter") {
-  const q = Number(document.getElementById("quarterInput").value || 1);
-  const y = Number(document.getElementById("quarterYearInput").value || today.getFullYear());
+  if (type === "quarter") {
+    const q = Number(quarterInput.value || 0);
+    const y = Number(quarterYearInput.value || 2025);
 
-  // ШКОЛЬНЫЕ ЧЕТВЕРТИ 2025-2026 (по твоему календарю с каникулами)
-  // Осенние каникулы: 27–31.10.2025 → четверть 1 до 26.10, четверть 2 с 01.11
-  // Зимние: 29–31.12.2025 и 01–06.01.2026 → четверть 2 до 28.12, четверть 3 с 07.01
-  // Весенние: 23–29.03.2026 → четверть 3 до 22.03, четверть 4 с 30.03
-  const Q = {
-    1: { from: `${y}-09-01`, to: `${y}-10-26` },
-    2: { from: `${y}-11-01`, to: `${y}-12-28` },
-    3: { from: `${y+1}-01-07`, to: `${y+1}-03-22` },
-    4: { from: `${y+1}-03-30`, to: `${y+1}-05-31` }, // если у вас учеба до 25/30 мая — скажи, поменяю
-  };
+    const Q = {
+      1:{from:`${y}-09-01`,to:`${y}-10-26`},
+      2:{from:`${y}-11-01`,to:`${y}-12-28`},
+      3:{from:`${y+1}-01-07`,to:`${y+1}-03-22`},
+      4:{from:`${y+1}-03-30`,to:`${y+1}-05-25`}
+    };
 
-  return Q[q] || Q[1];
-}
+    if (q === 0) {
+      const t = today.toISOString().slice(0,10);
+      for (const k in Q)
+        if (t>=Q[k].from && t<=Q[k].to) return Q[k];
+    }
+    return Q[q];
+  }
 
+  if (type === "all") return {from:"2000-01-01",to:"2100-01-01"};
   return null;
 }
+
 
 function sumTotals(report){
   const totals = { total:0, katysty:0, keshikti:0, sebep:0, sebsez:0, auyrdy:0 };
@@ -720,6 +660,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
