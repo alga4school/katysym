@@ -530,6 +530,11 @@ async function updateStats() {
   const range = getRangeFromPeriod();
   updateSchoolDaysUI();
   if (!range) return alert(I18N_MSG[currentLang].needPeriod);
+if (document.getElementById("periodType").value === "custom" && range.from === range.to) {
+  renderDayIssues(report, range.from);
+} else {
+  hideDayIssues();
+}
 
   const reportClass = document.getElementById("reportClass").value || "ALL";
   let grade = "ALL", class_letter = "ALL";
@@ -545,6 +550,7 @@ async function updateStats() {
       grade,
       class_letter
     });
+    
 const periodType = document.getElementById("periodType").value;
 const reportClass = document.getElementById("reportClass").value || "ALL";
 
@@ -660,6 +666,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
