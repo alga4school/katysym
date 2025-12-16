@@ -548,7 +548,7 @@ async function updateStats() {
     if (document.getElementById("periodType").value === "custom" && range.from === range.to) {
   renderDayIssues(report, range.from);
 } else {
-  hideDayIssues();
+ hideDayIssues();
 }
 const periodType = document.getElementById("periodType").value;
 const reportClass = document.getElementById("reportClass").value || "ALL";
@@ -665,6 +665,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
