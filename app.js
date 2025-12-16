@@ -24,12 +24,12 @@ let currentLang = document.body.dataset.lang || "kk";
 const I18N_UI = {
   kk: {
     schoolName: 'Ақтөбе облысының білім басқармасы Алға ауданының білім бөлімі" ММ "№4 Алға орта мектебі" КММ',
-    bannerTitle: "Қатысу журналы",
-    bannerText: "Оқушылардың сабаққа қатысуын, кешігуді және себепсіз қалуды\nкүнделікті бақылауға арналған мектепішілік жүйе.",
-    btnAttendance: "Қатысуды белгілеу",
+    bannerTitle: "Оқушылардың қатысуын бақылаудың автоматтандырылған жүйесі",
+    bannerText: "",
+    btnAttendance: "Сабаққа қатысуды белгілеу",
     btnReports: "Есептер мен статистика",
     backHome: "Басты бет",
-    attendanceTitle: "Қатысу журналы",
+    attendanceTitle: "Оқушылардың сабаққа қатысуын есепке алудың мектепішілік жүйесі",
     reportsTitle: "Есептер мен статистика",
     dateLabel: "Күні",
     classLabel: "Сынып",
@@ -76,9 +76,9 @@ const I18N_UI = {
   },
   ru: {
     schoolName: 'КГУ "Алгинская средняя школа №4" ГУ "Отдел образования Алгинского района Управления образования Актюбинской области"',
-    bannerTitle: "Журнал посещаемости",
-    bannerText: "Внутришкольная система для ежедневного контроля посещаемости,\nопозданий и пропусков без причины.",
-    btnAttendance: "Журнал посещаемости",
+    bannerTitle: "Автоматизированная система контроля посещаемости учащихся",
+    bannerText: "",
+    btnAttendance: "Отметить посещаемость",
     btnReports: "Отчёты и статистика",
     backHome: "Главная",
     attendanceTitle: "Журнал посещаемости",
@@ -796,6 +796,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
