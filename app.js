@@ -421,6 +421,8 @@ function renderAttendanceTable(){
 // SAVE
 // ============================
 async function saveAttendance(){
+  const btn = document.getElementById("saveBtn"); // егер ID басқа болса, соны жаз
+if (btn) btn.disabled = true;
   const dateEl = document.getElementById("attendanceDate");
   const classSelect = document.getElementById("classSelect");
   const saveStatus = document.getElementById("saveStatus");
@@ -447,6 +449,9 @@ async function saveAttendance(){
   } catch (e) {
     saveStatus.textContent = `${I18N_MSG[currentLang].saveErr} ${e.message}`;
   }
+}
+finally {
+  if (btn) btn.disabled = false;
 }
 
 /* ================== ПЕРИОД ================== */
@@ -754,6 +759,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
