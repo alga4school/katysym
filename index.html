@@ -173,63 +173,6 @@
   </div>
 </div>
             
-function fillSimpleTable(tableId, rows){
-  const tbody = document.querySelector(`#${tableId} tbody`);
-  if (!tbody) return;
-  tbody.innerHTML = "";
-
-  rows.forEach((r, i) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${i+1}</td><td>${r.name}</td><td>${r.cls}</td><td>${r.status}</td>`;
-    tbody.appendChild(tr);
-  });
-}
-
-function hideDayIssues(){
-  const box = document.getElementById("dayIssuesBox");
-  if (box) box.style.display = "none";
-  ["tblLate","tblSick","tblExcused","tblUnexcused"].forEach(id => fillSimpleTable(id, []));
-}
-
-function renderDayIssues(report, dateISO){
-  const box = document.getElementById("dayIssuesBox");
-  if (!box) return;
-
-  const dailyMap = report.daily?.[dateISO] || {}; // { studentId: {status_code,...} }
-  const students = report.students || [];
-
-  // ТЕК қатыспаған/кешіккендерді жинаймыз
-  const late = [];
-  const sick = [];
-  const excused = [];
-  const unexcused = [];
-
-  // dailyMap ішінде тек белгіленгендер бар (қалғаны “қатысты” деп есептеледі)
-  Object.entries(dailyMap).forEach(([sid, st]) => {
-    const s = students.find(x => String(x.id) === String(sid));
-    const name = s?.full_name || sid;
-    const cls = s ? `${s.grade}${s.class_letter}` : "";
-    const statusText = st.status_kk || st.status_ru || st.status_code;
-
-    // “katysty” көрсетпейміз
-    if (st.status_code === "katysty") return;
-
-    const row = { name, cls, status: statusText };
-
-    if (st.status_code === "keshikti") late.push(row);
-    else if (st.status_code === "auyrdy") sick.push(row);
-    else if (st.status_code === "sebep") excused.push(row);
-    else if (st.status_code === "sebsez") unexcused.push(row);
-  });
-
-  fillSimpleTable("tblLate", late);
-  fillSimpleTable("tblSick", sick);
-  fillSimpleTable("tblExcused", excused);
-  fillSimpleTable("tblUnexcused", unexcused);
-
-  box.style.display = "block";
-}
-
             <label class="field">
               <span class="label" data-i18n="periodLabel">Кезең</span>
               <select id="periodType">
@@ -341,6 +284,7 @@ function renderDayIssues(report, dateISO){
   <script src="app.js"></script>
 </body>
 </html>
+
 
 
 
