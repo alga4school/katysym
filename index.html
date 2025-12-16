@@ -240,33 +240,45 @@
               </table>
             </div>
           </div>
-<div id="dayIssuesBox" style="display:none; margin-top:20px">
-  <h3>📌 Сабақтан қалғандар (күндік)</h3>
+<!-- ✅ КҮНДІК: сабақтан қалғандар (тек custom күн = 1 күн болғанда шығады) -->
+<div id="dayIssuesBox" class="day-issues" style="display:none; margin-top:18px">
+  <h3 style="margin:0 0 10px 0">📌 Сабақтан қалғандар (күндік)</h3>
 
-  <h4>⏰ Кешіккендер</h4>
-  <table id="tblLate">
-    <thead><tr><th>№</th><th>Оқушы</th><th>Сынып</th></tr></thead>
-    <tbody></tbody>
-  </table>
+  <div class="tables-grid">
+    <div class="mini-card">
+      <h3 class="mini-title">⏰ Кешіккендер</h3>
+      <table id="tblLate" class="table mini">
+        <thead><tr><th>№</th><th>Оқушы</th><th>Сынып</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
 
-  <h4>🤒 Ауырғандар</h4>
-  <table id="tblSick">
-    <thead><tr><th>№</th><th>Оқушы</th><th>Сынып</th></tr></thead>
-    <tbody></tbody>
-  </table>
+    <div class="mini-card">
+      <h3 class="mini-title">🤒 Ауырғандар</h3>
+      <table id="tblSick" class="table mini">
+        <thead><tr><th>№</th><th>Оқушы</th><th>Сынып</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
 
-  <h4>📄 Себепті</h4>
-  <table id="tblExcused">
-    <thead><tr><th>№</th><th>Оқушы</th><th>Сынып</th></tr></thead>
-    <tbody></tbody>
-  </table>
+    <div class="mini-card">
+      <h3 class="mini-title">📄 Себепті</h3>
+      <table id="tblExcused" class="table mini">
+        <thead><tr><th>№</th><th>Оқушы</th><th>Сынып</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
 
-  <h4>❌ Себепсіз</h4>
-  <table id="tblUnexcused">
-    <thead><tr><th>№</th><th>Оқушы</th><th>Сынып</th></tr></thead>
-    <tbody></tbody>
-  </table>
+    <div class="mini-card">
+      <h3 class="mini-title">❌ Себепсіз</h3>
+      <table id="tblUnexcused" class="table mini">
+        <thead><tr><th>№</th><th>Оқушы</th><th>Сынып</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
 </div>
+
 
           <div class="hint light" data-i18n="reportHint">
             Ескерту: Есептер деректері Google Script арқылы алынады.
@@ -280,6 +292,7 @@
   <script src="app.js"></script>
 </body>
 </html>
+
 
 
 
