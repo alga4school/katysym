@@ -797,6 +797,27 @@ function hideDayIssues(){
   if (box) box.style.display = "none";
 }
 
+function isClassAlreadyMarked_(dateISO, grade, class_letter) {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sh = ss.getSheetByName(SHEET_ATT);
+  const vals = sh.getDataRange().getValues();
+
+  const head = vals[0].map(String);
+  const iDate = head.indexOf("date");
+  const iGrade = head.indexOf("grade");
+  const iLet = head.indexOf("class_letter");
+
+  for (let i = 1; i < vals.length; i++) {
+    const d = String(vals[i][iDate]).slice(0,10);
+    const g = String(vals[i][iGrade]);
+    const l = String(vals[i][iLet]);
+    if (d === dateISO && g === String(grade) && l === String(class_letter)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 
 
 
