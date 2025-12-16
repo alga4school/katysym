@@ -24,12 +24,12 @@ let currentLang = document.body.dataset.lang || "kk";
 const I18N_UI = {
   kk: {
     schoolName: 'Ақтөбе облысының білім басқармасы Алға ауданының білім бөлімі" ММ "№4 Алға орта мектебі" КММ',
-    bannerTitle: "",
-    bannerText: "Оқушылардың қатысуын бақылаудың автоматтандырылған жүйесі",
-    btnAttendance: "Сабаққа қатысуды белгілеу",
+    bannerTitle: "Қатысу журналы",
+    bannerText: "Оқушылардың сабаққа қатысуын, кешігуді және себепсіз қалуды\nкүнделікті бақылауға арналған мектепішілік жүйе.",
+    btnAttendance: "Қатысуды белгілеу",
     btnReports: "Есептер мен статистика",
     backHome: "Басты бет",
-    attendanceTitle: "Оқушылардың сабаққа қатысуын есепке алудың мектепішілік жүйесі",
+    attendanceTitle: "Қатысу журналы",
     reportsTitle: "Есептер мен статистика",
     dateLabel: "Күні",
     classLabel: "Сынып",
@@ -63,22 +63,17 @@ const I18N_UI = {
     kpiUnexcused: "Себепсіз",
     topLate: "Көп кешігу (TOP)",
     topUnexcused: "Көп себепсіз (TOP)",
-    dayIssuesTitle: "Сабақтан қалғандар (күндік)",
-    lateTitle: "Кешіккендер",
-    sickTitle: "Ауырғандар",
-    excusedTitle: "Себепті",
-    unexcusedTitle: "Себепсіз",
-    dayIssuesNote: "Ескерту: “Қатысты” оқушылар көрсетілмейді.",
-    holidaysLabel: "Неучебные дни (праздники/каникулы):",
-    schoolDaysLabel: "Учебных дней в периоде:",
-    btnAdd: "Добавить",
-    btnClear: "Очистить",
   },
   ru: {
+    dayIssuesTitle:"📌 Пропуски за день",
+    dayLateTitle:"⏰ Опоздавшие",
+    daySickTitle:"🤒 Болели",
+    dayExcusedTitle:"📄 По уважительной",
+    dayUnexcusedTitle:"❌ Без уважительной",
     schoolName: 'КГУ "Алгинская средняя школа №4" ГУ "Отдел образования Алгинского района Управления образования Актюбинской области"',
-    bannerTitle: "Автоматизированная система контроля посещаемости учащихся",
-    bannerText: "",
-    btnAttendance: "Отметить посещаемость",
+    bannerTitle: "Журнал посещаемости",
+    bannerText: "Внутришкольная система для ежедневного контроля посещаемости,\nопозданий и пропусков без причины.",
+    btnAttendance: "Журнал посещаемости",
     btnReports: "Отчёты и статистика",
     backHome: "Главная",
     attendanceTitle: "Журнал посещаемости",
@@ -203,22 +198,17 @@ function updateSchoolDaysUI() {
 
 const I18N_MSG = {
   kk: {
+    dayIssuesTitle:"📌 Сабақтан қалғандар (күндік)",
+    dayLateTitle:"⏰ Кешіккендер",
+    daySickTitle:"🤒 Ауырғандар",
+    dayExcusedTitle:"📄 Себепті",
+    dayUnexcusedTitle:"❌ Себепсіз",
     saveOk: "✅ Сақталды:",
     saveErr: "❌ Қате:",
     needClass: "Сыныпты таңдаңыз",
     needDate: "Күнді таңдаңыз",
     chooseException: "Тек қажет болса таңдаңыз",
     needPeriod: "Кезеңді таңдаңыз",
-    dayIssuesTitle: "Пропуски/опоздания (за день)",
-    lateTitle: "Опоздавшие",
-    sickTitle: "Болели",
-    excusedTitle: "Уважительная",
-    unexcusedTitle: "Без уважительной",
-    dayIssuesNote: "Примечание: “Присутствовал(а)” не показывается.",
-    holidaysLabel: "Нерабочие дни (праздники/каникулы):",
-    schoolDaysLabel: "Учебных дней в периоде:",
-    btnAdd: "Добавить",
-    btnClear: "Очистить",
   },
   ru: {
     saveOk: "✅ Сохранено:",
@@ -452,106 +442,87 @@ async function saveAttendance(){
   saveStatus.textContent = "⏳ ...";
 
   try {
-    try {
-  const res = await apiPost({
-    key: API_KEY,
-    date,
-    grade,
-    class_letter: letter,
-    records
-  });
-
-  // бәрі дұрыс сақталды
-  saveStatus.textContent = I18N_MSG[currentLang].saveOk;
-
-} catch (e) {
-
-  // 👇 МІНЕ ОСЫ ЖЕР МАҢЫЗДЫ
-  if (e.message === "already_marked") {
-    saveStatus.textContent =
-      currentLang === "ru"
-        ? "Этот класс уже отмечен сегодня"
-        : "Бұл сынып бүгін белгіленген";
-  } else {
-    saveStatus.textContent =
-      `${I18N_MSG[currentLang].saveErr} ${e.message}`;
+    const res = await apiPost({ key: API_KEY, date, grade, class_letter: letter, records });
+    saveStatus.textContent = `${I18N_MSG[currentLang].saveOk} ${res.saved}`;
+  } catch (e) {
+    saveStatus.textContent = `${I18N_MSG[currentLang].saveErr} ${e.message}`;
   }
 }
 
-
 /* ================== ПЕРИОД ================== */
-function escapeHtml(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
-
-function getRangeFromPeriod(){
-  const type = document.getElementById("periodType")?.value || "custom";
+function getRangeFromPeriod() {
+  const type = document.getElementById("periodType").value;
   const today = new Date();
-  const toISO = (d) => d.toISOString().slice(0, 10);
+  const toISO = d => d.toISOString().slice(0,10);
 
   if (type === "custom") {
-    const s = document.getElementById("customStart")?.value;
-    const e = document.getElementById("customEnd")?.value;
+    const s = customStart.value, e = customEnd.value;
     if (!s || !e) return null;
-    return { from: s, to: e };
+    return { from:s, to:e };
   }
 
   if (type === "week") {
-    const end = new Date(today);
-    const start = new Date(today);
+    const end = today, start = new Date();
     start.setDate(start.getDate() - 6);
-    return { from: toISO(start), to: toISO(end) };
+    return { from:toISO(start), to:toISO(end) };
   }
 
-  if (type === "all") return { from:"2000-01-01", to:"2100-01-01" };
-
   if (type === "month") {
-    const mi = document.getElementById("monthInput")?.value;
-    if (!mi) return null;
-    const [y,m] = mi.split("-").map(Number);
-    const start = new Date(y, m-1, 1);
-    const end = new Date(y, m, 0);
-    return { from: toISO(start), to: toISO(end) };
+    const [y,m] = monthInput.value.split("-");
+    return { from:`${y}-${m}-01`, to:toISO(new Date(y,m,0)) };
   }
 
   if (type === "year") {
-    const y = Number(document.getElementById("yearInput")?.value || today.getFullYear());
-    return { from: `${y}-01-01`, to: `${y}-12-31` };
+    const y = quarterYearInput.value || today.getFullYear();
+    return { from:`${y}-01-01`, to:`${y}-12-31` };
   }
 
-  // quarter: for now = 3 months in calendar year (1=Jan-Mar). If you want school quarters, we can configure later.
   if (type === "quarter") {
-    const q = Number(document.getElementById("quarterInput")?.value || 1);
-    const y = Number(document.getElementById("quarterYearInput")?.value || today.getFullYear());
-    const startMonth = (q - 1) * 3;
-    const start = new Date(y, startMonth, 1);
-    const end = new Date(y, startMonth + 3, 0);
-    return { from: toISO(start), to: toISO(end) };
+    const q = Number(quarterInput.value || 0);
+    const y = Number(quarterYearInput.value || 2025);
+
+    const Q = {
+      1:{from:`${y}-09-01`,to:`${y}-10-26`},
+      2:{from:`${y}-11-01`,to:`${y}-12-28`},
+      3:{from:`${y+1}-01-07`,to:`${y+1}-03-22`},
+      4:{from:`${y+1}-03-30`,to:`${y+1}-05-25`}
+    };
+
+    if (q === 0) {
+      const t = today.toISOString().slice(0,10);
+      for (const k in Q)
+        if (t>=Q[k].from && t<=Q[k].to) return Q[k];
+    }
+    return Q[q];
   }
 
+  if (type === "all") return {from:"2000-01-01",to:"2100-01-01"};
   return null;
 }
+
 
 function sumTotals(report){
   const totals = { total:0, katysty:0, keshikti:0, sebep:0, sebsez:0, auyrdy:0 };
   Object.values(report.totals || {}).forEach(t => {
     ["katysty","keshikti","sebep","sebsez","auyrdy"].forEach(k => {
-      totals[k] += Number(t?.[k] || 0);
-      totals.total += Number(t?.[k] || 0);
+      totals[k] += Number(t[k] || 0);
+      totals.total += Number(t[k] || 0);
     });
   });
   return totals;
 }
 
-// TOP filtering: show only students with count >= minCount (default 4)
-function buildTop(report, code, limit=10, minCount=4){
-  const arr = (report.students || []).map(s => ({
-    id:String(s.id),
-    name:s.full_name,
-    cls:`${s.grade}${s.class_letter}`,
-    count:Number(report.totals?.[String(s.id)]?.[code] || 0)
-  })).filter(x => x.count >= minCount);
-
-  arr.sort((a,b)=>b.count-a.count);
-  return arr.slice(0, limit);
+/* ================== TOP ================== */
+function buildTop(report, code, limit=10) {
+  return (report.students||[])
+    .map(s=>({
+      name:s.full_name,
+      cls:`${s.grade}${s.class_letter}`,
+      count:Number(report.totals?.[String(s.id)]?.[code]||0)
+    }))
+    .filter(x=>x.count>4) // ТЕК 5+ рет
+    .sort((a,b)=>b.count-a.count)
+    .slice(0,limit);
 }
 
 function fillTable(tableId, rows){
@@ -560,37 +531,43 @@ function fillTable(tableId, rows){
   tbody.innerHTML = "";
   rows.forEach((r,i)=>{
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${i+1}</td><td>${escapeHtml(r.name)}</td><td>${escapeHtml(r.cls)}</td><td>${r.count}</td>`;
+    tr.innerHTML = `<td>${i+1}</td><td>${r.name}</td><td>${r.cls}</td><td>${r.count}</td>`;
     tbody.appendChild(tr);
   });
 }
 
-function fillSimpleTable(tableId, rows){
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));}
+
+// ============================
+// REPORTS
+// ============================
+
+function fillSimpleTable(tableId, rows) {
   const tbody = document.querySelector(`#${tableId} tbody`);
   if (!tbody) return;
   tbody.innerHTML = "";
-  rows.forEach((r,i)=>{
+  rows.forEach((r, i) => {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${i+1}</td><td>${escapeHtml(r.name)}</td><td>${escapeHtml(r.cls)}</td>`;
+    tr.innerHTML = `<td>${i + 1}</td><td>${escapeHtml(r.name)}</td><td>${escapeHtml(r.cls)}</td>`;
     tbody.appendChild(tr);
   });
 }
 
-function hideDayIssues(){
+function hideDayIssues() {
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
-  ["tblLate","tblSick","tblExcused","tblUnexcused"].forEach(id=>{
-    const tbody = document.querySelector(`#${id} tbody`);
-    if (tbody) tbody.innerHTML = "";
+  ["tblLate","tblSick","tblExcused","tblUnexcused"].forEach(id => {
+    const tb = document.querySelector(`#${id} tbody`);
+    if (tb) tb.innerHTML = "";
   });
 }
 
-function renderDayIssues(report, dateISO){
+function renderDayIssues(report, dateISO) {
   const box = document.getElementById("dayIssuesBox");
   if (!box) return;
 
-  const dailyMap = report.daily?.[dateISO] || {};
-  const byId = new Map((report.students || []).map(s => [String(s.id), s]));
+  const dailyMap = report.daily?.[dateISO] || {}; // {studentId: {status_code,...}}
+  const students = report.students || [];
 
   const late = [];
   const sick = [];
@@ -598,20 +575,16 @@ function renderDayIssues(report, dateISO){
   const unexcused = [];
 
   Object.entries(dailyMap).forEach(([sid, st]) => {
-    const s = byId.get(String(sid));
-    if (!s) return;
-
-    const cls = `${s.grade}${s.class_letter}`;
+    const s = students.find(x => String(x.id) === String(sid));
+    const name = s ? s.full_name : sid;
+    const cls = s ? `${s.grade}${s.class_letter}` : "";
     const code = st?.status_code;
 
-    // do NOT show present
-    if (code === "katysty") return;
-
-    const row = { name: s.full_name, cls };
-    if (code === "keshikti") late.push(row);
-    else if (code === "auyrdy") sick.push(row);
-    else if (code === "sebep") excused.push(row);
-    else if (code === "sebsez") unexcused.push(row);
+    if (code === "keshikti") late.push({ name, cls });
+    else if (code === "auyrdy") sick.push({ name, cls });
+    else if (code === "sebep") excused.push({ name, cls });
+    else if (code === "sebsez") unexcused.push({ name, cls });
+    // "katysty" көрсетпейміз
   });
 
   fillSimpleTable("tblLate", late);
@@ -625,30 +598,30 @@ function renderDayIssues(report, dateISO){
 async function updateStats() {
   const range = getRangeFromPeriod();
   updateSchoolDaysUI();
+
   if (!range) return alert(I18N_MSG[currentLang].needPeriod);
 
-  const reportClassVal = document.getElementById("reportClass")?.value || "ALL";
+  const reportClass = document.getElementById("reportClass").value || "ALL";
   let grade = "ALL", class_letter = "ALL";
-  if (reportClassVal !== "ALL") {
-    const p = parseClass(reportClassVal);
+  if (reportClass !== "ALL") {
+    const p = parseClass(reportClass);
     grade = p.grade;
     class_letter = p.letter;
   }
 
   try {
-    const report = await apiGet("report", {
-      from: range.from,
-      to: range.to,
-      grade,
-      class_letter
-    });
+    const report = await apiGet("report", { from: range.from, to: range.to, grade, class_letter });
 
-    // Daily issues show only when selected 1 day
-    const isOneDay = (document.getElementById("periodType")?.value === "custom" && range.from === range.to);
-    if (isOneDay) renderDayIssues(report, range.from);
-    else hideDayIssues();
+    // ✅ КҮНДІК "Сабақтан қалғандар" тек: Күні (custom) + 1 күн + нақты сынып таңдалса
+    const periodType = document.getElementById("periodType").value;
+    if (periodType === "custom" && range.from === range.to && reportClass !== "ALL") {
+      renderDayIssues(report, range.from);
+    } else {
+      hideDayIssues();
+    }
 
     const t = sumTotals(report);
+
     document.getElementById("totalLessons").textContent = t.total;
     document.getElementById("totalPresent").textContent = t.katysty;
     document.getElementById("totalLate").textContent = t.keshikti;
@@ -656,8 +629,9 @@ async function updateStats() {
     document.getElementById("totalExcused").textContent = t.sebep;
     document.getElementById("totalUnexcused").textContent = t.sebsez;
 
-    fillTable("topLateTable", buildTop(report, "keshikti", 10, 4));
-    fillTable("topUnexcusedTable", buildTop(report, "sebsez", 10, 4));
+    // TOP: тек 4-тен жоғары
+    fillTable("topLateTable", buildTop(report, "keshikti"));
+    fillTable("topUnexcusedTable", buildTop(report, "sebsez"));
 
   } catch (e) {
     hideDayIssues();
@@ -665,70 +639,6 @@ async function updateStats() {
   }
 }
 
-function exportCsv(){
-  const range = getRangeFromPeriod();
-  if (!range) return alert(I18N_MSG[currentLang].needPeriod);
-
-  const reportClassVal = document.getElementById("reportClass")?.value || "ALL";
-  let grade="ALL", class_letter="ALL";
-  if (reportClassVal !== "ALL") {
-    const p = parseClass(reportClassVal);
-    grade = p.grade;
-    class_letter = p.letter;
-  }
-
-  apiGet("report", { from: range.from, to: range.to, grade, class_letter })
-    .then(report => {
-      const header = ["date","student","class","status_code","status_kk","status_ru"];
-      const rows = [];
-      const byId = new Map((report.students || []).map(s => [String(s.id), s]));
-
-      Object.entries(report.daily || {}).forEach(([date, map]) => {
-        Object.entries(map || {}).forEach(([sid, st]) => {
-          const s = byId.get(String(sid));
-          rows.push([
-            date,
-            s ? s.full_name : sid,
-            s ? `${s.grade}${s.class_letter}` : "",
-            st?.status_code || "",
-            st?.status_kk || "",
-            st?.status_ru || ""
-          ]);
-        });
-      });
-
-      // Excel-friendly CSV: BOM + separator hint + semicolon
-      const sep = ";";
-      const esc = (x) => {
-        const v = String(x ?? "");
-        return (v.includes(sep) || v.includes('"') || v.includes("\n") || v.includes("\r"))
-          ? `"${v.replace(/"/g,'""')}"`
-          : v;
-      };
-
-      const csv = "\ufeffsep=;\r\n" + [header, ...rows]
-        .map(r => r.map(esc).join(sep))
-        .join("\r\n");
-
-      const blob = new Blob([csv], { type:"text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "attendance_report.csv";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    })
-    .catch(err => alert(err.message));
-}
-
-document.addEventListener("DOMContentLoaded",()=>{
-  initHolidayUI();
-  updateSchoolDaysUI();
-});
-
-/* ================== CSV ================== */
 function exportCsv(){
   const r=getRangeFromPeriod(); if(!r)return alert("Период таңдаңыз");
   apiGet("report",{from:r.from,to:r.to,grade:"ALL",class_letter:"ALL"}).then(rep=>{
@@ -816,30 +726,6 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
-
-function isClassAlreadyMarked_(dateISO, grade, class_letter) {
-  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const sh = ss.getSheetByName(SHEET_ATT);
-  const vals = sh.getDataRange().getValues();
-
-  const head = vals[0].map(String);
-  const iDate = head.indexOf("date");
-  const iGrade = head.indexOf("grade");
-  const iLet = head.indexOf("class_letter");
-
-  for (let i = 1; i < vals.length; i++) {
-    const d = String(vals[i][iDate]).slice(0,10);
-    const g = String(vals[i][iGrade]);
-    const l = String(vals[i][iLet]);
-    if (d === dateISO && g === String(grade) && l === String(class_letter)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-
-
 
 
 
