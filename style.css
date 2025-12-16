@@ -309,12 +309,15 @@ input, select{
   border-radius: 14px;
   overflow: hidden; /* дөңгелек бұрыш көріну үшін */
 }
-/* Көрсету (update) – көк емес */
+/* Көрсету (update) – көк */
 #updateStatsBtn{
-  background: #111827 !important; /* қара/қою */
-  color: #fff !important;
-  border: 1px solid rgba(255,255,255,.15);
+  .reports-head{
+  background: linear-gradient(90deg, #2563eb, #7c3aed);
+  color: #fff;
+  border-radius: 16px;
+  padding: 14px 20px;
 }
+
 
 /* CSV жүктеу – көк */
 #exportCsvBtn{
@@ -323,6 +326,7 @@ input, select{
   border: none !important;
 }
 #exportCsvBtn:hover{ filter: brightness(0.95); }
+
 
 
 
