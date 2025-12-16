@@ -219,6 +219,27 @@ const I18N_MSG = {
     needPeriod: "Укажите период",
   }
 };
+const I18N_MSG = {
+  kk: {
+    backHome: "Басты бет",
+    reportsTitle: "Есептер мен статистика",
+
+    holidaysLabel: "Оқымайтын күндер (мереке/каникул):",
+    btnAdd: "Қосу",
+    btnClear: "Тазалау",
+    schoolDaysLabel: "Оқу күндерінің саны:"
+  },
+
+  ru: {
+    backHome: "Главная",
+    reportsTitle: "Отчеты и статистика",
+
+    holidaysLabel: "Неучебные дни (праздники/каникулы):",
+    btnAdd: "Добавить",
+    btnClear: "Очистить",
+    schoolDaysLabel: "Учебных дней в периоде:"
+  }
+};
 
 // ============================
 // API
@@ -825,6 +846,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
