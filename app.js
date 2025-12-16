@@ -525,18 +525,68 @@ function fillTable(tableId, rows){
     tbody.appendChild(tr);
   });
 }
+function hideDayIssues(){
+  const box = document.getElementById("dayIssuesBox");
+  if (box) box.style.display = "none";
+}
 
+function renderDayIssues(report, dateISO){
+  const box = document.getElementById("dayIssuesBox");
+  if (!box) return;
+
+  box.style.display = "block";
+
+  const late = [];
+  const sick = [];
+  const excused = [];
+  const unexcused = [];
+
+  const dayMap = (report.daily && report.daily[dateISO]) ? report.daily[dateISO] : {};
+
+  Object.entries(dayMap).forEach(([sid, st]) => {
+    const s = (report.students || []).find(x => String(x.id) === String(sid));
+    const name = s ? s.full_name : sid;
+    const cls  = s ? `${s.grade}${s.class_letter}` : "";
+
+    const code = st.status_code;
+
+    if (code === "keshikti") late.push({name, cls});
+    if (code === "auyrdy")  sick.push({name, cls});
+    if (code === "sebep")   excused.push({name, cls});
+    if (code === "sebsez")  unexcused.push({name, cls});
+  });
+
+  const fill = (tableId, rows) => {
+    const tb = document.querySelector(`#${tableId} tbody`);
+    if (!tb) return;
+    tb.innerHTML = "";
+    rows.forEach((r, i) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${i+1}</td><td>${r.name}</td><td>${r.cls}</td>`;
+      tb.appendChild(tr);
+    });
+  };
+
+  fill("tblLate", late);
+  fill("tblSick", sick);
+  fill("tblExcused", excused);
+  fill("tblUnexcused", unexcused);
+}
 async function updateStats() {
   const range = getRangeFromPeriod();
   updateSchoolDaysUI();
   if (!range) return alert(I18N_MSG[currentLang].needPeriod);
+
+  const periodType = document.getElementById("periodType").value;
   const reportClass = document.getElementById("reportClass").value || "ALL";
+
   let grade = "ALL", class_letter = "ALL";
   if (reportClass !== "ALL") {
     const p = parseClass(reportClass);
     grade = p.grade;
     class_letter = p.letter;
   }
+
   try {
     const report = await apiGet("report", {
       from: range.from,
@@ -544,40 +594,13 @@ async function updateStats() {
       grade,
       class_letter
     });
-  if ( document.getElementById("periodType").value === "custom" &&
-  range.from === range.to
-) {
-  renderDayIssues(report, range.from);
-} else {
-  hideDayIssues();
-}
 
-const periodType = document.getElementById("periodType").value;
-const reportClass = document.getElementById("reportClass").value || "ALL";
-
-// Тек "Күні" және нақты сынып таңдалса ғана тізім көрсетеміз
-if (periodType === "custom" && reportClass !== "ALL" && range.from === range.to) {
-  renderDayList(report, range.from);
-} else {
-  hideDayIssues();
-}
-
-    const t = sumTotals(report); 
-    
-    if (document.getElementById("periodType").value === "custom" && range.from === range.to) {
-  renderDayIssues(report, range.from);
-} else {
- hideDayIssues();
-}
-const periodType = document.getElementById("periodType").value;
-const reportClass = document.getElementById("reportClass").value || "ALL";
-
-// Тек "Күні" және нақты сынып таңдалса ғана тізім көрсетеміз
-if (periodType === "custom" && reportClass !== "ALL" && range.from === range.to) {
-  renderDayList(report, range.from);
-} else {
-  hideDayIssues();
-}
+    // ✅ КҮНДІК тізім: тек period=Күні және 1 күн (from==to)
+    if (periodType === "custom" && range.from === range.to) {
+      renderDayIssues(report, range.from);
+    } else {
+      hideDayIssues();
+    }
 
     const t = sumTotals(report);
 
@@ -588,13 +611,16 @@ if (periodType === "custom" && reportClass !== "ALL" && range.from === range.to)
     document.getElementById("totalExcused").textContent = t.sebep;
     document.getElementById("totalUnexcused").textContent = t.sebsez;
 
-   fillTable("topLateTable", buildTop(report, "keshikti", 10, 4));
-fillTable("topUnexcusedTable", buildTop(report, "sebsez", 10, 4));
+    // TOP: сен “4-тен жоғары ғана” дегенсің — buildTop ішінде filter(x.count>4) болуы керек
+    fillTable("topLateTable", buildTop(report, "keshikti"));
+    fillTable("topUnexcusedTable", buildTop(report, "sebsez"));
 
   } catch (e) {
+    hideDayIssues();
     alert((currentLang === "ru" ? "Ошибка отчёта: " : "Отчет қатесі: ") + e.message);
   }
 }
+
 /* ================== INIT ================== */
 document.addEventListener("DOMContentLoaded",()=>{
   initHolidayUI();
@@ -689,6 +715,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
