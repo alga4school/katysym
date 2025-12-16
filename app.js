@@ -562,18 +562,17 @@ function sumTotals(report){
   return totals;
 }
 
-function buildTop(report, code, limit = 10, threshold = 4) {
-  const arr = (report.students || []).map(s => ({
-    id: s.id,
-    name: s.full_name,
-    cls: `${s.grade}${s.class_letter}`,
-    count: Number(report.totals?.[String(s.id)]?.[code] || 0)
-  }))
-  // ✅ тек 4-тен ЖОҒАРЫ (яғни >=5) көрсетіледі
-  .filter(x => x.count > threshold);
-
-  arr.sort((a, b) => b.count - a.count);
-  return arr.slice(0, limit);
+/* ================== TOP ================== */
+function buildTop(report, code, limit=10) {
+  return (report.students||[])
+    .map(s=>({
+      name:s.full_name,
+      cls:`${s.grade}${s.class_letter}`,
+      count:Number(report.totals?.[String(s.id)]?.[code]||0)
+    }))
+    .filter(x=>x.count>4) // ТЕК 5+ рет
+    .sort((a,b)=>b.count-a.count)
+    .slice(0,limit);
 }
 
 function fillTable(tableId, rows){
@@ -638,53 +637,27 @@ document.addEventListener("DOMContentLoaded", () => {
   updateSchoolDaysUI();
 });
 
+/* ================== CSV ================== */
 function exportCsv(){
-  const range = getRangeFromPeriod();
-  if (!range) return alert(I18N_MSG[currentLang].needPeriod);
-
-  const reportClass = document.getElementById("reportClass").value || "ALL";
-  let grade="ALL", class_letter="ALL";
-  if (reportClass !== "ALL") {
-    const p = parseClass(reportClass);
-    grade = p.grade;
-    class_letter = p.letter;
-  }
-
-  apiGet("report", { from: range.from, to: range.to, grade, class_letter })
-    .then(report => {
-      const header = ["date","student","class","status_code","status_kk","status_ru"];
-      const rows = [];
-
-      Object.entries(report.daily || {}).forEach(([date, map]) => {
-        Object.entries(map).forEach(([sid, st]) => {
-          const s = (report.students || []).find(x => String(x.id) === String(sid));
-          rows.push([date, s ? s.full_name : sid, s ? `${s.grade}${s.class_letter}` : "", st.status_code, st.status_kk, st.status_ru]);
-        });
+  const r=getRangeFromPeriod(); if(!r)return alert("Период таңдаңыз");
+  apiGet("report",{from:r.from,to:r.to,grade:"ALL",class_letter:"ALL"}).then(rep=>{
+    const header=["Күні","Оқушы","Сынып","Статус"];
+    const rows=[];
+    Object.entries(rep.daily||{}).forEach(([d,m])=>{
+      Object.entries(m).forEach(([id,st])=>{
+        const s=rep.students.find(x=>String(x.id)===String(id));
+        rows.push([d,s?.full_name||"",`${s?.grade||""}${s?.class_letter||""}`,st.status_kk]);
       });
+    });
 
-      const sep = ";";
-const csv = "\ufeff" + [header, ...rows]
-  .map(r => r.map(x => {
-    const v = String(x ?? "");
-    return (v.includes(sep) || v.includes('"') || v.includes("\n"))
-      ? `"${v.replace(/"/g,'""')}"`
-      : v;
-  }).join(sep))
-  .join("\n");
-
-
-      const blob = new Blob([csv], { type:"text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "attendance_report.csv";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    })
-    .catch(err => alert(err.message));
+    const sep=";";
+    const csv="\ufeff"+[header,...rows].map(r=>r.join(sep)).join("\n");
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8;"}));
+    a.download="attendance.csv"; a.click();
+  });
 }
+
 
 // ============================
 // INIT
@@ -747,6 +720,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
