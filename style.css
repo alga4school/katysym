@@ -286,19 +286,19 @@ input, select{
 .holidayTag button{margin-left:6px;cursor:pointer}
 .reportButtons button{margin-right:10px;margin-top:10px}
 .schoolDaysInfo{margin-top:8px}
-
-/* REPORTS header – басты беттегідей қою фон */
+/* REPORTS header – көк градиент */
 #viewReports .reports-head{
-  background: #0b1220 !important;   /* қою (navy) */
-  color: #fff !important;
+  background: linear-gradient(90deg, #2563eb, #7c3aed) !important;
+  color:#fff !important;
   border-radius: 16px;
   padding: 14px 16px;
 }
 
 #viewReports .reports-head .view-title,
 #viewReports .reports-head .btn.link.light{
-  color: #fff !important;
+  color:#fff !important;
 }
+
 /* Таблица тақырыбы дөңгелек */
 #viewReports table.table thead th{
   border-top-left-radius: 12px;
@@ -309,23 +309,22 @@ input, select{
   border-radius: 14px;
   overflow: hidden; /* дөңгелек бұрыш көріну үшін */
 }
-/* Көрсету (update) – көк */
+/* Көрсету батырмасы – көк */
 #updateStatsBtn{
-  .reports-head{
-  background: linear-gradient(90deg, #2563eb, #7c3aed);
-  color: #fff;
-  border-radius: 16px;
-  padding: 14px 20px;
+  background:#2563eb !important;
+  color:#fff !important;
+  border:none !important;
 }
-
+#updateStatsBtn:hover{ filter: brightness(0.95); }
 
 /* CSV жүктеу – көк */
 #exportCsvBtn{
-  background: #2563eb !important;
-  color: #fff !important;
-  border: none !important;
+  background:#2563eb !important;
+  color:#fff !important;
+  border:none !important;
 }
 #exportCsvBtn:hover{ filter: brightness(0.95); }
+
 
 
 
