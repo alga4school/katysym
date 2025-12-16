@@ -622,7 +622,6 @@ function renderDayIssues(report, dateISO){
 async function updateStats() {
   const range = getRangeFromPeriod();
   updateSchoolDaysUI();
-
   if (!range) return alert(I18N_MSG[currentLang].needPeriod);
 
   const reportClass = document.getElementById("reportClass").value || "ALL";
@@ -633,15 +632,15 @@ async function updateStats() {
     class_letter = p.letter;
   }
 
-  if (document.getElementById("periodType").value === "custom" && range.from === range.to) {
-  renderDayIssues(report, range.from);
-} else {
-  hideDayIssues();
-}
   try {
-    const report = await apiGet("report", { from: range.from, to: range.to, grade, class_letter });
+    const report = await apiGet("report", {
+      from: range.from,
+      to: range.to,
+      grade,
+      class_letter
+    });
 
-    // ✅ КҮНДІК "Сабақтан қалғандар" тек: Күні (custom) + 1 күн + нақты сынып таңдалса
+    // ✅ МІНЕ ОСЫ ЖЕРДЕ ҒАНА dayIssues шақырылады (report бар)
     const periodType = document.getElementById("periodType").value;
     if (periodType === "custom" && range.from === range.to && reportClass !== "ALL") {
       renderDayIssues(report, range.from);
@@ -658,7 +657,6 @@ async function updateStats() {
     document.getElementById("totalExcused").textContent = t.sebep;
     document.getElementById("totalUnexcused").textContent = t.sebsez;
 
-    // TOP: тек 4-тен жоғары
     fillTable("topLateTable", buildTop(report, "keshikti"));
     fillTable("topUnexcusedTable", buildTop(report, "sebsez"));
 
@@ -667,6 +665,7 @@ async function updateStats() {
     alert((currentLang === "ru" ? "Ошибка отчёта: " : "Отчет қатесі: ") + e.message);
   }
 }
+
 
 function exportCsv(){
   const r=getRangeFromPeriod(); if(!r)return alert("Период таңдаңыз");
@@ -755,6 +754,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
