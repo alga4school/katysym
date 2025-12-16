@@ -452,12 +452,32 @@ async function saveAttendance(){
   saveStatus.textContent = "⏳ ...";
 
   try {
-    const res = await apiPost({ key: API_KEY, date, grade, class_letter: letter, records });
-    saveStatus.textContent = `${I18N_MSG[currentLang].saveOk} ${res.saved}`;
-  } catch (e) {
-    saveStatus.textContent = `${I18N_MSG[currentLang].saveErr} ${e.message}`;
+    try {
+  const res = await apiPost({
+    key: API_KEY,
+    date,
+    grade,
+    class_letter: letter,
+    records
+  });
+
+  // бәрі дұрыс сақталды
+  saveStatus.textContent = I18N_MSG[currentLang].saveOk;
+
+} catch (e) {
+
+  // 👇 МІНЕ ОСЫ ЖЕР МАҢЫЗДЫ
+  if (e.message === "already_marked") {
+    saveStatus.textContent =
+      currentLang === "ru"
+        ? "Этот класс уже отмечен сегодня"
+        : "Бұл сынып бүгін белгіленген";
+  } else {
+    saveStatus.textContent =
+      `${I18N_MSG[currentLang].saveErr} ${e.message}`;
   }
 }
+
 
 /* ================== ПЕРИОД ================== */
 function escapeHtml(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
@@ -817,6 +837,7 @@ function isClassAlreadyMarked_(dateISO, grade, class_letter) {
   }
   return false;
 }
+
 
 
 
