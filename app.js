@@ -672,24 +672,90 @@ async function updateStats() {
 }
 
 
-function exportCsv(){
-  const r=getRangeFromPeriod(); if(!r)return alert("Период таңдаңыз");
-  apiGet("report",{from:r.from,to:r.to,grade:"ALL",class_letter:"ALL"}).then(rep=>{
-    const header=["Күні","Оқушы","Сынып","Статус"];
-    const rows=[];
-    Object.entries(rep.daily||{}).forEach(([d,m])=>{
-      Object.entries(m).forEach(([id,st])=>{
-        const s=rep.students.find(x=>String(x.id)===String(id));
-        rows.push([d,s?.full_name||"",`${s?.grade||""}${s?.class_letter||""}`,st.status_kk]);
-      });
-    });
+function eachDateISO(fromISO, toISO) {
+  const res = [];
+  const start = new Date(fromISO + "T00:00:00");
+  const end = new Date(toISO + "T00:00:00");
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    res.push(d.toISOString().slice(0, 10));
+  }
+  return res;
+}
 
-    const sep=";";
-    const csv="\ufeff"+[header,...rows].map(r=>r.join(sep)).join("\n");
-    const a=document.createElement("a");
-    a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8;"}));
-    a.download="attendance.csv"; a.click();
-  });
+function exportCsv(){
+  const range = getRangeFromPeriod();
+  if (!range) return alert(I18N_MSG[currentLang].needPeriod);
+
+  const reportClass = document.getElementById("reportClass").value || "ALL";
+  let grade="ALL", class_letter="ALL";
+  if (reportClass !== "ALL") {
+    const p = parseClass(reportClass);
+    grade = p.grade;
+    class_letter = p.letter;
+  }
+
+  apiGet("report", { from: range.from, to: range.to, grade, class_letter })
+    .then(report => {
+      const header = ["date","student","class","status_code","status_kk","status_ru"];
+      const rows = [];
+
+      const byId = new Map((report.students || []).map(s => [String(s.id), s]));
+
+      // ✅ ТЕК таңдалған диапазон күндері
+      const wantedDates = (range.from === range.to)
+        ? [range.from]
+        : eachDateISO(range.from, range.to);
+
+      wantedDates.forEach(dateISO => {
+        const daily = report.daily?.[dateISO];
+        if (!daily) return;
+
+        Object.entries(daily).forEach(([sid, st]) => {
+          const s = byId.get(String(sid));
+          if (!s) return; // осы есептің ішіндегі оқушы болмаса, шығармаймыз
+
+          // ✅ ТЕК таңдалған сынып (егер ALL емес болса)
+          if (reportClass !== "ALL") {
+            const cls = `${s.grade}${s.class_letter}`.trim();
+            if (cls !== reportClass.trim()) return;
+          }
+
+          rows.push([
+            dateISO,
+            s.full_name,
+            `${s.grade}${s.class_letter}`,
+            st?.status_code ?? "",
+            st?.status_kk ?? "",
+            st?.status_ru ?? ""
+          ]);
+        });
+      });
+
+      // Excel үшін: BOM + ; (сенде Excel дұрыс оқысын)
+      const sep = ";";
+      const csv = "\ufeff" + [header, ...rows]
+        .map(r => r.map(x => {
+          const v = String(x ?? "");
+          return (v.includes(sep) || v.includes('"') || v.includes("\n"))
+            ? `"${v.replace(/"/g,'""')}"`
+            : v;
+        }).join(sep))
+        .join("\n");
+
+      const blob = new Blob([csv], { type:"text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+
+      const clsPart = (reportClass === "ALL") ? "ALL" : reportClass.replace(/\s+/g,"");
+      a.download = `attendance_${clsPart}_${range.from}_to_${range.to}.csv`;
+
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    })
+    .catch(err => alert(err.message));
 }
 
 
@@ -759,6 +825,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
