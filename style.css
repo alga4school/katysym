@@ -91,12 +91,15 @@ body{
   justify-content:flex-end;
   color:#fff;
 }
-.banner-title, .banner-text{
-  background: rgba(0,0,0,.22);
+.banner-title,
+.banner-text{
+  background: rgba(37,99,235,.28); /* көк */
   display: inline-block;
-  padding: 6px 10px;
-  border-radius: 10px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  backdrop-filter: blur(2px); /* әдемі эффект */
 }
+
 .home-actions{
   display:flex;
   gap:12px;
@@ -320,5 +323,6 @@ input, select{
   border: none !important;
 }
 #exportCsvBtn:hover{ filter: brightness(0.95); }
+
 
 
