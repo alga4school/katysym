@@ -113,6 +113,58 @@
         <div class="reports-card">
           <div class="report-controls">
     <div>
+      <!-- ✅ КҮНДІК: сабақтан қалғандар (тек custom күн = 1 күн болғанда шығады) -->
+<div id="dayIssuesBox" class="day-issues" style="display:none; margin-top:18px">
+  <h3 style="margin:0 0 10px 0">📌 Сабақтан қалғандар (күндік)</h3>
+
+  <div class="tables-grid">
+    <div class="mini-card">
+      <h3 class="mini-title">⏰ Кешіккендер</h3>
+      <table id="tblLate" class="table mini">
+        <thead><tr><th>№</th><th>Оқушы</th><th>Сынып</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="mini-card">
+      <h3 class="mini-title">🤒 Ауырғандар</h3>
+      <table id="tblSick" class="table mini">
+        <thead><tr><th>№</th><th>Оқушы</th><th>Сынып</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="mini-card">
+      <h3 class="mini-title">📄 Себепті</h3>
+      <table id="tblExcused" class="table mini">
+        <thead><tr><th>№</th><th>Оқушы</th><th>Сынып</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="mini-card">
+      <h3 class="mini-title">❌ Себепсіз</h3>
+      <table id="tblUnexcused" class="table mini">
+        <thead><tr><th>№</th><th>Оқушы</th><th>Сынып</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+          <div class="hint light" data-i18n="reportHint">
+            Ескерту: Есептер деректері Google Script арқылы алынады.
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
       <h4 style="margin:6px 0;">Ауырды</h4>
       <table id="tblSick" class="table">
         <thead><tr><th>№</th><th>Оқушы</th><th>Сынып</th><th>Статус</th></tr></thead>
@@ -240,58 +292,7 @@
               </table>
             </div>
           </div>
-<!-- ✅ КҮНДІК: сабақтан қалғандар (тек custom күн = 1 күн болғанда шығады) -->
-<div id="dayIssuesBox" class="day-issues" style="display:none; margin-top:18px">
-  <h3 style="margin:0 0 10px 0">📌 Сабақтан қалғандар (күндік)</h3>
 
-  <div class="tables-grid">
-    <div class="mini-card">
-      <h3 class="mini-title">⏰ Кешіккендер</h3>
-      <table id="tblLate" class="table mini">
-        <thead><tr><th>№</th><th>Оқушы</th><th>Сынып</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <div class="mini-card">
-      <h3 class="mini-title">🤒 Ауырғандар</h3>
-      <table id="tblSick" class="table mini">
-        <thead><tr><th>№</th><th>Оқушы</th><th>Сынып</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <div class="mini-card">
-      <h3 class="mini-title">📄 Себепті</h3>
-      <table id="tblExcused" class="table mini">
-        <thead><tr><th>№</th><th>Оқушы</th><th>Сынып</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <div class="mini-card">
-      <h3 class="mini-title">❌ Себепсіз</h3>
-      <table id="tblUnexcused" class="table mini">
-        <thead><tr><th>№</th><th>Оқушы</th><th>Сынып</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-
-          <div class="hint light" data-i18n="reportHint">
-            Ескерту: Есептер деректері Google Script арқылы алынады.
-          </div>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <script src="app.js"></script>
-</body>
-</html>
 
 
 
