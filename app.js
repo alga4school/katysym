@@ -326,7 +326,6 @@ function applyI18n(){
   }
 
   renderAttendanceTable();
-}
 
 function statusLabel(code){
   const item = STATUS[code] || STATUS.katysty;
@@ -861,6 +860,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
