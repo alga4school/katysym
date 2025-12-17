@@ -451,50 +451,34 @@ function renderAttendanceTable(){
 // ============================
 // SAVE
 // ============================
-async function saveAttendance(){
+async function saveAttendance() {
+  const btn = document.getElementById("saveAttendanceBtn");
   const dateEl = document.getElementById("attendanceDate");
   const classSelect = document.getElementById("classSelect");
   const saveStatus = document.getElementById("saveStatus");
-  const btn = document.getElementById("saveBtn"); // ⚠️ батырма ID
-
-  if (btn) btn.disabled = true;
 
   const date = dateEl?.value;
   const cls = classSelect?.value;
 
-  if (!date) {
-    if (btn) btn.disabled = false;
-    return alert(I18N_MSG[currentLang].needDate);
-  }
+  if (!date) return alert(I18N_MSG[currentLang].needDate);
+  if (!cls) return alert(I18N_MSG[currentLang].needClass);
 
-  if (!cls) {
-    if (btn) btn.disabled = false;
-    return alert(I18N_MSG[currentLang].needClass);
-  }
-
-  const { grade, letter } = parseClass(cls);
-  const students = allStudents.filter(
-    s => String(s.grade) === grade && String(s.class_letter) === letter
-  );
-
-  const records = students.map(s => ({
-    student_id: s.id,
-    status_code: statusMap.get(s.id) || "katysty"
-  }));
-
+  if (btn) btn.disabled = true;
   saveStatus.textContent = "⏳ ...";
 
   try {
-    const res = await apiPost({
-      key: API_KEY,
-      date,
-      grade,
-      class_letter: letter,
-      records
-    });
+    const { grade, letter } = parseClass(cls);
+    const students = allStudents.filter(
+      s => String(s.grade) === grade && String(s.class_letter) === letter
+    );
 
+    const records = students.map(s => ({
+      student_id: s.id,
+      status_code: statusMap.get(s.id) || "katysty",
+    }));
+
+    const res = await apiPost({ key: API_KEY, date, grade, class_letter: letter, records });
     saveStatus.textContent = `${I18N_MSG[currentLang].saveOk} ${res.saved}`;
-
   } catch (e) {
     saveStatus.textContent = `${I18N_MSG[currentLang].saveErr} ${e.message}`;
   } finally {
@@ -877,6 +861,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
