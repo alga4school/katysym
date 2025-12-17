@@ -301,7 +301,7 @@ function setLang(lang){
 }
 
 function applyI18n(){
-  const dict = I18N_UI[currentLang] || I18N_UI.kk;
+  const dict = I18N_MSG[currentLang] || I18N_MSG.kk;
 
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.getAttribute("data-i18n");
@@ -318,6 +318,7 @@ function applyI18n(){
       if (k && dict[k] != null) opt.textContent = dict[k];
     });
   }
+}
 
   if (window.__classesLoaded) {
     renderClassesTo(document.getElementById("classSelect"), window.__classList, false);
@@ -858,6 +859,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
