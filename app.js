@@ -455,15 +455,27 @@ async function saveAttendance(){
   const dateEl = document.getElementById("attendanceDate");
   const classSelect = document.getElementById("classSelect");
   const saveStatus = document.getElementById("saveStatus");
+  const btn = document.getElementById("saveBtn"); // ⚠️ батырма ID
+
+  if (btn) btn.disabled = true;
 
   const date = dateEl?.value;
   const cls = classSelect?.value;
 
-  if (!date) return alert(I18N_MSG[currentLang].needDate);
-  if (!cls) return alert(I18N_MSG[currentLang].needClass);
+  if (!date) {
+    if (btn) btn.disabled = false;
+    return alert(I18N_MSG[currentLang].needDate);
+  }
+
+  if (!cls) {
+    if (btn) btn.disabled = false;
+    return alert(I18N_MSG[currentLang].needClass);
+  }
 
   const { grade, letter } = parseClass(cls);
-  const students = allStudents.filter(s => String(s.grade) === grade && String(s.class_letter) === letter);
+  const students = allStudents.filter(
+    s => String(s.grade) === grade && String(s.class_letter) === letter
+  );
 
   const records = students.map(s => ({
     student_id: s.id,
@@ -473,15 +485,23 @@ async function saveAttendance(){
   saveStatus.textContent = "⏳ ...";
 
   try {
-    const res = await apiPost({ key: API_KEY, date, grade, class_letter: letter, records });
+    const res = await apiPost({
+      key: API_KEY,
+      date,
+      grade,
+      class_letter: letter,
+      records
+    });
+
     saveStatus.textContent = `${I18N_MSG[currentLang].saveOk} ${res.saved}`;
+
   } catch (e) {
     saveStatus.textContent = `${I18N_MSG[currentLang].saveErr} ${e.message}`;
+  } finally {
+    if (btn) btn.disabled = false;
   }
 }
-finally {
-  if (btn) btn.disabled = false;
-}
+
 
 /* ================== ПЕРИОД ================== */
 function getRangeFromPeriod() {
@@ -857,6 +877,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
