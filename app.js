@@ -727,7 +727,6 @@ function exportCsv(){
 
   const reportClass = document.getElementById("reportClass").value || "ALL";
   let grade="ALL", class_letter="ALL";
-
   if (reportClass !== "ALL") {
     const p = parseClass(reportClass);
     grade = p.grade;
@@ -741,8 +740,10 @@ function exportCsv(){
 
       const byId = new Map((report.students || []).map(s => [String(s.id), s]));
 
-      // ✅ ТЕК таңдалған күндер
-      const wantedDates = (range.from === range.to) ? [range.from] : eachDateISO(range.from, range.to);
+      // ✅ ТЕК таңдалған диапазон күндері
+      const wantedDates = (range.from === range.to)
+        ? [range.from]
+        : eachDateISO(range.from, range.to);
 
       wantedDates.forEach(dateISO => {
         const daily = report.daily?.[dateISO];
@@ -750,9 +751,9 @@ function exportCsv(){
 
         Object.entries(daily).forEach(([sid, st]) => {
           const s = byId.get(String(sid));
-          if (!s) return;
+          if (!s) return; // осы есептің ішіндегі оқушы болмаса, шығармаймыз
 
-          // ✅ ТЕК таңдалған класс (ALL болмаса)
+          // ✅ ТЕК таңдалған сынып (егер ALL емес болса)
           if (reportClass !== "ALL") {
             const cls = `${s.grade}${s.class_letter}`.trim();
             if (cls !== reportClass.trim()) return;
@@ -769,7 +770,7 @@ function exportCsv(){
         });
       });
 
-      // Excel үшін: BOM + ;  
+      // Excel үшін: BOM + ; (сенде Excel дұрыс оқысын)
       const sep = ";";
       const csv = "\ufeff" + [header, ...rows]
         .map(r => r.map(x => {
@@ -784,7 +785,10 @@ function exportCsv(){
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `attendance_${reportClass}_${range.from}_${range.to}.csv`;
+
+      const clsPart = (reportClass === "ALL") ? "ALL" : reportClass.replace(/\s+/g,"");
+      a.download = `attendance_${clsPart}_${range.from}_to_${range.to}.csv`;
+
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -792,7 +796,6 @@ function exportCsv(){
     })
     .catch(err => alert(err.message));
 }
-
 
 // ============================
 // INIT
@@ -860,6 +863,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
