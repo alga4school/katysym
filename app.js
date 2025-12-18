@@ -1,3 +1,4 @@
+let __isSavingAttendance = false;
 // ============================
 // SETTINGS (СІЗДІҢ URL / KEY)
 // ============================
@@ -462,14 +463,22 @@ async function saveAttendance() {
   if (!date) return alert(I18N_MSG[currentLang].needDate);
   if (!cls) return alert(I18N_MSG[currentLang].needClass);
 
+  // ҚАЙТАЛАНҒАН басуды тоқтатамыз (localStorage guard)
+  const { grade, letter } = parseClass(cls);
+  const guardKey = `att_saved:${date}:${grade}:${letter}`;
+  if (localStorage.getItem(guardKey) === "1") {
+    saveStatus.textContent = I18N_MSG[currentLang].alreadySaved || "✅ Бұл сынып бұл күні already сақталған";
+    return;
+  }
+
   if (btn) btn.disabled = true;
   saveStatus.textContent = "⏳ ...";
 
   try {
-    const { grade, letter } = parseClass(cls);
-    const students = allStudents.filter(
-      s => String(s.grade) === grade && String(s.class_letter) === letter
-    );
+    const students = allStudents.filter(s => String(s.grade) === grade && String(s.class_letter) === letter);
+    if (!students.length) {
+      throw new Error(I18N_MSG[currentLang].noStudents || "Оқушылар тізімі бос. Google Sheet students толтырылғанын тексеріңіз.");
+    }
 
     const records = students.map(s => ({
       student_id: s.id,
@@ -477,7 +486,14 @@ async function saveAttendance() {
     }));
 
     const res = await apiPost({ key: API_KEY, date, grade, class_letter: letter, records });
-    saveStatus.textContent = `${I18N_MSG[currentLang].saveOk} ${res.saved}`;
+    if (!res || res.ok === false) {
+      throw new Error(res?.error || "Save failed");
+    }
+
+    // ✅ енді қайта басса да, фронт бөгейді; ал сервер жағы — overwrite (duplicate болмайды)
+    localStorage.setItem(guardKey, "1");
+    const extra = res.replaced ? (I18N_MSG[currentLang].replaced || "(қайта жазылды)") : "";
+    saveStatus.textContent = `${I18N_MSG[currentLang].saveOk} ${res.saved} ${extra}`;
   } catch (e) {
     saveStatus.textContent = `${I18N_MSG[currentLang].saveErr} ${e.message}`;
   } finally {
