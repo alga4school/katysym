@@ -200,7 +200,7 @@ const I18N_MSG = {
   kk: {
     backHome: "Басты бет",
     reportsTitle: "Есептер мен статистика",
-
+  
     dayIssuesTitle:"📌 Сабақтан қалғандар (күндік)",
     late:"Кешіккендер",
     sick:"Ауырғандар",
@@ -209,12 +209,13 @@ const I18N_MSG = {
     student:"Оқушы",
     class:"Сынып",
     dayIssuesNote:"Ескерту: “Қатысты” оқушылар көрсетілмейді.",
-
-    holidaysLabel: "Оқымайтын күндер (мереке/каникул):",
+   dailyControl: "Күнделікті бақылау",
+    searchByName: "Оқушының аты-жөні бойынша іздеу"
+  
+      holidaysLabel: "Оқымайтын күндер (мереке/каникул):",
     btnAdd: "Қосу",
     btnClear: "Тазалау",
     schoolDaysLabel: "Оқу күндерінің саны:",
-
     saveOk: "✅ Сақталды:",
     saveErr: "❌ Қате:",
     needClass: "Сыныпты таңдаңыз",
@@ -234,8 +235,10 @@ const I18N_MSG = {
     student:"Ученик",
     class:"Класс",
     dayIssuesNote:"Примечание: “Присутствовал(а)” не показывается.",
-
-    holidaysLabel: "Неучебные дни (праздники/каникулы):",
+    dailyControl: "Ежедневный контроль",
+   searchByName: "Поиск по ФИО ученика"
+   
+  holidaysLabel: "Неучебные дни (праздники/каникулы):",
     btnAdd: "Добавить",
     btnClear: "Очистить",
     schoolDaysLabel: "Учебных дней в периоде:",
@@ -319,7 +322,6 @@ function applyI18n(){
     });
   }
 }
-
   if (window.__classesLoaded) {
     renderClassesTo(document.getElementById("classSelect"), window.__classList, false);
     renderClassesTo(document.getElementById("reportClass"), window.__classList, true);
@@ -906,6 +908,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
