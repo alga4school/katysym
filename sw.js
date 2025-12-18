@@ -1,4 +1,4 @@
-const CACHE_NAME = 'katysym-v1';
+const CACHE_NAME = 'katysym-v2';
 const ASSETS = [
   './',
   './index.html',
