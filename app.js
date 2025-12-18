@@ -208,7 +208,7 @@ const I18N_MSG = {
     unexcused:"Себепсіз",
     student:"Оқушы",
     class:"Сынып",
-    dayIssuesNote:"Ескерту: “Қатысты” оқушылар көрсетілмейді.",
+    dayIssuesNote:"Ескерту: “Қатысты” оқушылар көрсетілмейді."
    dailyControl: "Күнделікті бақылау",
     searchByName: "Оқушының аты-жөні бойынша іздеу"
     holidaysLabel: "Оқымайтын күндер (мереке/каникул):",
@@ -234,7 +234,7 @@ const I18N_MSG = {
     unexcused:"Без уважительной",
     student:"Ученик",
     class:"Класс",
-    dayIssuesNote:"Примечание: “Присутствовал(а)” не показывается.",
+    dayIssuesNote:"Примечание: “Присутствовал(а)” не показывается."
     dailyControl: "Ежедневный контроль",
    searchByName: "Поиск по ФИО ученика"
    
@@ -908,6 +908,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
