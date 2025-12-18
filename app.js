@@ -467,9 +467,12 @@ async function saveAttendance() {
   const { grade, letter } = parseClass(cls);
   const guardKey = `att_saved:${date}:${grade}:${letter}`;
   if (localStorage.getItem(guardKey) === "1") {
-    saveStatus.textContent = I18N_MSG[currentLang].alreadySaved || "✅ Бұл сынып бұл күні already сақталған";
-    return;
-  }
+  saveStatus.textContent = (currentLang === "kk")
+    ? "✅ Бұл сынып бұл күні бұрын сақталған"
+    : "✅ Этот класс за этот день уже сохранён";
+  return;
+}
+
 
   if (btn) btn.disabled = true;
   saveStatus.textContent = "⏳ ...";
@@ -889,6 +892,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
