@@ -93,11 +93,11 @@ body{
 }
 .banner-title,
 .banner-text{
-  background: rgba(37,99,235,.28); /* көк */
+  background: transparent;
   display: inline-block;
-  padding: 6px 12px;
-  border-radius: 12px;
-  backdrop-filter: blur(2px); /* әдемі эффект */
+  padding: 0;
+  border-radius: 0;
+  text-shadow: 0 6px 20px rgba(0,0,0,.35);
 }
 
 .home-actions{
@@ -329,3 +329,28 @@ input, select{
 
 
 
+
+
+.banner-title,
+.banner-text{
+  /* ✅ көк жолақты алып тастау */
+  background: transparent;
+  display: inline-block;
+  padding: 0;
+  border-radius: 0;
+  backdrop-filter: none;
+  text-shadow: 0 6px 18px rgba(0,0,0,.25);
+}
+
+.banner-title{
+  font-size: 34px;
+  font-weight: 900;
+  margin: 0 0 10px;
+}
+
+.banner-text{
+  font-size: 15px;
+  font-weight: 700;
+  max-width: 720px;
+  line-height: 1.4;
+}
