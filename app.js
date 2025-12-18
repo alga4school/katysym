@@ -715,9 +715,13 @@ if (reportClass !== "ALL") {
   const g = String(p.grade);
   const l = String(p.letter);
 
-  report.students = (report.students || []).filter(s =>
-    String(s.grade) === g && String(s.class_letter) === l
-  );
+  const target = String(reportClass).replace(/\s+/g, "").toUpperCase(); // "0Ә"
+
+report.students = (report.students || []).filter(s => {
+  const cls = `${s.grade ?? ""}${s.class_letter ?? ""}`.replace(/\s+/g, "").toUpperCase();
+  return cls === target;
+});
+
 
   const keep = new Set(report.students.map(s => String(s.id)));
 
@@ -954,6 +958,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
