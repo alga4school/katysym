@@ -225,7 +225,8 @@ const I18N_MSG = {
     chooseException: "Тек қажет болса таңдаңыз",
     needPeriod: "Кезеңді таңдаңыз",
 
-    alreadySaved: "✅ Бұл сынып бұл күні сақталған"
+    alreadySaved: "✅ Бұл сынып бұл күні бұрын сақталған",
+
   },
 
   ru: {
@@ -256,7 +257,7 @@ const I18N_MSG = {
     chooseException: "Выбирайте только при необходимости",
     needPeriod: "Укажите период",
 
-    alreadySaved: "✅ Этот класс за эту дату уже сохранён"
+   alreadySaved: "✅ Этот класс за этот день уже сохранён",
   }
 };
 
@@ -312,7 +313,12 @@ function setLang(lang){
 }
 
 function applyI18n(){
-  const dict = I18N_MSG[currentLang] || I18N_MSG.kk;
+  const dict = {
+    ...(I18N_UI.kk || {}),
+    ...(I18N_MSG.kk || {}),
+    ...(I18N_UI[currentLang] || {}),
+    ...(I18N_MSG[currentLang] || {})
+  };
 
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.getAttribute("data-i18n");
@@ -320,7 +326,7 @@ function applyI18n(){
   });
 
   const search = document.getElementById("searchInput");
-  if (search) search.placeholder = currentLang === "ru" ? "ФИО..." : "Аты-жөні...";
+  if (search) search.placeholder = dict.searchByName || (currentLang === "ru" ? "ФИО..." : "Аты-жөні...");
 
   const period = document.getElementById("periodType");
   if (period) {
@@ -330,6 +336,7 @@ function applyI18n(){
     });
   }
 }
+
   if (window.__classesLoaded) {
     renderClassesTo(document.getElementById("classSelect"), window.__classList, false);
     renderClassesTo(document.getElementById("reportClass"), window.__classList, true);
@@ -478,13 +485,10 @@ async function saveAttendance() {
   // ҚАЙТАЛАНҒАН басуды тоқтатамыз (localStorage guard)
   const { grade, letter } = parseClass(cls);
   const guardKey = `att_saved:${date}:${grade}:${letter}`;
-  if (localStorage.getItem(guardKey) === "1") {
-  saveStatus.textContent = (currentLang === "kk")
-    ? "✅ Бұл сынып бұл күні бұрын сақталған"
-    : "✅ Этот класс за этот день уже сохранён";
+ if (localStorage.getItem(guardKey) === "1") {
+  saveStatus.textContent = I18N_MSG[currentLang].alreadySaved;
   return;
 }
-
 
   if (btn) btn.disabled = true;
   saveStatus.textContent = "⏳ ...";
@@ -926,6 +930,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
