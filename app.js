@@ -707,21 +707,40 @@ async function updateStats() {
   }
 
   try {
-    const report = await apiGet("report", { from: range.from, to: range.to, grade: "ALL", class_letter: "ALL" });
+ // 1) Әрқашан бәрін аламыз (сервер фильтрі қате болса да)
+const report = await apiGet("report", { from: range.from, to: range.to, grade: "ALL", class_letter: "ALL" });
 
-// ✅ сосын таңдаған сыныпты осында өзіміз фильтрлейміз
+// 2) Таңдалған сыныпқа қатаң фильтр (ЦИФР+ӘРІП бірге)
+const reportClass = document.getElementById("reportClass").value || "ALL";
 if (reportClass !== "ALL") {
-  const p = parseClass(reportClass);
-  const g = String(p.grade);
-  const l = String(p.letter);
+  const target = String(reportClass).replace(/\s+/g, "").toUpperCase(); // мыс: "1В", "0Ә"
 
-  const target = String(reportClass).replace(/\s+/g, "").toUpperCase(); // "0Ә"
+  // students
+  report.students = (report.students || []).filter(s => {
+    const cls = `${s.grade ?? ""}${s.class_letter ?? ""}`.replace(/\s+/g, "").toUpperCase();
+    return cls === target;
+  });
 
-report.students = (report.students || []).filter(s => {
-  const cls = `${s.grade ?? ""}${s.class_letter ?? ""}`.replace(/\s+/g, "").toUpperCase();
-  return cls === target;
-});
+  const keep = new Set((report.students || []).map(s => String(s.id)));
 
+  // daily
+  const newDaily = {};
+  Object.entries(report.daily || {}).forEach(([date, obj]) => {
+    const filtered = {};
+    Object.entries(obj || {}).forEach(([sid, st]) => {
+      if (keep.has(String(sid))) filtered[sid] = st;
+    });
+    newDaily[date] = filtered;
+  });
+  report.daily = newDaily;
+
+  // totals  ✅ ЕҢ МАҢЫЗДЫ!
+  const newTotals = {};
+  Object.entries(report.totals || {}).forEach(([sid, t]) => {
+    if (keep.has(String(sid))) newTotals[sid] = t;
+  });
+  report.totals = newTotals;
+}
 
  // ✅ totals-ты да тек таңдалған оқушыларға қалдырамыз
 const newTotals = {};
@@ -952,6 +971,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
