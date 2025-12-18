@@ -707,7 +707,31 @@ async function updateStats() {
   }
 
   try {
-    const report = await apiGet("report", { from: range.from, to: range.to, grade, class_letter });
+    const report = await apiGet("report", { from: range.from, to: range.to, grade: "ALL", class_letter: "ALL" });
+
+// ✅ сосын таңдаған сыныпты осында өзіміз фильтрлейміз
+if (reportClass !== "ALL") {
+  const p = parseClass(reportClass);
+  const g = String(p.grade);
+  const l = String(p.letter);
+
+  report.students = (report.students || []).filter(s =>
+    String(s.grade) === g && String(s.class_letter) === l
+  );
+
+  const keep = new Set(report.students.map(s => String(s.id)));
+
+  const newDaily = {};
+  Object.entries(report.daily || {}).forEach(([date, obj]) => {
+    const filtered = {};
+    Object.entries(obj || {}).forEach(([sid, st]) => {
+      if (keep.has(String(sid))) filtered[sid] = st;
+    });
+    newDaily[date] = filtered;
+  });
+  report.daily = newDaily;
+}
+
 
     // ✅ КҮНДІК "Сабақтан қалғандар" тек: Күні + 1 күн + нақты сынып
     const periodType = document.getElementById("periodType").value;
@@ -930,6 +954,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
