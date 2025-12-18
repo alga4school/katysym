@@ -14,6 +14,13 @@ self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)));
 });
 
+const report = await apiGet("report", {
+  from: range.from,
+  to: range.to,
+  grade,
+  class_letter
+});
+
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => Promise.all(keys.map(k => (k === CACHE_NAME ? null : caches.delete(k)))))
