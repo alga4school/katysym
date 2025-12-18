@@ -837,6 +837,24 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("langToggle")?.addEventListener("click", () => {
     setLang(currentLang === "kk" ? "ru" : "kk");
   });
+  
+// Күнделікті бақылау атауы
+const dailyTitle = document.getElementById("dailyTitle");
+if (dailyTitle) {
+  dailyTitle.textContent =
+    currentLang === "kk"
+      ? "Күнделікті бақылау"
+      : "Ежедневный контроль";
+}
+
+// Іздеу placeholder
+const searchInput = document.getElementById("searchInput");
+if (searchInput) {
+  searchInput.placeholder =
+    currentLang === "kk"
+      ? "Оқушының аты-жөні бойынша іздеу"
+      : "Поиск по ФИО ученика";
+}
 
   const today = new Date();
   const iso = today.toISOString().slice(0,10);
@@ -891,6 +909,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
