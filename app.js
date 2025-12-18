@@ -711,9 +711,10 @@ async function updateStats() {
 const report = await apiGet("report", {
   from: range.from,
   to: range.to,
-  grade: "ALL",
-  class_letter: "ALL"
+  grade,
+  class_letter
 });
+
 
 // 2) Таңдалған сыныпқа қатаң фильтр (цифр+әріп бірге)
 const reportClass = document.getElementById("reportClass").value || "ALL";
@@ -978,6 +979,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
