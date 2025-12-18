@@ -362,11 +362,14 @@ function renderClassesTo(selectEl, classList, includeAll=false){
   });
 }
 
-function parseClass(cls){
-  const grade = String(parseInt(cls, 10));
-  const letter = cls.replace(grade, "");
-  return { grade, letter };
+function parseClass(cls) {
+  const m = String(cls).match(/^(\d+)(.*)$/);
+  return {
+    grade: m ? m[1] : "",
+    letter: m ? m[2] : ""
+  };
 }
+
 
 function buildStatusCell(studentId){
   const wrap = document.createElement("div");
@@ -903,6 +906,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
