@@ -723,18 +723,12 @@ report.students = (report.students || []).filter(s => {
 });
 
 
-  const keep = new Set(report.students.map(s => String(s.id)));
-
-  const newDaily = {};
-  Object.entries(report.daily || {}).forEach(([date, obj]) => {
-    const filtered = {};
-    Object.entries(obj || {}).forEach(([sid, st]) => {
-      if (keep.has(String(sid))) filtered[sid] = st;
-    });
-    newDaily[date] = filtered;
-  });
-  report.daily = newDaily;
-}
+ // ✅ totals-ты да тек таңдалған оқушыларға қалдырамыз
+const newTotals = {};
+Object.entries(report.totals || {}).forEach(([sid, t]) => {
+  if (keep.has(String(sid))) newTotals[sid] = t;
+});
+report.totals = newTotals;
 
 
     // ✅ КҮНДІК "Сабақтан қалғандар" тек: Күні + 1 күн + нақты сынып
@@ -958,6 +952,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
