@@ -211,8 +211,7 @@ const I18N_MSG = {
     dayIssuesNote:"Ескерту: “Қатысты” оқушылар көрсетілмейді.",
    dailyControl: "Күнделікті бақылау",
     searchByName: "Оқушының аты-жөні бойынша іздеу"
-  
-      holidaysLabel: "Оқымайтын күндер (мереке/каникул):",
+    holidaysLabel: "Оқымайтын күндер (мереке/каникул):",
     btnAdd: "Қосу",
     btnClear: "Тазалау",
     schoolDaysLabel: "Оқу күндерінің саны:",
@@ -223,6 +222,7 @@ const I18N_MSG = {
     chooseException: "Тек қажет болса таңдаңыз",
     needPeriod: "Кезеңді таңдаңыз",
   },
+  
   ru: {
     backHome: "Главная",
     reportsTitle: "Отчеты и статистика",
@@ -238,7 +238,7 @@ const I18N_MSG = {
     dailyControl: "Ежедневный контроль",
    searchByName: "Поиск по ФИО ученика"
    
-  holidaysLabel: "Неучебные дни (праздники/каникулы):",
+   holidaysLabel: "Неучебные дни (праздники/каникулы):",
     btnAdd: "Добавить",
     btnClear: "Очистить",
     schoolDaysLabel: "Учебных дней в периоде:",
@@ -908,6 +908,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
