@@ -2,7 +2,7 @@ let __isSavingAttendance = false;
 // ============================
 // SETTINGS (СІЗДІҢ URL / KEY)
 // ============================
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyYyTrObA51WeYAo2yumSRZxu0ZH17IpMjrTeeEBBDJ3qhUv0ZKXwHD12JWHyed9he7Cg/exec";
+const WEBAPP_URL = "https://broken-paper-fdf4.alga4school.workers.dev/";
 const API_KEY = "school2025";
 
 // ============================
@@ -708,12 +708,18 @@ async function updateStats() {
 
   try {
  // 1) Әрқашан бәрін аламыз (сервер фильтрі қате болса да)
-const report = await apiGet("report", { from: range.from, to: range.to, grade: "ALL", class_letter: "ALL" });
+const report = await apiGet("report", {
+  from: range.from,
+  to: range.to,
+  grade: "ALL",
+  class_letter: "ALL"
+});
 
-// 2) Таңдалған сыныпқа қатаң фильтр (ЦИФР+ӘРІП бірге)
+// 2) Таңдалған сыныпқа қатаң фильтр (цифр+әріп бірге)
 const reportClass = document.getElementById("reportClass").value || "ALL";
+
 if (reportClass !== "ALL") {
-  const target = String(reportClass).replace(/\s+/g, "").toUpperCase(); // мыс: "1В", "0Ә"
+  const target = String(reportClass).replace(/\s+/g, "").toUpperCase();
 
   // students
   report.students = (report.students || []).filter(s => {
@@ -721,6 +727,7 @@ if (reportClass !== "ALL") {
     return cls === target;
   });
 
+  // keep (✅ міндетті түрде осында!)
   const keep = new Set((report.students || []).map(s => String(s.id)));
 
   // daily
@@ -734,7 +741,7 @@ if (reportClass !== "ALL") {
   });
   report.daily = newDaily;
 
-  // totals  ✅ ЕҢ МАҢЫЗДЫ!
+  // totals (✅ ең маңызды)
   const newTotals = {};
   Object.entries(report.totals || {}).forEach(([sid, t]) => {
     if (keep.has(String(sid))) newTotals[sid] = t;
@@ -971,6 +978,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
