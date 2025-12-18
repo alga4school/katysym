@@ -721,6 +721,16 @@ function eachDateISO(fromISO, toISO) {
   return res;
 }
 
+function eachDateISO(fromISO, toISO) {
+  const res = [];
+  const start = new Date(fromISO + "T00:00:00");
+  const end = new Date(toISO + "T00:00:00");
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    res.push(d.toISOString().slice(0, 10));
+  }
+  return res;
+}
+
 function exportCsv(){
   const range = getRangeFromPeriod();
   if (!range) return alert(I18N_MSG[currentLang].needPeriod);
@@ -738,16 +748,7 @@ function exportCsv(){
       const header = ["date","student","class","status_code","status_kk","status_ru"];
       const rows = [];
 
-      // ✅ FALLBACK: егер report.students бос болса, students.js-тегі allStudents қолданамыз
-      const fallbackStudents = (reportClass === "ALL")
-        ? (allStudents || [])
-        : (allStudents || []).filter(s => `${s.grade}${s.class_letter}`.trim() === reportClass.trim());
-
-      const studentsList = (report.students && report.students.length)
-        ? report.students
-        : fallbackStudents;
-
-      const byId = new Map(studentsList.map(s => [String(s.id), s]));
+      const byId = new Map((report.students || []).map(s => [String(s.id), s]));
 
       // ✅ ТЕК таңдалған диапазон күндері
       const wantedDates = (range.from === range.to)
@@ -760,7 +761,7 @@ function exportCsv(){
 
         Object.entries(daily).forEach(([sid, st]) => {
           const s = byId.get(String(sid));
-          if (!s) return; // егер оқушы табылмаса, өткіземіз
+          if (!s) return; // осы есептің ішіндегі оқушы болмаса, шығармаймыз
 
           // ✅ ТЕК таңдалған сынып (егер ALL емес болса)
           if (reportClass !== "ALL") {
@@ -778,11 +779,6 @@ function exportCsv(){
           ]);
         });
       });
-
-      // ✅ Егер rows бос болса — алдын ала ескерту шығарайық
-      if (!rows.length) {
-        alert("Бұл диапазонда белгіленген қатысу деректері табылмады (немесе report.daily бос).");
-      }
 
       // Excel үшін: BOM + ; (сенде Excel дұрыс оқысын)
       const sep = ";";
@@ -877,6 +873,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
