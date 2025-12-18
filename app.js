@@ -698,13 +698,20 @@ async function updateStats() {
   if (!range) return alert(I18N_MSG[currentLang].needPeriod);
 
   const reportClass = document.getElementById("reportClass").value || "ALL";
-  let grade = "ALL", class_letter = "ALL";
+let grade = "ALL", class_letter = "ALL";
 
-  if (reportClass !== "ALL") {
-    const p = parseClass(reportClass);
-    grade = p.grade;
-    class_letter = p.letter;
-  }
+if (reportClass !== "ALL") {
+  const p = parseClass(reportClass);
+  grade = String(p.grade);
+  class_letter = String(p.letter);
+}
+
+const report = await apiGet("report", {
+  from: range.from,
+  to: range.to,
+  grade,
+  class_letter
+});
 
   try {
     
@@ -982,6 +989,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
