@@ -200,53 +200,66 @@ const I18N_MSG = {
   kk: {
     backHome: "Басты бет",
     reportsTitle: "Есептер мен статистика",
-    dayIssuesTitle: "📌 Сабақтан қалғандар (күндік)",
-    late: "Кешіккендер",
-    sick: "Ауырғандар",
-    excused: "Себепті",
-    unexcused: "Себепсіз",
-    student: "Оқушы",
-    class: "Сынып",
-    dayIssuesNote: "Ескерту: “Қатысты” оқушылар көрсетілмейді.",
+
+    dayIssuesTitle:"📌 Сабақтан қалғандар (күндік)",
+    late:"Кешіккендер",
+    sick:"Ауырғандар",
+    excused:"Себепті",
+    unexcused:"Себепсіз",
+    student:"Оқушы",
+    class:"Сынып",
+    dayIssuesNote:"Ескерту: “Қатысты” оқушылар көрсетілмейді.",
+
     dailyControl: "Күнделікті бақылау",
     searchByName: "Оқушының аты-жөні бойынша іздеу",
+
     holidaysLabel: "Оқымайтын күндер (мереке/каникул):",
     btnAdd: "Қосу",
     btnClear: "Тазалау",
     schoolDaysLabel: "Оқу күндерінің саны:",
+
     saveOk: "✅ Сақталды:",
     saveErr: "❌ Қате:",
     needClass: "Сыныпты таңдаңыз",
     needDate: "Күнді таңдаңыз",
     chooseException: "Тек қажет болса таңдаңыз",
     needPeriod: "Кезеңді таңдаңыз",
+
+    alreadySaved: "✅ Бұл сынып бұл күні сақталған"
   },
 
   ru: {
     backHome: "Главная",
     reportsTitle: "Отчеты и статистика",
-    dayIssuesTitle: "📌 Пропуски за день",
-    late: "Опоздавшие",
-    sick: "Болели",
-    excused: "По уважительной",
-    unexcused: "Без уважительной",
-    student: "Ученик",
-    class: "Класс",
-    dayIssuesNote: "Примечание: “Присутствовал(а)” не показывается.",
+
+    dayIssuesTitle:"📌 Пропуски за день",
+    late:"Опоздавшие",
+    sick:"Болели",
+    excused:"По уважительной",
+    unexcused:"Без уважительной",
+    student:"Ученик",
+    class:"Класс",
+    dayIssuesNote:"Примечание: “Присутствовал(а)” не показывается.",
+
     dailyControl: "Ежедневный контроль",
     searchByName: "Поиск по ФИО ученика",
+
     holidaysLabel: "Неучебные дни (праздники/каникулы):",
     btnAdd: "Добавить",
     btnClear: "Очистить",
     schoolDaysLabel: "Учебных дней в периоде:",
+
     saveOk: "✅ Сохранено:",
     saveErr: "❌ Ошибка:",
     needClass: "Выберите класс",
     needDate: "Выберите дату",
     chooseException: "Выбирайте только при необходимости",
     needPeriod: "Укажите период",
+
+    alreadySaved: "✅ Этот класс за эту дату уже сохранён"
   }
 };
+
 
 // ============================
 // API
@@ -773,30 +786,37 @@ function exportCsv(){
         ? [range.from]
         : eachDateISO(range.from, range.to);
 
-      wantedDates.forEach(dateISO => {
-        const daily = report.daily?.[dateISO];
-        if (!daily) return;
+    wantedDates.forEach(dateISO => {
+  const daily = report.daily?.[dateISO] || {};
+  const studentsList = (report.students || []);
 
-        Object.entries(daily).forEach(([sid, st]) => {
-          const s = byId.get(String(sid));
-          if (!s) return; // осы есептің ішіндегі оқушы болмаса, шығармаймыз
+  studentsList.forEach(s => {
+    // ✅ ТЕК таңдалған сынып (егер ALL емес болса)
+    if (reportClass !== "ALL") {
+      const cls = `${s.grade}${s.class_letter}`.trim();
+      if (cls !== reportClass.trim()) return;
+    }
 
-          // ✅ ТЕК таңдалған сынып (егер ALL емес болса)
-          if (reportClass !== "ALL") {
-            const cls = `${s.grade}${s.class_letter}`.trim();
-            if (cls !== reportClass.trim()) return;
-          }
+    const st = daily[String(s.id)] || null;
 
-          rows.push([
-            dateISO,
-            s.full_name,
-            `${s.grade}${s.class_letter}`,
-            st?.status_code ?? "",
-            st?.status_kk ?? "",
-            st?.status_ru ?? ""
-          ]);
-        });
-      });
+    // Егер ол күнге жазба табылмаса — әдепкі "katysty"
+    const code = st?.status_code || "katysty";
+
+    // STATUS сенде бар (front-та). Болмаса, мынаны қолдан:
+    const kk = (STATUS?.[code]?.kk) || st?.status_kk || "";
+    const ru = (STATUS?.[code]?.ru) || st?.status_ru || "";
+
+    rows.push([
+      dateISO,
+      s.full_name,
+      `${s.grade}${s.class_letter}`,
+      code,
+      kk,
+      ru
+    ]);
+  });
+});
+
 
       // Excel үшін: BOM + ; (сенде Excel дұрыс оқысын)
       const sep = ";";
@@ -906,6 +926,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
