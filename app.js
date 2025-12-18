@@ -829,47 +829,40 @@ function exportCsv(){
 // INIT
 // ============================
 document.addEventListener("DOMContentLoaded", async () => {
+
+  // 1) Навигация
   document.getElementById("goAttendance")?.addEventListener("click", () => showView("viewAttendance"));
   document.getElementById("goReports")?.addEventListener("click", () => showView("viewReports"));
   document.getElementById("backHome1")?.addEventListener("click", () => showView("viewHome"));
   document.getElementById("backHome2")?.addEventListener("click", () => showView("viewHome"));
 
+  // 2) Тіл ауыстыру
   document.getElementById("langToggle")?.addEventListener("click", () => {
     setLang(currentLang === "kk" ? "ru" : "kk");
   });
-  
-// Күнделікті бақылау атауы
-const dailyTitle = document.getElementById("dailyTitle");
-if (dailyTitle) {
-  dailyTitle.textContent =
-    currentLang === "kk"
-      ? "Күнделікті бақылау"
-      : "Ежедневный контроль";
-}
 
-// Іздеу placeholder
-const searchInput = document.getElementById("searchInput");
-if (searchInput) {
-  searchInput.placeholder =
-    currentLang === "kk"
-      ? "Оқушының аты-жөні бойынша іздеу"
-      : "Поиск по ФИО ученика";
-}
+  // ✅ Бет ашылғанда бірден тіл қолдану
+  setLang(currentLang);
 
+  // 3) Даталарды қою
   const today = new Date();
-  const iso = today.toISOString().slice(0,10);
-  document.getElementById("attendanceDate").value = iso;
-  document.getElementById("customStart").value = iso;
-  document.getElementById("customEnd").value = iso;
-  document.getElementById("yearInput").value = today.getFullYear();
-  document.getElementById("quarterYearInput").value = today.getFullYear();
+  const iso = today.toISOString().slice(0, 10);
 
+  document.getElementById("attendanceDate") && (document.getElementById("attendanceDate").value = iso);
+  document.getElementById("customStart") && (document.getElementById("customStart").value = iso);
+  document.getElementById("customEnd") && (document.getElementById("customEnd").value = iso);
+  document.getElementById("yearInput") && (document.getElementById("yearInput").value = today.getFullYear());
+  document.getElementById("quarterYearInput") && (document.getElementById("quarterYearInput").value = today.getFullYear());
+
+  // 4) Период ауысқанда блоктарды көрсету
   document.getElementById("periodType")?.addEventListener("change", () => {
     const type = document.getElementById("periodType").value;
-    ["monthControl","quarterControl","yearControl","customControl"].forEach(id => {
+
+    ["monthControl", "quarterControl", "yearControl", "customControl"].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.style.display = "none";
     });
+
     if (type === "month") document.getElementById("monthControl").style.display = "flex";
     if (type === "quarter") document.getElementById("quarterControl").style.display = "flex";
     if (type === "year") document.getElementById("yearControl").style.display = "flex";
@@ -877,15 +870,18 @@ if (searchInput) {
     if (type === "week") document.getElementById("customControl").style.display = "none";
   });
 
+  // 5) Батырмалар
   document.getElementById("saveAttendanceBtn")?.addEventListener("click", saveAttendance);
   document.getElementById("updateStatsBtn")?.addEventListener("click", updateStats);
   document.getElementById("exportCsvBtn")?.addEventListener("click", exportCsv);
   document.getElementById("searchInput")?.addEventListener("input", renderAttendanceTable);
 
+  // 6) API деректерін алу
   try {
     const cls = await apiGet("classes");
     window.__classesLoaded = true;
     window.__classList = cls.classes || [];
+
     renderClassesTo(document.getElementById("classSelect"), window.__classList, false);
     renderClassesTo(document.getElementById("reportClass"), window.__classList, true);
 
@@ -905,10 +901,12 @@ if (searchInput) {
   }
 });
 
+
 function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
