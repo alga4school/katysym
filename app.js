@@ -665,72 +665,116 @@ function fillSimpleTable(tableId, rows) {
   });
 }
 
+/* =========================================
+   Day Issues (Lists) + Update Stats (clean)
+   ========================================= */
+
+// 1) бір ғана hideDayIssues
 function hideDayIssues() {
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
-  ["tblLate","tblSick","tblExcused","tblUnexcused"].forEach(id => {
+
+  ["tblLate", "tblSick", "tblExcused", "tblUnexcused"].forEach((id) => {
     const tb = document.querySelector(`#${id} tbody`);
     if (tb) tb.innerHTML = "";
   });
 }
 
-function hideDayIssues(){
-  const box = document.getElementById("dayIssuesBox");
-  if (box) box.style.display = "none";
-}
-
-function fill3(tableId, rows){
+// 2) кестеге 3 бағанмен толтыру
+function fill3(tableId, rows) {
   const tb = document.querySelector(`#${tableId} tbody`);
   if (!tb) return;
+
   tb.innerHTML = "";
-  rows.forEach((r,i)=>{
+  rows.forEach((r, i) => {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${i+1}</td><td>${r.name}</td><td>${r.cls}</td>`;
+    tr.innerHTML = `<td>${i + 1}</td><td>${r.name}</td><td>${r.cls}</td>`;
     tb.appendChild(tr);
   });
 }
 
-function renderDayIssues(report, dateISO){
+// 3) дата диапазонындағы ISO күндер тізімі (бір ғана)
+function eachDateISO(fromISO, toISO) {
+  const res = [];
+  const start = new Date(fromISO + "T00:00:00");
+  const end = new Date(toISO + "T00:00:00");
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    res.push(d.toISOString().slice(0, 10));
+  }
+  return res;
+}
+
+// 4) report.daily ішінен таңдалған мерзім бойынша (1 күн/апта/ай/жыл/барлығы)
+// кешіккен/ауырған/себепті/себепсіз тізімдерді жинау
+function buildIssuesForRange(report, range) {
+  const stById = new Map((report.students || []).map((s) => [String(s.id), s]));
+  const daily = report.daily || {};
+
+  const late = [];
+  const sick = [];
+  const exc = [];
+  const unex = [];
+
+  const dates = eachDateISO(range.from, range.to);
+
+  // бір адам мерзім ішінде бірнеше рет кездесуі мүмкін → қайталамас үшін Set
+  const seen = {
+    keshikti: new Set(),
+    auyrdy: new Set(),
+    sebep: new Set(),
+    sebsez: new Set(),
+  };
+
+  for (const dateISO of dates) {
+    const dailyMap = daily[dateISO];
+    if (!dailyMap) continue;
+
+    Object.entries(dailyMap).forEach(([sid, st]) => {
+      const code = st?.status_code;
+      if (!code || code === "katysty") return;
+
+      const s = stById.get(String(sid));
+      const name = s ? s.full_name : String(sid);
+      const cls = s ? `${s.grade}${s.class_letter}` : "";
+
+      // қайталамау: бір оқушы бір категорияға 1-ақ рет түссін
+      if (seen[code] && seen[code].has(String(sid))) return;
+      if (seen[code]) seen[code].add(String(sid));
+
+      const row = { name, cls };
+
+      if (code === "keshikti") late.push(row);
+      if (code === "auyrdy") sick.push(row);
+      if (code === "sebep") exc.push(row);
+      if (code === "sebsez") unex.push(row);
+    });
+  }
+
+  return { late, sick, exc, unex };
+}
+
+// 5) dayIssuesBox көрсету (ЕНДІ: кез келген мерзімде, кез келген класс/ALL үшін)
+function renderDayIssuesForRange(report, range) {
   const box = document.getElementById("dayIssuesBox");
   if (!box) return;
 
-  const stById = new Map((report.students || []).map(s => [String(s.id), s]));
-  const dailyMap = (report.daily && report.daily[dateISO]) ? report.daily[dateISO] : null;
+  const issues = buildIssuesForRange(report, range);
 
-  if (!dailyMap) { hideDayIssues(); return; }
-
-  const late=[], sick=[], exc=[], unex=[];
-
-  Object.entries(dailyMap).forEach(([sid, st]) => {
-    const code = st?.status_code;
-    if (!code || code === "katysty") return;
-
-    const s = stById.get(String(sid));
-    const name = s ? s.full_name : String(sid);
-    const cls  = s ? `${s.grade}${s.class_letter}` : "";
-
-    const row = { name, cls };
-
-    if (code === "keshikti") late.push(row);
-    if (code === "auyrdy")   sick.push(row);
-    if (code === "sebep")    exc.push(row);
-    if (code === "sebsez")   unex.push(row);
-  });
-
-  if (!(late.length || sick.length || exc.length || unex.length)) {
+  // егер бәрі бос болса — жасырамыз
+  if (!(issues.late.length || issues.sick.length || issues.exc.length || issues.unex.length)) {
     hideDayIssues();
     return;
   }
 
-  fill3("tblLate", late);
-  fill3("tblSick", sick);
-  fill3("tblExcused", exc);
-  fill3("tblUnexcused", unex);
+  fill3("tblLate", issues.late);
+  fill3("tblSick", issues.sick);
+  fill3("tblExcused", issues.exc);
+  fill3("tblUnexcused", issues.unex);
 
   box.style.display = "block";
 }
 
-
+// 6) Update Stats (clean): күндік блок енді бәріне бірдей шығады
 async function updateStats() {
   const range = getRangeFromPeriod();
   updateSchoolDaysUI();
@@ -738,7 +782,8 @@ async function updateStats() {
   if (!range) return alert(I18N_MSG[currentLang].needPeriod);
 
   const reportClass = document.getElementById("reportClass").value || "ALL";
-  let grade = "ALL", class_letter = "ALL";
+  let grade = "ALL",
+    class_letter = "ALL";
 
   if (reportClass !== "ALL") {
     const p = parseClass(reportClass);
@@ -747,16 +792,17 @@ async function updateStats() {
   }
 
   try {
-    const report = await apiGet("report", { from: range.from, to: range.to, grade, class_letter });
+    const report = await apiGet("report", {
+      from: range.from,
+      to: range.to,
+      grade,
+      class_letter,
+    });
 
-    // ✅ КҮНДІК "Сабақтан қалғандар" тек: Күні + 1 күн + нақты сынып
-    const periodType = document.getElementById("periodType").value;
-    if (periodType === "custom" && range.from === range.to && reportClass !== "ALL") {
-      renderDayIssues(report, range.from);
-    } else {
-      hideDayIssues();
-    }
+    // ✅ ЕНДІ dayIssuesBox: кез келген мерзімде, ALL таңдаса да шығады
+    renderDayIssuesForRange(report, range);
 
+    // KPI
     const t = sumTotals(report);
 
     document.getElementById("totalLessons").textContent = t.total;
@@ -766,10 +812,9 @@ async function updateStats() {
     document.getElementById("totalExcused").textContent = t.sebep;
     document.getElementById("totalUnexcused").textContent = t.sebsez;
 
-    // TOP (сенде 4-тен жоғары керек болса buildTop ішінде filter >4 тұрады)
+    // TOP
     fillTable("topLateTable", buildTop(report, "keshikti"));
     fillTable("topUnexcusedTable", buildTop(report, "sebsez"));
-
   } catch (e) {
     alert((currentLang === "ru" ? "Ошибка отчёта: " : "Отчет қатесі: ") + e.message);
   }
@@ -986,6 +1031,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
