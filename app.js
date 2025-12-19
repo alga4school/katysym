@@ -468,6 +468,10 @@ function buildStatusCell(studentId){
   wrap.appendChild(sel);
   return wrap;
 }
+renderList("tblLate", data.lists.late);
+renderList("tblSick", data.lists.sick);
+renderList("tblExcused", data.lists.excused);
+renderList("tblUnexcused", data.lists.unexcused);
 
 function renderAttendanceTable(){
   const tbody = document.querySelector("#attendanceTable tbody");
@@ -798,6 +802,23 @@ async function updateStats() {
       grade,
       class_letter,
     });
+function renderList(tableId, arr){
+  const t = document.getElementById(tableId);
+  if(!t) return;
+  const tb = t.querySelector("tbody");
+  tb.innerHTML = "";
+
+  arr.forEach((x, i)=>{
+    const cls = `${x.grade}${x.class_letter}`;
+    tb.insertAdjacentHTML("beforeend", `
+      <tr>
+        <td>${i+1}</td>
+        <td>${x.full_name}</td>
+        <td>${cls}</td>
+      </tr>
+    `);
+  });
+}
 
     // ✅ ЕНДІ dayIssuesBox: кез келген мерзімде, ALL таңдаса да шығады
     renderDayIssuesForRange(report, range);
@@ -1031,6 +1052,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
