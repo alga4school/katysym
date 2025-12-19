@@ -238,7 +238,7 @@ function setLang(lang){
 }
 
 function applyI18n(){
-  const dict = I18N_MSG[currentLang] || I18N_MSG.kk;
+  const dict = I18N[currentLang] || I18N.kk;
 
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.getAttribute("data-i18n");
@@ -255,35 +255,38 @@ function applyI18n(){
       if (k && dict[k] != null) opt.textContent = dict[k];
     });
   }
-  function applyI18N() {
-  const dict = I18N[currentLang];
+ function applyI18n() {
+  const dict = I18N[currentLang] || I18N.kk;
 
-  // кәдімгі текст
+  // мәтіндер (data-i18n)
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.dataset.i18n;
-    if (dict[key]) el.textContent = dict[key];
+    if (dict[key] != null) el.textContent = dict[key];
   });
 
-  // placeholder
+  // placeholder (data-i18n-placeholder)
   document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
     const key = el.dataset.i18nPlaceholder;
-    if (dict[key]) el.placeholder = dict[key];
+    if (dict[key] != null) el.placeholder = dict[key];
   });
 
-  // option (select)
-  document.querySelectorAll("option[data-i18n]").forEach(opt => {
-    const key = opt.dataset.i18n;
-    if (dict[key]) opt.textContent = dict[key];
-  });
-}
-}
+  // periodType select option-дары
+  const period = document.getElementById("periodType");
+  if (period) {
+    [...period.options].forEach(opt => {
+      const key = opt.dataset.i18n;
+      if (key && dict[key] != null) opt.textContent = dict[key];
+    });
+  }
 
+  // class select-терді қайта салу (тіл ауысқанда “Барлық сынып/Все классы” дұрыс шығу үшін)
   if (window.__classesLoaded) {
     renderClassesTo(document.getElementById("classSelect"), window.__classList, false);
     renderClassesTo(document.getElementById("reportClass"), window.__classList, true);
   }
 
   renderAttendanceTable();
+}
 
 function statusLabel(code){
   const item = STATUS[code] || STATUS.katysty;
@@ -349,7 +352,7 @@ function buildStatusCell(studentId){
 
   const hint = document.createElement("option");
   hint.value = "";
-  hint.textContent = I18N_MSG[currentLang].chooseException;
+  hint.textContent = I18N[currentLang].chooseException;
   sel.appendChild(hint);
 
   EXCEPTIONS.forEach(code => {
@@ -369,14 +372,9 @@ function buildStatusCell(studentId){
     if (tr) tr.className = rowClassColor(pick);
   });
 
-  wrap.appendChild(text);
-  wrap.appendChild(sel);
-  return wrap;
-  renderList("tblLate", data.lists.late);
-renderList("tblSick", data.lists.sick);
-renderList("tblExcused", data.lists.excused);
-renderList("tblUnexcused", data.lists.unexcused);
-
+ wrap.appendChild(text);
+wrap.appendChild(sel);
+return wrap;
 }
 
 function renderAttendanceTable(){
@@ -429,14 +427,14 @@ async function saveAttendance() {
   const date = dateEl?.value;
   const cls = classSelect?.value;
 
-  if (!date) return alert(I18N_MSG[currentLang].needDate);
-  if (!cls) return alert(I18N_MSG[currentLang].needClass);
+  if (!date) return alert(I18N[currentLang].needDate);
+  if (!cls) return alert(I18N[currentLang].needClass);
 
   // ҚАЙТАЛАНҒАН басуды тоқтатамыз (localStorage guard)
   const { grade, letter } = parseClass(cls);
   const guardKey = `att_saved:${date}:${grade}:${letter}`;
   if (localStorage.getItem(guardKey) === "1") {
-    saveStatus.textContent = I18N_MSG[currentLang].alreadySaved || "✅ Бұл сынып бұл күні already сақталған";
+    saveStatus.textContent = I18N[currentLang].alreadySaved || "✅ Бұл сынып бұл күні already сақталған";
     return;
   }
 
@@ -446,7 +444,7 @@ async function saveAttendance() {
   try {
     const students = allStudents.filter(s => String(s.grade) === grade && String(s.class_letter) === letter);
     if (!students.length) {
-      throw new Error(I18N_MSG[currentLang].noStudents || "Оқушылар тізімі бос. Google Sheet students толтырылғанын тексеріңіз.");
+      throw new Error(I18N[currentLang].noStudents || "Оқушылар тізімі бос. Google Sheet students толтырылғанын тексеріңіз.");
     }
 
     const records = students.map(s => ({
@@ -461,10 +459,10 @@ async function saveAttendance() {
 
     // ✅ енді қайта басса да, фронт бөгейді; ал сервер жағы — overwrite (duplicate болмайды)
     localStorage.setItem(guardKey, "1");
-    const extra = res.replaced ? (I18N_MSG[currentLang].replaced || "(қайта жазылды)") : "";
-    saveStatus.textContent = `${I18N_MSG[currentLang].saveOk} ${res.saved} ${extra}`;
+    const extra = res.replaced ? (I18N[currentLang].replaced || "(қайта жазылды)") : "";
+    saveStatus.textContent = `${I18N[currentLang].saveOk} ${res.saved} ${extra}`;
   } catch (e) {
-    saveStatus.textContent = `${I18N_MSG[currentLang].saveErr} ${e.message}`;
+    saveStatus.textContent = `${I18N[currentLang].saveErr} ${e.message}`;
   } finally {
     if (btn) btn.disabled = false;
   }
@@ -575,11 +573,11 @@ function fillSimpleTable(tableId, rows) {
   });
 }
 
-/* =========================================
+  /* =========================================
    Day Issues (Lists) + Update Stats (clean)
    ========================================= */
-
-// 1) бір ғана hideDayIssues
+  
+  // 1) бір ғана hideDayIssues
 function hideDayIssues() {
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
@@ -589,9 +587,10 @@ function hideDayIssues() {
     if (tb) tb.innerHTML = "";
   });
 }
-
+  
 // 2) кестеге 3 бағанмен толтыру
 function fill3(tableId, rows) {
+  
   const tb = document.querySelector(`#${tableId} tbody`);
   if (!tb) return;
 
@@ -689,7 +688,7 @@ async function updateStats() {
   const range = getRangeFromPeriod();
   updateSchoolDaysUI();
 
-  if (!range) return alert(I18N_MSG[currentLang].needPeriod);
+  if (!range) return alert(I18N[currentLang].needPeriod);
 
   const reportClass = document.getElementById("reportClass").value || "ALL";
   let grade = "ALL",
@@ -747,40 +746,9 @@ function renderList(tableId, arr){
   }
 }
 
-
-function eachDateISO(fromISO, toISO) {
-  const res = [];
-  const start = new Date(fromISO + "T00:00:00");
-  const end = new Date(toISO + "T00:00:00");
-  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    res.push(d.toISOString().slice(0, 10));
-  }
-  return res;
-}
-
-function eachDateISO(fromISO, toISO) {
-  const res = [];
-  const start = new Date(fromISO + "T00:00:00");
-  const end = new Date(toISO + "T00:00:00");
-  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    res.push(d.toISOString().slice(0, 10));
-  }
-  return res;
-}
-
-function eachDateISO(fromISO, toISO) {
-  const res = [];
-  const start = new Date(fromISO + "T00:00:00");
-  const end = new Date(toISO + "T00:00:00");
-  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    res.push(d.toISOString().slice(0, 10));
-  }
-  return res;
-}
-
 function exportCsv(){
   const range = getRangeFromPeriod();
-  if (!range) return alert(I18N_MSG[currentLang].needPeriod);
+  if (!range) return alert(I18N[currentLang].needPeriod);
 
   const reportClass = document.getElementById("reportClass").value || "ALL";
   let grade="ALL", class_letter="ALL";
@@ -954,10 +922,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-function hideDayIssues(){
-  const box = document.getElementById("dayIssuesBox");
-  if (box) box.style.display = "none";
-}
 
 
 
