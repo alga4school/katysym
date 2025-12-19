@@ -723,9 +723,6 @@ async function updateStats() {
   }
 }
 
-    
-  const report = await apiGet("report", { from: range.from, to: range.to, grade, class_letter });
-
  // 1) Әрқашан бәрін аламыз (сервер фильтрі қате болса да)
 const report = await apiGet("report", {
   from: range.from,
@@ -998,6 +995,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
