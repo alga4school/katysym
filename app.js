@@ -372,11 +372,12 @@ function buildStatusCell(studentId){
   wrap.appendChild(text);
   wrap.appendChild(sel);
   return wrap;
-}
-renderList("tblLate", data.lists.late);
+  renderList("tblLate", data.lists.late);
 renderList("tblSick", data.lists.sick);
 renderList("tblExcused", data.lists.excused);
 renderList("tblUnexcused", data.lists.unexcused);
+
+}
 
 function renderAttendanceTable(){
   const tbody = document.querySelector("#attendanceTable tbody");
@@ -957,6 +958,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
