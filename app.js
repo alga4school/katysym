@@ -350,6 +350,27 @@ function applyI18n(){
       if (k && dict[k] != null) opt.textContent = dict[k];
     });
   }
+  function applyI18N() {
+  const dict = I18N[currentLang];
+
+  // кәдімгі текст
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.dataset.i18n;
+    if (dict[key]) el.textContent = dict[key];
+  });
+
+  // placeholder
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+    const key = el.dataset.i18nPlaceholder;
+    if (dict[key]) el.placeholder = dict[key];
+  });
+
+  // option (select)
+  document.querySelectorAll("option[data-i18n]").forEach(opt => {
+    const key = opt.dataset.i18n;
+    if (dict[key]) opt.textContent = dict[key];
+  });
+}
 }
 
   if (window.__classesLoaded) {
@@ -965,6 +986,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
