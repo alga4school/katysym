@@ -698,9 +698,9 @@ async function updateStats() {
 
   const reportClass = document.getElementById("reportClass").value || "ALL";
 
+  // серверге де фильтр жібереміз
   let grade = "ALL";
   let class_letter = "ALL";
-
   if (reportClass !== "ALL") {
     const p = parseClass(reportClass);
     grade = String(p.grade);
@@ -708,7 +708,7 @@ async function updateStats() {
   }
 
   try {
-    // ✅ ТЕК БІР РЕТ жариялаймыз
+    // 1) Report алу
     const report = await apiGet("report", {
       from: range.from,
       to: range.to,
@@ -716,65 +716,37 @@ async function updateStats() {
       class_letter
     });
 
-    renderReport(report);
+    // 2) Қауіпсіздік үшін: фронтта да нақты сыныпқа қатаң фильтр
+    if (reportClass !== "ALL") {
+      const target = String(reportClass).replace(/\s+/g, "").toUpperCase();
 
-  } catch (e) {
-    alert("Отчет қатесі: " + e.message);
-  }
-}
+      report.students = (report.students || []).filter(s => {
+        const cls = `${s.grade ?? ""}${s.class_letter ?? ""}`.replace(/\s+/g, "").toUpperCase();
+        return cls === target;
+      });
 
- // 1) Әрқашан бәрін аламыз (сервер фильтрі қате болса да)
-const report = await apiGet("report", {
-  from: range.from,
-  to: range.to,
-  grade,
-  class_letter
-});
+      const keep = new Set((report.students || []).map(s => String(s.id)));
 
+      // daily
+      const newDaily = {};
+      Object.entries(report.daily || {}).forEach(([date, obj]) => {
+        const filtered = {};
+        Object.entries(obj || {}).forEach(([sid, st]) => {
+          if (keep.has(String(sid))) filtered[sid] = st;
+        });
+        newDaily[date] = filtered;
+      });
+      report.daily = newDaily;
 
-// 2) Таңдалған сыныпқа қатаң фильтр (цифр+әріп бірге)
-const reportClass = document.getElementById("reportClass").value || "ALL";
+      // totals
+      const newTotals = {};
+      Object.entries(report.totals || {}).forEach(([sid, t]) => {
+        if (keep.has(String(sid))) newTotals[sid] = t;
+      });
+      report.totals = newTotals;
+    }
 
-if (reportClass !== "ALL") {
-  const target = String(reportClass).replace(/\s+/g, "").toUpperCase();
-
-  // students
-  report.students = (report.students || []).filter(s => {
-    const cls = `${s.grade ?? ""}${s.class_letter ?? ""}`.replace(/\s+/g, "").toUpperCase();
-    return cls === target;
-  });
-
-  // keep (✅ міндетті түрде осында!)
-  const keep = new Set((report.students || []).map(s => String(s.id)));
-
-  // daily
-  const newDaily = {};
-  Object.entries(report.daily || {}).forEach(([date, obj]) => {
-    const filtered = {};
-    Object.entries(obj || {}).forEach(([sid, st]) => {
-      if (keep.has(String(sid))) filtered[sid] = st;
-    });
-    newDaily[date] = filtered;
-  });
-  report.daily = newDaily;
-
-  // totals (✅ ең маңызды)
-  const newTotals = {};
-  Object.entries(report.totals || {}).forEach(([sid, t]) => {
-    if (keep.has(String(sid))) newTotals[sid] = t;
-  });
-  report.totals = newTotals;
-}
-
- // ✅ totals-ты да тек таңдалған оқушыларға қалдырамыз
-const newTotals = {};
-Object.entries(report.totals || {}).forEach(([sid, t]) => {
-  if (keep.has(String(sid))) newTotals[sid] = t;
-});
-report.totals = newTotals;
-
-
-    // ✅ КҮНДІК "Сабақтан қалғандар" тек: Күні + 1 күн + нақты сынып
+    // 3) КҮНДІК "Сабақтан қалғандар" тек: Custom + 1 күн + нақты сынып
     const periodType = document.getElementById("periodType").value;
     if (periodType === "custom" && range.from === range.to && reportClass !== "ALL") {
       renderDayIssues(report, range.from);
@@ -782,8 +754,8 @@ report.totals = newTotals;
       hideDayIssues();
     }
 
+    // 4) KPI
     const t = sumTotals(report);
-
     document.getElementById("totalLessons").textContent = t.total;
     document.getElementById("totalPresent").textContent = t.katysty;
     document.getElementById("totalLate").textContent = t.keshikti;
@@ -791,16 +763,14 @@ report.totals = newTotals;
     document.getElementById("totalExcused").textContent = t.sebep;
     document.getElementById("totalUnexcused").textContent = t.sebsez;
 
-    // TOP (сенде 4-тен жоғары керек болса buildTop ішінде filter >4 тұрады)
+    // 5) TOP
     fillTable("topLateTable", buildTop(report, "keshikti"));
     fillTable("topUnexcusedTable", buildTop(report, "sebsez"));
-
   } catch (e) {
     alert((currentLang === "ru" ? "Ошибка отчёта: " : "Отчет қатесі: ") + e.message);
   }
 }
 
-
 function eachDateISO(fromISO, toISO) {
   const res = [];
   const start = new Date(fromISO + "T00:00:00");
@@ -811,7 +781,7 @@ function eachDateISO(fromISO, toISO) {
   return res;
 }
 
-function eachDateISO(fromISO, toISO) {
+(fromISO, toISO) {
   const res = [];
   const start = new Date(fromISO + "T00:00:00");
   const end = new Date(toISO + "T00:00:00");
@@ -821,15 +791,6 @@ function eachDateISO(fromISO, toISO) {
   return res;
 }
 
-function eachDateISO(fromISO, toISO) {
-  const res = [];
-  const start = new Date(fromISO + "T00:00:00");
-  const end = new Date(toISO + "T00:00:00");
-  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    res.push(d.toISOString().slice(0, 10));
-  }
-  return res;
-}
 
 function exportCsv(){
   const range = getRangeFromPeriod();
