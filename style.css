@@ -452,4 +452,63 @@ input, select{
   opacity: .9;
 }
 
+/* Фильтрлер блогын жинақы ету */
+.report-controls{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  align-items:flex-end;
+}
+
+/* Holiday box жоғарыда әдемі көрінсін */
+.holidayBox{
+  margin-top:14px;
+  padding:12px;
+  border:1px dashed #c7c7c7;
+  border-radius:14px;
+  background:#fff;
+}
+
+/* ==== Day issues grid (3 баған) ==== */
+.day-issues-grid{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:14px;
+}
+@media (max-width: 900px){
+  .day-issues-grid{ grid-template-columns:1fr; }
+}
+
+/* ==== Дөңгелек summary ==== */
+.summary-circles{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap:16px;
+  margin:18px 0 6px;
+}
+.sum-item{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+}
+.sum-item .circle{
+  width:72px;height:72px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;font-weight:900;
+  background:#fff;
+  border:3px solid;
+  box-shadow: 0 10px 24px rgba(17,24,39,.10);
+}
+.sum-item .label{ font-weight:800; font-size:14px; opacity:.9; text-align:center; }
+
+/* Түстер */
+.sum-item.total .circle{ border-color:#6366f1; color:#6366f1; }
+.sum-item.present .circle{ border-color:#22c55e; color:#22c55e; }
+.sum-item.late .circle{ border-color:#f59e0b; color:#f59e0b; }
+.sum-item.sick .circle{ border-color:#fb923c; color:#fb923c; }
+.sum-item.excused .circle{ border-color:#3b82f6; color:#3b82f6; }
+.sum-item.unexcused .circle{ border-color:#ef4444; color:#ef4444; }
+
+
 
