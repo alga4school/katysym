@@ -116,35 +116,47 @@
         <div class="reports-card">
           <div class="report-controls">
       <!-- ✅ КҮНДІК: сабақтан қалғандар (тек custom күн = 1 күн болғанда шығады) -->
-<div id="dayIssuesBox" style="display:none; margin-top:18px">
-  <h3>📌 <span data-i18n="dayIssuesTitle">Сабақтан қалғандар (күндік)</span></h3>
+<div id="dayIssuesBox" class="day-issues" style="display:none;">
+  <h3>📌 Сабақтан қалғандар (күндік)</h3>
 
-  <h4>⏰ <span data-i18n="late">Кешіккендер</span></h4>
-  <table id="tblLate" class="table">
-    <thead><tr><th>№</th><th data-i18n="student">Оқушы</th><th data-i18n="class">Сынып</th></tr></thead>
-    <tbody></tbody>
-  </table>
+  <div class="day-issues-grid">
 
-  <h4>🤒 <span data-i18n="sick">Ауырғандар</span></h4>
-  <table id="tblSick" class="table">
-    <thead><tr><th>№</th><th data-i18n="student">Оқушы</th><th data-i18n="class">Сынып</th></tr></thead>
-    <tbody></tbody>
-  </table>
+    <div class="day-card">
+      <h4>⏰ Кешіккендер</h4>
+      <table id="tblLate" class="table mini">
+        <thead><tr><th>№</th><th>Оқушы</th><th>Сынып</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
 
-  <h4>📄 <span data-i18n="excused">Себепті</span></h4>
-  <table id="tblExcused" class="table">
-    <thead><tr><th>№</th><th data-i18n="student">Оқушы</th><th data-i18n="class">Сынып</th></tr></thead>
-    <tbody></tbody>
-  </table>
+    <div class="day-card">
+      <h4>🤒 Ауырғандар</h4>
+      <table id="tblSick" class="table mini">
+        <thead><tr><th>№</th><th>Оқушы</th><th>Сынып</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
 
-  <h4>❌ <span data-i18n="unexcused">Себепсіз</span></h4>
-  <table id="tblUnexcused" class="table">
-    <thead><tr><th>№</th><th data-i18n="student">Оқушы</th><th data-i18n="class">Сынып</th></tr></thead>
-    <tbody></tbody>
-  </table>
+    <div class="day-card">
+      <h4>📄 Себепті</h4>
+      <table id="tblExcused" class="table mini">
+        <thead><tr><th>№</th><th>Оқушы</th><th>Сынып</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
 
-  <div style="margin-top:10px; opacity:.8;">
-    <span data-i18n="dayIssuesNote">Ескерту: “Қатысты” оқушылар көрсетілмейді.</span>
+    <div class="day-card">
+      <h4>❌ Себепсіз</h4>
+      <table id="tblUnexcused" class="table mini">
+        <thead><tr><th>№</th><th>Оқушы</th><th>Сынып</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <div class="hint" style="margin-top:10px;">
+    Ескерту: “Қатысты” оқушылар көрсетілмейді.
   </div>
 </div>
 
@@ -207,6 +219,9 @@
               <button id="updateStatsBtn" class="btn primary" type="button">📈 <span data-i18n="btnUpdate">Көрсету</span></button>
               <button id="exportCsvBtn" class="btn ghost" type="button">⬇️ <span data-i18n="btnExport">CSV жүктеу</span></button>
             </div>
+            <div id="dayIssuesBox" style="display:none; margin-top:18px">
+  ...
+</div>
           </div>
 <div class="holidayBox">
  <label data-i18n="holidaysLabel"></label>
