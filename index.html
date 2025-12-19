@@ -201,9 +201,10 @@
     <div id="holidaysList" class="holidayList"></div>
   </div>
 
-  <!-- 3) КҮНДІК: сабақтан қалғандар (тек 1 күн болғанда шығады) -->
-dayIssuesBox.style.display = "";
-    <h3>📌 <span data-i18n="dayIssuesTitle">Сабақтан қалғандар (күндік)</span></h3>
+   <!-- 3) ТІЗІМ: сабақтан қалғандар (таңдалған мерзім бойынша) -->
+         
+  <div id="dayIssuesBox" class="dayIssuesBox" style="display:none;">
+    <h3>📌 <span data-i18n="dayIssuesTitle">Сабақтан қалғандар</span></h3>
 
     <div class="dayGrid">
       <div class="mini-card">
@@ -278,7 +279,7 @@ dayIssuesBox.style.display = "";
   </div>
 
   <!-- 5) TOP TABLES -->
-  <div class="">
+ <div class="tables-grid">
     <div class="mini-card">
       <h3 class="mini-title" data-i18n="topLate">Көп кешігу (TOP)</h3>
       <table id="topLateTable" class="table mini">
@@ -299,21 +300,7 @@ dayIssuesBox.style.display = "";
   <div class="hint light" data-i18n="reportHint">
     Ескерту: Есептер деректері Google Script арқылы алынады.
   </div>
-</div>
-        
-<div class="holidayBox">
-
-  <button type="button" id="addHolidayBtn" data-i18n="btnAdd"></button>
-  <button type="button" id="clearHolidaysBtn" data-i18n="btnClear"></button>
-
-  <div id="holidaysList" style="margin-top:8px;"></div>
-
-  <div style="margin-top:10px;">
-    <b data-i18n="schoolDaysLabel"></b>
-    <span id="schoolDaysCount">0</span>
   </div>
-</div>
-
          
 
 
