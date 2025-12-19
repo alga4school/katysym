@@ -237,40 +237,19 @@ function setLang(lang){
   applyI18n();
 }
 
-function applyI18n(){
+function applyI18n() {
   const dict = I18N[currentLang] || I18N.kk;
 
-  document.querySelectorAll("[data-i18n]").forEach(el => {
-    const key = el.getAttribute("data-i18n");
-    if (dict[key] != null) el.textContent = dict[key];
-  });
-
-  const search = document.getElementById("searchInput");
-  if (search) search.placeholder = currentLang === "ru" ? "ФИО..." : "Аты-жөні...";
-
-  const period = document.getElementById("periodType");
-  if (period) {
-    [...period.options].forEach(opt => {
-      const k = opt.getAttribute("data-i18n");
-      if (k && dict[k] != null) opt.textContent = dict[k];
-    });
-  }
- function applyI18n() {
-  const dict = I18N[currentLang] || I18N.kk;
-
-  // мәтіндер (data-i18n)
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.dataset.i18n;
     if (dict[key] != null) el.textContent = dict[key];
   });
 
-  // placeholder (data-i18n-placeholder)
   document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
     const key = el.dataset.i18nPlaceholder;
     if (dict[key] != null) el.placeholder = dict[key];
   });
 
-  // periodType select option-дары
   const period = document.getElementById("periodType");
   if (period) {
     [...period.options].forEach(opt => {
@@ -279,7 +258,6 @@ function applyI18n(){
     });
   }
 
-  // class select-терді қайта салу (тіл ауысқанда “Барлық сынып/Все классы” дұрыс шығу үшін)
   if (window.__classesLoaded) {
     renderClassesTo(document.getElementById("classSelect"), window.__classList, false);
     renderClassesTo(document.getElementById("reportClass"), window.__classList, true);
@@ -287,6 +265,7 @@ function applyI18n(){
 
   renderAttendanceTable();
 }
+
 
 function statusLabel(code){
   const item = STATUS[code] || STATUS.katysty;
@@ -679,7 +658,10 @@ function renderDayIssuesForRange(report, range) {
   fill3("tblSick", issues.sick);
   fill3("tblExcused", issues.exc);
   fill3("tblUnexcused", issues.unex);
-
+ renderList("tblLate", data.lists.late || []);
+      renderList("tblSick", data.lists.sick || []);
+      renderList("tblExcused", data.lists.excused || []);
+      renderList("tblUnexcused", data.lists.unexcused || []);
   box.style.display = "block";
 }
 
@@ -709,10 +691,6 @@ async function updateStats() {
     });
 
      if (data.lists) {
-      renderList("tblLate", data.lists.late || []);
-      renderList("tblSick", data.lists.sick || []);
-      renderList("tblExcused", data.lists.excused || []);
-      renderList("tblUnexcused", data.lists.unexcused || []);
     }
     
 function renderList(tableId, arr){
@@ -927,5 +905,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (e) {
     alert("API error: " + e.message);
   }
+
 
 
