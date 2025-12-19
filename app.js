@@ -366,10 +366,17 @@ function renderClassesTo(selectEl, classList, includeAll=false){
   });
 }
 
+function normalizeClassValue(v){
+  return String(v || "")
+    .replace(/\s+/g, "")   // убираем пробелы: "0 Ә" -> "0Ә"
+    .toUpperCase();
+}
+
 function parseClass(cls){
-  const grade = String(parseInt(cls, 10));
-  const letter = cls.replace(grade, "");
-  return { grade, letter };
+  const c = normalizeClassValue(cls);
+  const m = c.match(/^(\d+)(.*)$/); // число + буква(ы)
+  if (!m) return { grade:"", letter:"" };
+  return { grade: m[1], letter: m[2] || "" };
 }
 
 function buildStatusCell(studentId){
@@ -780,8 +787,9 @@ function exportCsv(){
           if (!s) return;
 
           if (reportClass !== "ALL") {
-            const cls = `${s.grade}${s.class_letter}`.trim();
-            if (cls !== reportClass.trim()) return;
+           const cls = normalizeClassValue(`${s.grade}${s.class_letter}`);
+if (cls !== normalizeClassValue(reportClass)) return;
+
           }
 
           rowsDaily.push([
@@ -926,6 +934,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
