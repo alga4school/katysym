@@ -309,6 +309,84 @@ input, select{
   border-radius: 14px;
   overflow: hidden; /* дөңгелек бұрыш көріну үшін */
 }
+/* ===== Reports layout improvements ===== */
+.report-controls-top{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(200px, 1fr));
+  gap:12px;
+  align-items:end;
+}
+.report-controls-top .subcontrols{ display:contents; } /* ішіндегі field-тер grid-ке бағынады */
+.report-controls-top .report-actions{
+  justify-self:end;
+  grid-column: 3 / 4;
+  display:flex;
+  gap:12px;
+}
+
+.holidayBox-top{
+  margin-top:12px;
+  border:1px dashed #cbd5e1;
+  border-radius:14px;
+  padding:12px;
+  background:#f8fafc;
+}
+.holidayRow{
+  display:grid;
+  grid-template-columns: 1fr auto auto;
+  gap:12px;
+  align-items:center;
+}
+.holidayBtns{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+.holidayDays{ justify-self:end; font-weight:800; }
+.holidayList{ margin-top:10px; }
+
+.dayIssuesBox{ margin-top:14px; }
+.dayGrid{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  gap:12px;
+}
+@media (max-width: 980px){
+  .dayGrid{ grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 640px){
+  .report-controls-top{ grid-template-columns: 1fr; }
+  .report-controls-top .report-actions{ grid-column:auto; justify-self:start; }
+  .holidayRow{ grid-template-columns: 1fr; }
+  .holidayDays{ justify-self:start; }
+  .dayGrid{ grid-template-columns: 1fr; }
+}
+
+.summary-circles{
+  margin-top:14px;
+  display:grid;
+  grid-template-columns: repeat(3, minmax(160px, 1fr));
+  gap:12px;
+}
+.sum-item{
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:14px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  background:#fff;
+}
+.sum-item .circle{
+  width:52px;
+  height:52px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:1000;
+  font-size:18px;
+  border:2px solid var(--line);
+  background:#f8fafc;
+}
+.sum-item .label{ font-weight:900; }
+
 /* Көрсету батырмасы – көк */
 #updateStatsBtn{
   background:#2563eb !important;
@@ -509,6 +587,7 @@ input, select{
 .sum-item.sick .circle{ border-color:#fb923c; color:#fb923c; }
 .sum-item.excused .circle{ border-color:#3b82f6; color:#3b82f6; }
 .sum-item.unexcused .circle{ border-color:#ef4444; color:#ef4444; }
+
 
 
 
