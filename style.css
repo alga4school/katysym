@@ -354,3 +354,39 @@ input, select{
   max-width: 720px;
   line-height: 1.4;
 }
+
+/* ===== КҮНДІК ПРОПУСКТАР (GRID) ===== */
+.day-issues{
+  margin-top: 20px;
+}
+
+.day-issues h3{
+  margin-bottom: 14px;
+}
+
+.day-issues-grid{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.day-card{
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+  background: #fff;
+}
+
+.day-card h4{
+  margin: 0 0 8px 0;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+/* Телефонға */
+@media (max-width: 900px){
+  .day-issues-grid{
+    grid-template-columns: 1fr;
+  }
+}
+
