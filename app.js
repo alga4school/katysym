@@ -867,7 +867,6 @@ if (cls !== normalizeClassValue(reportClass)) return;
     .catch(err => alert(err.message));
 }
 
-
 // ============================
 // INIT
 // ============================
@@ -929,52 +928,3 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
