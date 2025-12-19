@@ -707,6 +707,14 @@ async function updateStats() {
       grade,
       class_letter,
     });
+
+     if (data.lists) {
+      renderList("tblLate", data.lists.late || []);
+      renderList("tblSick", data.lists.sick || []);
+      renderList("tblExcused", data.lists.excused || []);
+      renderList("tblUnexcused", data.lists.unexcused || []);
+    }
+    
 function renderList(tableId, arr){
   const t = document.getElementById(tableId);
   if(!t) return;
@@ -921,6 +929,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
