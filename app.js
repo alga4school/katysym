@@ -2,7 +2,7 @@ let __isSavingAttendance = false;
 // ============================
 // SETTINGS (СІЗДІҢ URL / KEY)
 // ============================
-const WEBAPP_URL = "https://broken-paper-fdf4.alga4school.workers.dev/";
+const WEBAPP_URL = "https://old-recipe-0d35eduqatysu.alga4school.workers.dev/";
 const API_KEY = "school2025";
 
 // ============================
@@ -889,6 +889,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
