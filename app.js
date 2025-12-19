@@ -661,16 +661,19 @@ function renderDayIssuesForRange(report, range) {
   box.style.display = "block";
 }
 
-// 6) Update Stats (clean): күндік блок енді бәріне бірдей шығады
+// 6) Update Stats (CLEAN)
 async function updateStats() {
   const range = getRangeFromPeriod();
   updateSchoolDaysUI();
 
-  if (!range) return alert(I18N[currentLang].needPeriod);
+  if (!range) {
+    alert(I18N[currentLang].needPeriod);
+    return;
+  }
 
   const reportClass = document.getElementById("reportClass").value || "ALL";
-  let grade = "ALL",
-    class_letter = "ALL";
+  let grade = "ALL";
+  let class_letter = "ALL";
 
   if (reportClass !== "ALL") {
     const p = parseClass(reportClass);
@@ -686,10 +689,9 @@ async function updateStats() {
       class_letter,
     });
 
-    // ✅ ЕНДІ dayIssuesBox: кез келген мерзімде, ALL таңдаса да шығады
+    // ✅ БАРЛЫҚ МЕРЗІМГЕ БІРДЕЙ (күн / апта / ай / жыл / барлық сынып)
     renderDayIssuesForRange(report, range);
 
-    // KPI
     const t = sumTotals(report);
 
     document.getElementById("totalLessons").textContent = t.total;
@@ -699,11 +701,13 @@ async function updateStats() {
     document.getElementById("totalExcused").textContent = t.sebep;
     document.getElementById("totalUnexcused").textContent = t.sebsez;
 
-    // TOP
     fillTable("topLateTable", buildTop(report, "keshikti"));
     fillTable("topUnexcusedTable", buildTop(report, "sebsez"));
   } catch (e) {
-    alert((currentLang === "ru" ? "Ошибка отчёта: " : "Отчет қатесі: ") + e.message);
+    alert(
+      (currentLang === "ru" ? "Ошибка отчёта: " : "Есеп қатесі: ") +
+        e.message
+    );
   }
 }
 
@@ -880,6 +884,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (e) {
     alert("API error: " + e.message);
   }
+
 
 
 
