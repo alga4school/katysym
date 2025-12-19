@@ -927,5 +927,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (e) {
     alert("API error: " + e.message);
   }
-}
+
 
