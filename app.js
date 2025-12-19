@@ -690,7 +690,6 @@ function renderDayIssues(report, dateISO){
   box.style.display = "block";
 }
 
-
 async function updateStats() {
   const range = getRangeFromPeriod();
   updateSchoolDaysUI();
@@ -698,22 +697,32 @@ async function updateStats() {
   if (!range) return alert(I18N_MSG[currentLang].needPeriod);
 
   const reportClass = document.getElementById("reportClass").value || "ALL";
-let grade = "ALL", class_letter = "ALL";
 
-if (reportClass !== "ALL") {
-  const p = parseClass(reportClass);
-  grade = String(p.grade);
-  class_letter = String(p.letter);
-}
+  let grade = "ALL";
+  let class_letter = "ALL";
 
-const report = await apiGet("report", {
-  from: range.from,
-  to: range.to,
-  grade,
-  class_letter
-});
+  if (reportClass !== "ALL") {
+    const p = parseClass(reportClass);
+    grade = String(p.grade);
+    class_letter = String(p.letter);
+  }
 
   try {
+    // ✅ ТЕК БІР РЕТ жариялаймыз
+    const report = await apiGet("report", {
+      from: range.from,
+      to: range.to,
+      grade,
+      class_letter
+    });
+
+    renderReport(report);
+
+  } catch (e) {
+    alert("Отчет қатесі: " + e.message);
+  }
+}
+
     
   const report = await apiGet("report", { from: range.from, to: range.to, grade, class_letter });
 
@@ -989,6 +998,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
