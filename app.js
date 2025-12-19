@@ -781,7 +781,6 @@ report.totals = newTotals;
     } else {
       hideDayIssues();
     }
-
     const t = sumTotals(report);
 
     document.getElementById("totalLessons").textContent = t.total;
@@ -995,6 +994,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
