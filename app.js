@@ -761,12 +761,12 @@ function exportCsv(){
 
   apiGet("report", { from: range.from, to: range.to, grade, class_letter })
     .then(report => {
-      const header = ["date","student","class","status_code","status_kk","status_ru"];
-      const rows = [];
 
+      // 1) пробуем детальный экспорт (daily)
+      const headerDaily = ["date","student","class","status_code","status_kk","status_ru"];
+      const rowsDaily = [];
       const byId = new Map((report.students || []).map(s => [String(s.id), s]));
 
-      // ✅ ТЕК таңдалған диапазон күндері
       const wantedDates = (range.from === range.to)
         ? [range.from]
         : eachDateISO(range.from, range.to);
@@ -777,15 +777,14 @@ function exportCsv(){
 
         Object.entries(daily).forEach(([sid, st]) => {
           const s = byId.get(String(sid));
-          if (!s) return; // осы есептің ішіндегі оқушы болмаса, шығармаймыз
+          if (!s) return;
 
-          // ✅ ТЕК таңдалған сынып (егер ALL емес болса)
           if (reportClass !== "ALL") {
             const cls = `${s.grade}${s.class_letter}`.trim();
             if (cls !== reportClass.trim()) return;
           }
 
-          rows.push([
+          rowsDaily.push([
             dateISO,
             s.full_name,
             `${s.grade}${s.class_letter}`,
@@ -796,7 +795,44 @@ function exportCsv(){
         });
       });
 
-      // Excel үшін: BOM + ; (сенде Excel дұрыс оқысын)
+      // 2) если daily пустой — делаем экспорт итогов по ученику (totals)
+      let header = headerDaily;
+      let rows = rowsDaily;
+
+      if (!rowsDaily.length) {
+        const headerTotals = ["student","class","katysty","keshikti","auyrdy","sebep","sebsez","total"];
+        const rowsTotals = [];
+
+        (report.students || []).forEach(s => {
+          const t = report.totals?.[String(s.id)] || {};
+          const katysty  = Number(t.katysty || 0);
+          const keshikti = Number(t.keshikti || 0);
+          const auyrdy   = Number(t.auyrdy || 0);
+          const sebep    = Number(t.sebep || 0);
+          const sebsez   = Number(t.sebsez || 0);
+          const total    = katysty + keshikti + auyrdy + sebep + sebsez;
+
+          if (total === 0) return; // чтобы не выгружать совсем пустых
+
+          rowsTotals.push([
+            s.full_name,
+            `${s.grade}${s.class_letter}`,
+            katysty, keshikti, auyrdy, sebep, sebsez, total
+          ]);
+        });
+
+        if (!rowsTotals.length) {
+          alert(currentLang === "ru"
+            ? "Нет данных для экспорта за выбранный период."
+            : "Таңдалған кезең бойынша экспортқа дерек жоқ.");
+          return;
+        }
+
+        header = headerTotals;
+        rows = rowsTotals;
+      }
+
+      // Excel-friendly CSV
       const sep = ";";
       const csv = "\ufeff" + [header, ...rows]
         .map(r => r.map(x => {
@@ -822,6 +858,7 @@ function exportCsv(){
     })
     .catch(err => alert(err.message));
 }
+
 
 // ============================
 // INIT
@@ -889,6 +926,7 @@ function hideDayIssues(){
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
 }
+
 
 
 
