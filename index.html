@@ -1,344 +1,315 @@
-<!doctype html>
-<html lang="kk">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Мектепішілік сабаққа қатысу жүйесі</title>
+// ============================
+// CONFIG
+// ============================
 
-  <!-- Styles -->
-  <link rel="stylesheet" href="style.css" />
+// ✅ МЫНДА Worker/Proxy URL тұруы керек (мысалы: https://xxxx.workers.dev/?key=...)
+// Егер проксиңыз query параметрлерді өткізіп тұрса — тек доменін қалдырыңыз.
+const WEBAPP_URL =
+  "PASTE_YOUR_WORKER_OR_SCRIPT_URL_HERE"; // <-- міндетті түрде ауыстырыңыз
 
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="favicon_io/apple-touch-icon.png">
-  <meta name="apple-mobile-web-app-title" content="Қатысу журналы">
-  <meta name="theme-color" content="#0b1220">
-</head>
+const API_KEY = "school2025"; // Apps Script-тағы API_KEY-пен бірдей болсын
 
+const STATUS = {
+  katysty: { kk: "Қатысты", ru: "Присутствовал(а)" },
+  keshikti: { kk: "Кешікті", ru: "Опоздал(а)" },
+  auyrdy: { kk: "Ауырды", ru: "Болел(а)" },
+  sebep: { kk: "Себепті", ru: "Отсутствовал(а) по уважительной причине" },
+  sebsez: { kk: "Себепсіз", ru: "Отсутствовал(а) без уважительной причины" },
+};
 
-<body data-lang="kk">
-  <!-- TOP BAR -->
-  <header class="topbar">
-    <div class="brand">
-      <img class="logo-img" src="img/logo.png" alt="School logo" />
-      <div class="brand-text">
-        <div class="school-name" data-i18n="schoolName">
-          Ақтөбе облысының білім басқармасы Алға ауданының білім бөлімі" ММ "№4 Алға орта мектебі" КММ
-        </div>
-      </div>
-    </div>
+const I18N = {
+  kk: {
+    saveOk: "✅ Сақталды",
+    saveErr: "❌ Қате:",
+    loadErr: "Дерек жүктелмеді:",
+    chooseClass: "Сынып таңдаңыз",
+    noStudents: "Оқушылар табылмады",
+  },
+  ru: {
+    saveOk: "✅ Сохранено",
+    saveErr: "❌ Ошибка:",
+    loadErr: "Не удалось загрузить данные:",
+    chooseClass: "Выберите класс",
+    noStudents: "Ученики не найдены",
+  },
+};
 
-    <button id="langToggle" class="lang-toggle" type="button" aria-label="Switch language">
-      <span class="pill">KK / RU</span>
-    </button>
-  </header>
+// ============================
+// STATE
+// ============================
+let currentLang = document.body?.dataset?.lang || "kk";
+let studentsCache = []; // ағымдағы сынып оқушылары
+let selectedClass = "ALL";
 
-  <main class="app">
+// ============================
+// HELPERS
+// ============================
+function $(id) {
+  return document.getElementById(id);
+}
 
-    <!-- HOME -->
-    <section id="viewHome" class="view active">
-      <div class="home-card">
-        <div class="banner">
-          <div class="banner-overlay">
-            <h1 class="banner-title" data-i18n="bannerTitle">Сабаққа қатысу журналы </h1>
-            <p class="banner-text" data-i18n="bannerText">
-              Оқушылардың сабаққа қатысуын есепке алудың автоматтандырылған жүйесі
-            </p>
-          </div>
-        </div>
+function showView(id) {
+  document.querySelectorAll(".view").forEach((v) => v.classList.remove("active"));
+  $(id)?.classList.add("active");
+}
 
-        <div class="home-actions">
-          <button id="goAttendance" class="btn primary" type="button">
-            📚 <span data-i18n="btnAttendance">Сабаққа қатысуды белгілеу</span>
-          </button>
+function setLang(lang) {
+  currentLang = lang;
+  document.body.dataset.lang = lang;
 
-          <button id="goReports" class="btn ghost" type="button">
-            📊 <span data-i18n="btnReports">Есептер мен статистика</span>
-          </button>
-        </div>
-      </div>
-    </section>
+  // data-i18n бар элементтердің текстін ауыстыру (сізде html ішінде мәтіннің көбі already бар,
+  // бірақ болашақта толық i18n жасаймыз десеңіз — осы қалады)
+}
 
-    <!-- ATTENDANCE -->
-    <section id="viewAttendance" class="view">
-      <div class="view-head">
-        <button class="btn link" id="backHome1" type="button">← <span data-i18n="backHome">Басты бет</span></button>
-        <h2 class="view-title">📚 <span data-i18n="attendanceTitle">Күнделікті бақылау / Ежедневный контроль</span></h2>
-      </div>
+function normalizeClassValue(v) {
+  return String(v ?? "")
+    .replace(/\s+/g, "")
+    .toUpperCase();
+}
 
-      <div class="panel">
-        <div class="controls">
-          <label class="field">
-            <span class="label" data-i18n="dateLabel">Күні</span>
-            <input id="attendanceDate" type="date" />
-          </label>
+function splitClass(cls) {
+  // "7А" / "7A" / "0Ә" сияқты
+  const s = normalizeClassValue(cls);
+  if (!s || s === "ALL") return { grade: "ALL", class_letter: "ALL" };
+  const grade = s.match(/^\d+/)?.[0] ?? "";
+  const class_letter = s.slice(grade.length) || "";
+  return { grade, class_letter };
+}
 
-          <label class="field">
-            <span class="label" data-i18n="classLabel">Сынып</span>
-            <select id="classSelect"></select>
-          </label>
+async function apiGet(params) {
+  const url = new URL(WEBAPP_URL);
 
-          <label class="field grow">
-            <span class="label" data-i18n="searchLabel">Іздеу</span>
-            <input id="searchInput" type="text" placeholder="..." />
-          </label>
+  // егер WEBAPP_URL ішінде already ?key=... бар болса — қоспай кетеді
+  if (!url.searchParams.get("key")) url.searchParams.set("key", API_KEY);
 
-          <button id="saveAttendanceBtn" class="btn primary" type="button">
-            💾 <span data-i18n="saveBtn">Сақтау</span>
-          </button>
-        </div>
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== "") url.searchParams.set(k, String(v));
+  });
 
-        <div id="saveStatus" class="save-status" aria-live="polite"></div>
+  const resp = await fetch(url.toString(), { method: "GET" });
+  const text = await resp.text();
 
-        <div class="table-wrap">
-          <table id="attendanceTable" class="table">
-            <thead>
-              <tr>
-                <th style="width:60px;">№</th>
-                <th data-i18n="colStudent">Оқушы</th>
-                <th style="width:110px;" data-i18n="colClass">Сынып</th>
-                <th style="width:320px;" data-i18n="colStatus">Белгі</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
+  let json;
+  try {
+    json = JSON.parse(text);
+  } catch {
+    throw new Error("API JSON емес жауап берді: " + text.slice(0, 120));
+  }
 
-        <div class="hint" data-i18n="attendanceHint">
-          Ескерту: барлығы әдепкіде «Қатысты». Тек қажет болса ғана «Ауырды / Себепті / Себепсіз / Кешікті» таңдаңыз.
-        </div>
-      </div>
-    </section>
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${text.slice(0, 120)}`);
+  if (json && json.ok === false) throw new Error(json.error || "API error");
 
-    <!-- REPORTS -->
-    <section id="viewReports" class="view reports-bg">
-      <div class="view-head reports-head">
-        <button class="btn link light" id="backHome2" type="button">← <span data-i18n="backHome">Басты бет</span></button>
-        <h2 class="view-title light">📊 <span data-i18n="reportsTitle">Есептер мен статистика</span></h2>
-      </div>
+  return json;
+}
 
-      <div class="reports-shell">
-       <div class="reports-card">
+async function apiPost(body) {
+  const url = new URL(WEBAPP_URL);
+  if (!url.searchParams.get("key")) url.searchParams.set("key", API_KEY);
 
-  <!-- 1) FILTERS / BUTTONS (үстінде тұрады) -->
-  <div class="report-controls report-controls-top">
+  const resp = await fetch(url.toString(), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
 
-    <label class="field">
-      <span class="label" data-i18n="periodLabel">Кезең</span>
-      <select id="periodType">
-        <option value="custom" selected data-i18n="pDay">Күні</option>
-     <option value="week" data-i18n="pWeek">Апта</option>
-        <option value="month" data-i18n="pMonth">Ай</option>
-        <option value="quarter" data-i18n="pQuarter">Тоқсан</option>
-        <option value="year" data-i18n="pYear">Жыл</option>
-        <option value="all" data-i18n="pAll">Барлығы</option>
-      </select>
-    </label>
+  const text = await resp.text();
+  let json;
+  try {
+    json = JSON.parse(text);
+  } catch {
+    throw new Error("API JSON емес жауап берді: " + text.slice(0, 120));
+  }
 
-    <div id="customControl" class="subcontrols">
-      <label class="field">
-        <span class="label" data-i18n="fromLabel">Басталу күні</span>
-        <input id="customStart" type="date" />
-      </label>
-      <label class="field">
-        <span class="label" data-i18n="toLabel">Аяқталу күні</span>
-        <input id="customEnd" type="date" />
-      </label>
-    </div>
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${text.slice(0, 120)}`);
+  if (json && json.ok === false) throw new Error(json.error || "API error");
 
-    <div id="monthControl" class="subcontrols" style="display:none">
-      <label class="field">
-        <span class="label" data-i18n="monthLabel">Ай</span>
-        <input id="monthInput" type="month" />
-      </label>
-    </div>
+  return json;
+}
 
-    <div id="quarterControl" class="subcontrols" style="display:none">
-      <label class="field">
-        <span class="label" data-i18n="quarterLabel">Тоқсан</span>
-        <select id="quarterInput">
-          <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
+// ============================
+// UI RENDER
+// ============================
+function renderAttendanceTable(list) {
+  const tbody = document.querySelector("#attendanceTable tbody");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  if (!list.length) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td colspan="4" style="padding:14px;opacity:.8">${I18N[currentLang].noStudents}</td>`;
+    tbody.appendChild(tr);
+    return;
+  }
+
+  list.forEach((s, i) => {
+    const tr = document.createElement("tr");
+    const cls = `${s.grade}${s.class_letter}`;
+
+    const options = Object.keys(STATUS)
+      .map((code) => {
+        const label = STATUS[code][currentLang];
+        const sel = code === "katysty" ? "selected" : "";
+        return `<option value="${code}" ${sel}>${label}</option>`;
+      })
+      .join("");
+
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${escapeHtml(s.full_name)}</td>
+      <td>${escapeHtml(cls)}</td>
+      <td>
+        <select class="statusSelect" data-sid="${escapeHtml(s.id)}">
+          ${options}
         </select>
-      </label>
-      <label class="field">
-        <span class="label" data-i18n="yearLabel">Жыл</span>
-        <input id="quarterYearInput" type="number" min="2000" max="2100" />
-      </label>
-    </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
 
-    <div id="yearControl" class="subcontrols" style="display:none">
-      <label class="field">
-        <span class="label" data-i18n="yearLabel">Жыл</span>
-        <input id="yearInput" type="number" min="2000" max="2100" />
-      </label>
-    </div>
+function escapeHtml(s) {
+  return String(s ?? "").replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  }[c]));
+}
 
-    <label class="field">
-      <span class="label" data-i18n="classLabel">Сынып</span>
-      <select id="reportClass"></select>
-    </label>
+function applySearchFilter() {
+  const q = normalizeClassValue($("searchInput")?.value || "");
+  const filtered = !q
+    ? studentsCache
+    : studentsCache.filter((s) => normalizeClassValue(s.full_name).includes(q));
+  renderAttendanceTable(filtered);
+}
 
-    <div class="report-actions">
-      <button id="updateStatsBtn" class="btn primary" type="button">📈 <span data-i18n="btnUpdate">Көрсету</span></button>
-      <button id="exportCsvBtn" class="btn ghost" type="button">⬇️ <span data-i18n="btnExport">CSV жүктеу</span></button>
-    </div>
+// ============================
+// DATA LOAD
+// ============================
+async function loadClassesToSelects() {
+  const classSelect = $("classSelect");
+  const reportClass = $("reportClass");
 
-  </div>
+  const putOptions = (sel) => {
+    if (!sel) return;
+    sel.innerHTML = "";
+    const optAll = document.createElement("option");
+    optAll.value = "ALL";
+    optAll.textContent = "ALL";
+    sel.appendChild(optAll);
+  };
 
-  <!-- 2) HOLIDAYS (мереке/каникул) — үстінде, фильтрден кейін -->
-  <div class="holidayBox holidayBox-top">
-    <div class="holidayRow">
-      <div class="holidayTitle">
-        <b data-i18n="holidaysLabel">Оқымайтын күндер (мереке/каникул):</b>
-      </div>
+  putOptions(classSelect);
+  putOptions(reportClass);
 
-      <div class="holidayBtns">
-        <button type="button" id="addHolidayBtn" class="btn mini" data-i18n="btnAdd">Қосу</button>
-        <button type="button" id="clearHolidaysBtn" class="btn mini" data-i18n="btnClear">Тазалау</button>
-      </div>
+  const data = await apiGet({ mode: "classes" });
+  const classes = data?.classes || [];
 
-      <div class="holidayDays">
-        <b data-i18n="schoolDaysLabel">Оқу күндерінің саны:</b>
-        <span id="schoolDaysCount">0</span>
-      </div>
-    </div>
+  classes.forEach((cls) => {
+    const o1 = document.createElement("option");
+    o1.value = cls;
+    o1.textContent = cls;
+    classSelect?.appendChild(o1);
 
-    <div id="holidaysList" class="holidayList"></div>
-  </div>
+    const o2 = document.createElement("option");
+    o2.value = cls;
+    o2.textContent = cls;
+    reportClass?.appendChild(o2);
+  });
+}
 
-   <!-- 3) ТІЗІМ: сабақтан қалғандар (таңдалған мерзім бойынша) -->
-         
-  <div id="dayIssuesBox" class="dayIssuesBox" style="display:none;">
-    <h3>📌 <span data-i18n="dayIssuesTitle">Сабақтан қалғандар</span></h3>
+async function loadStudentsForSelectedClass() {
+  const cls = $("classSelect")?.value || "ALL";
+  selectedClass = cls;
 
-    <div class="dayGrid">
-      <div class="mini-card">
-        <h4>⏰ <span data-i18n="late">Кешіккендер</span></h4>
-        <table id="tblLate" class="table mini">
-          <thead><tr><th>№</th><th data-i18n="student">Оқушы</th><th data-i18n="class">Сынып</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
+  if (cls === "ALL") {
+    studentsCache = [];
+    renderAttendanceTable([]);
+    return;
+  }
 
-      <div class="mini-card">
-        <h4>🤒 <span data-i18n="sick">Ауырғандар</span></h4>
-        <table id="tblSick" class="table mini">
-          <thead><tr><th>№</th><th data-i18n="student">Оқушы</th><th data-i18n="class">Сынып</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
+  const { grade, class_letter } = splitClass(cls);
+  const data = await apiGet({ mode: "students", grade, class_letter });
+  studentsCache = data?.students || [];
+  renderAttendanceTable(studentsCache);
+}
 
-      <div class="mini-card">
-        <h4>📄 <span data-i18n="excused">Себепті</span></h4>
-        <table id="tblExcused" class="table mini">
-          <thead><tr><th>№</th><th data-i18n="student">Оқушы</th><th data-i18n="class">Сынып</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
+async function saveAttendance() {
+  const date = $("attendanceDate")?.value;
+  const cls = $("classSelect")?.value;
 
-      <div class="mini-card">
-        <h4>❌ <span data-i18n="unexcused">Себепсіз</span></h4>
-        <table id="tblUnexcused" class="table mini">
-          <thead><tr><th>№</th><th data-i18n="student">Оқушы</th><th data-i18n="class">Сынып</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
+  const statusBox = $("saveStatus");
+  if (statusBox) statusBox.textContent = "";
 
-    <div class="hint" style="margin-top:10px;" data-i18n="dayIssuesNote">
-      Ескерту: “Қатысты” оқушылар көрсетілмейді.
-    </div>
-  </div>
+  if (!date || !cls || cls === "ALL") {
+    if (statusBox) statusBox.textContent = I18N[currentLang].chooseClass;
+    return;
+  }
 
-  <!-- 4) SUMMARY CIRCLES (дөңгелек санақ) -->
-  <div class="summary-circles">
-    <div class="sum-item total">
-      <div class="circle" id="totalLessons">0</div>
-      <div class="label">📊 <span data-i18n="kpiTotal">Барлық белгі</span></div>
-    </div>
+  const { grade, class_letter } = splitClass(cls);
 
-    <div class="sum-item present">
-      <div class="circle" id="totalPresent">0</div>
-      <div class="label">✅ <span data-i18n="kpiPresent">Қатысты</span></div>
-    </div>
+  // барлық select мәндерін жинаймыз
+  const records = Array.from(document.querySelectorAll(".statusSelect")).map((sel) => ({
+    student_id: sel.dataset.sid,
+    status_code: sel.value || "katysty",
+  }));
 
-    <div class="sum-item late">
-      <div class="circle" id="totalLate">0</div>
-      <div class="label">⏰ <span data-i18n="kpiLate">Кешікті</span></div>
-    </div>
+  // ✅ Егер “Қатысты” да көп болса — бәрін жібереміз (кейін backend-та “қайта басуды” тежейміз)
+  const body = {
+    key: API_KEY,
+    date,
+    grade,
+    class_letter,
+    records,
+  };
 
-    <div class="sum-item sick">
-      <div class="circle" id="totalSick">0</div>
-      <div class="label">🤒 <span data-i18n="kpiSick">Ауырды</span></div>
-    </div>
+  const btn = $("saveAttendanceBtn");
+  if (btn) btn.disabled = true;
 
-    <div class="sum-item excused">
-      <div class="circle" id="totalExcused">0</div>
-      <div class="label">📄 <span data-i18n="kpiExcused">Себепті</span></div>
-    </div>
+  try {
+    await apiPost(body);
+    if (statusBox) statusBox.textContent = I18N[currentLang].saveOk;
+  } catch (e) {
+    if (statusBox) statusBox.textContent = `${I18N[currentLang].saveErr} ${e.message}`;
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
 
-    <div class="sum-item unexcused">
-      <div class="circle" id="totalUnexcused">0</div>
-      <div class="label">❌ <span data-i18n="kpiUnexcused">Себепсіз</span></div>
-    </div>
-  </div>
+// ============================
+// INIT
+// ============================
+document.addEventListener("DOMContentLoaded", async () => {
+  // Навигация
+  $("goAttendance")?.addEventListener("click", () => showView("viewAttendance"));
+  $("goReports")?.addEventListener("click", () => showView("viewReports"));
+  $("backHome1")?.addEventListener("click", () => showView("viewHome"));
+  $("backHome2")?.addEventListener("click", () => showView("viewHome"));
 
-  <!-- 5) TOP TABLES -->
- <div class="tables-grid">
-    <div class="mini-card">
-      <h3 class="mini-title" data-i18n="topLate">Көп кешігу (TOP)</h3>
-      <table id="topLateTable" class="table mini">
-        <thead><tr><th>№</th><th data-i18n="colStudent">Оқушы</th><th data-i18n="colClass">Сынып</th><th data-i18n="colCount">Саны</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
+  // Тіл ауыстыру
+  $("langToggle")?.addEventListener("click", () => {
+    setLang(currentLang === "kk" ? "ru" : "kk");
+  });
 
-    <div class="mini-card">
-      <h3 class="mini-title" data-i18n="topUnexcused">Көп себепсіз (TOP)</h3>
-      <table id="topUnexcusedTable" class="table mini">
-        <thead><tr><th>№</th><th data-i18n="colStudent">Оқушы</th><th data-i18n="colClass">Сынып</th><th data-i18n="colCount">Саны</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
+  // Date default
+  const todayISO = new Date().toISOString().slice(0, 10);
+  if ($("attendanceDate")) $("attendanceDate").value = todayISO;
 
-  <div class="hint light" data-i18n="reportHint">
-    Ескерту: Есептер деректері Google Script арқылы алынады.
-  </div>
-  </div>
-         
+  // Search
+  $("searchInput")?.addEventListener("input", applySearchFilter);
 
+  // Save
+  $("saveAttendanceBtn")?.addEventListener("click", saveAttendance);
 
-          <div class="hint light" data-i18n="reportHint">
-            Ескерту: Есептер деректері Google Script арқылы алынады.
-          </div>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <script src="app.js"></script>
-</body>
-</html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  // Load initial
+  try {
+    await loadClassesToSelects();
+    $("classSelect")?.addEventListener("change", loadStudentsForSelectedClass);
+  } catch (e) {
+    const box = $("saveStatus");
+    if (box) box.textContent = `${I18N[currentLang].loadErr} ${e.message}`;
+  }
+});
