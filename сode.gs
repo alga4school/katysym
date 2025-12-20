@@ -1,7 +1,7 @@
 /*************************
  * CONFIG
  *************************/
-const SPREADSHEET_ID = 'ВАШ_ID_ТАБЛИЦЫ'; // ❗ если уже был — вставьте свой
+const SPREADSHEET_ID = "1dHAvNmJXPe1F60wP9ZSw9GhVHM2eMELP90-sWnoSPCE";
 const SHEET_STUDENTS = 'students';
 const SHEET_ATT = 'attendance';
 const API_KEY = 'school2025';
@@ -173,15 +173,42 @@ function getReport_(p){
   }
 
   return { students, daily, totals };
-}
+  // rowsFiltered — фильтрден өткен жазбалар
 
+const list = { late: [], sick: [], excused: [], unexcused: [] };
+
+rowsFiltered.forEach(r => {
+  const st = String(r[idx.status_code] || "");
+
+  const item = {
+    full_name: r[idx.full_name],
+    grade: r[idx.grade],
+    class_letter: r[idx.class_letter],
+  };
+
+  if (st === "keshikti") list.late.push(item);
+  if (st === "auyrdy")   list.sick.push(item);
+  if (st === "sebep")    list.excused.push(item);
+  if (st === "sebsez")   list.unexcused.push(item);
+});
+
+// ✅ return тек функцияның ішінде болуы керек!
+return {
+  totals: totals,
+  topLate: topLate,
+  topUnexcused: topUnexcused,
+  lists: list
+};
+
+}
 
 /*************************
  * HEADER MAP
  *************************/
 function header_(h){
   const m = {};
-  h.forEach((v,i)=>m[String(v).toLowerCase()]=i);
+  h.forEach((v,i)=> m[String(v).toLowerCase()] = i);
+
   return {
     id: m.id,
     full_name: m.full_name,
@@ -192,3 +219,10 @@ function header_(h){
     status_code: m.status_code
   };
 }
+
+
+function testOpen(){
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  Logger.log(ss.getName());
+}
+
