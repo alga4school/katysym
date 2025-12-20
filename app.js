@@ -1,7 +1,7 @@
 // ============================
 // SETTINGS (СІЗДІҢ URL / KEY)
 // ============================
-const WEBAPP_URL = "https://attendance-proxy.workers.dev";
+const WEBAPP_URL = "https://old-recipe-0d35eduqatysu.alga4school.workers.dev/";
 const API_KEY = "school2025";
 
 // ============================
@@ -908,6 +908,7 @@ if (cls !== normalizeClassValue(reportClass)) return;
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
