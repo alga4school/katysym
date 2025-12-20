@@ -204,7 +204,7 @@
               <div class="controls">
                 <div class="field">
                   <label class="label" data-i18n="periodLabel">Период</label>
-                  <select id="periodType">
+                  <select id="rep_periodType">
                     <option value="day" data-i18n="pDay">День</option>
                     <option value="week" data-i18n="pWeek">Неделя</option>
                     <option value="month" data-i18n="pMonth">Месяц</option>
@@ -213,29 +213,29 @@
                     <option value="all" data-i18n="pAll">Все</option>
                   </select>
                 </div>
-                <div class="field" id="monthControl" style="display:none;">
+                <div class="field" id="rep_monthControl" style="display:none;">
                   <label class="label">Месяц</label>
-                  <input type="month" id="monthInput" />
+                  <input type="month" id="rep_monthInput" />
                 </div>
-                <div class="field" id="quarterControl" style="display:none;">
+                <div class="field" id="rep_quarterControl" style="display:none;">
                   <label class="label">Квартал</label>
-                  <select id="quarterInput">
+                  <select id="rep_quarterInput">
                     <option value="1">1-й квартал</option>
                     <option value="2">2-й квартал</option>
                     <option value="3">3-й квартал</option>
                     <option value="4">4-й квартал</option>
                   </select>
-                  <input type="number" id="quarterYearInput" placeholder="Год" />
+                  <input type="number" id="rep_quarterYearInput" placeholder="Год" />
                 </div>
-                <div class="field" id="yearControl" style="display:none;">
+                <div class="field" id="rep_yearControl" style="display:none;">
                   <label class="label">Год</label>
-                  <input type="number" id="yearInput" />
+                  <input type="number" id="rep_yearInput" />
                 </div>
-                <div class="field" id="customControl" style="display:none;">
+                <div class="field" id="rep_customControl" style="display:none;">
                   <label class="label">С</label>
-                  <input type="date" id="customStart" />
+                  <input type="date" id="rep_customStart" />
                   <label class="label">По</label>
-                  <input type="date" id="customEnd" />
+                  <input type="date" id="rep_customEnd" />
                 </div>
                 <div class="field">
                   <label class="label">Класс</label>
@@ -475,6 +475,17 @@ async function apiPost(body) {
 let allStudents = [];
 let statusMap = new Map();
 
+function elActive(id){
+  const active = document.querySelector('.view.active');
+  if (active) {
+    const el = active.querySelector('#' + id);
+    if (el) return el;
+    const el2 = active.querySelector('#rep_' + id);
+    if (el2) return el2;
+  }
+  return document.getElementById(id) || document.getElementById('rep_' + id);
+}
+
 // VIEW SWITCH
 function showView(id){
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
@@ -495,17 +506,32 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (document.getElementById("customEnd")) document.getElementById("customEnd").value = iso;
   if (document.getElementById("yearInput")) document.getElementById("yearInput").value = today.getFullYear();
   if (document.getElementById("quarterYearInput")) document.getElementById("quarterYearInput").value = today.getFullYear();
+  if (document.getElementById("rep_customStart")) document.getElementById("rep_customStart").value = iso;
+  if (document.getElementById("rep_customEnd")) document.getElementById("rep_customEnd").value = iso;
+  if (document.getElementById("rep_yearInput")) document.getElementById("rep_yearInput").value = today.getFullYear();
+  if (document.getElementById("rep_quarterYearInput")) document.getElementById("rep_quarterYearInput").value = today.getFullYear();
 
-  document.getElementById("periodType")?.addEventListener("change", () => {
-    ["monthControl", "quarterControl", "yearControl", "customControl"].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = "none";
+  document.querySelectorAll('#periodType, #rep_periodType').forEach(periodEl => {
+    periodEl?.addEventListener('change', () => {
+      const prefix = periodEl.id.startsWith('rep_') ? 'rep_' : '';
+      ['monthControl', 'quarterControl', 'yearControl', 'customControl'].forEach(id => {
+        const el = document.getElementById(prefix + id);
+        if (el) el.style.display = 'none';
+      });
+      const type = periodEl.value;
+      if (type === 'month') {
+        const el = document.getElementById(prefix + 'monthControl'); if (el) el.style.display = 'flex';
+      }
+      if (type === 'quarter') {
+        const el = document.getElementById(prefix + 'quarterControl'); if (el) el.style.display = 'flex';
+      }
+      if (type === 'year') {
+        const el = document.getElementById(prefix + 'yearControl'); if (el) el.style.display = 'flex';
+      }
+      if (type === 'custom') {
+        const el = document.getElementById(prefix + 'customControl'); if (el) el.style.display = 'flex';
+      }
     });
-    const type = document.getElementById("periodType").value;
-    if (type === "month") document.getElementById("monthControl").style.display = "flex";
-    if (type === "quarter") document.getElementById("quarterControl").style.display = "flex";
-    if (type === "year") document.getElementById("yearControl").style.display = "flex";
-    if (type === "custom") document.getElementById("customControl").style.display = "none";
   });
 
   document.getElementById("goAttendance")?.addEventListener("click", () => showView("viewAttendance"));
@@ -552,13 +578,13 @@ function applyI18n() {
     const key = el.dataset.i18nPlaceholder;
     if (dict[key] != null) el.placeholder = dict[key];
   });
-  const period = document.getElementById("periodType");
-  if (period) {
+  document.querySelectorAll('#periodType, #rep_periodType').forEach(period => {
+    if (!period) return;
     [...period.options].forEach(opt => {
       const key = opt.dataset.i18n;
       if (key && dict[key] != null) opt.textContent = dict[key];
     });
-  }
+  });
   if (window.__classesLoaded) {
     renderClassesTo(document.getElementById("classSelect"), window.__classList, false);
     renderClassesTo(document.getElementById("reportClass"), window.__classList, true);
@@ -718,13 +744,15 @@ async function saveAttendance() {
 
 // PERIOD
 function getRangeFromPeriod() {
-  const type = document.getElementById("periodType").value;
+  const periodEl = elActive('periodType');
+  const type = periodEl ? periodEl.value : 'day';
   const today = new Date();
   const toISO = d => d.toISOString().slice(0,10);
   if (type === "custom") {
-    const s = document.getElementById("customStart").value, e = document.getElementById("customEnd").value;
+    const sEl = elActive('customStart'), eEl = elActive('customEnd');
+    const s = sEl?.value, e = eEl?.value;
     if (!s || !e) return null;
-    return { from:s, to:e };
+    return { from: s, to: e };
   }
   if (type === "week") {
     const end = today, start = new Date();
@@ -732,16 +760,18 @@ function getRangeFromPeriod() {
     return { from:toISO(start), to:toISO(end) };
   }
   if (type === "month") {
-    const [y,m] = document.getElementById("monthInput").value.split("-");
-    return { from:`${y}-${m}-01`, to:toISO(new Date(y,m,0)) };
+    const monthEl = elActive('monthInput');
+    const [y,m] = (monthEl?.value || "").split("-");
+    if (!y || !m) return null;
+    return { from: `${y}-${m}-01`, to: toISO(new Date(y, m, 0)) };
   }
   if (type === "year") {
-    const y = document.getElementById("yearInput").value || today.getFullYear();
+    const y = elActive('yearInput')?.value || today.getFullYear();
     return { from:`${y}-01-01`, to:`${y}-12-31` };
   }
   if (type === "quarter") {
-    const q = Number(document.getElementById("quarterInput").value || 0);
-    const y = Number(document.getElementById("quarterYearInput").value || 2025);
+    const q = Number(elActive('quarterInput')?.value || 0);
+    const y = Number(elActive('quarterYearInput')?.value || 2025);
     const Q = {
       1:{from:`${y}-09-01`,to:`${y}-10-26`},
       2:{from:`${y}-11-01`,to:`${y}-12-28`},
