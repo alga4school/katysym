@@ -242,7 +242,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("langToggle")?.addEventListener("click", () => {
     setLang(currentLang === "kk" ? "ru" : "kk");
   });
-
+ 
   // Date default
   const todayISO = new Date().toISOString().slice(0, 10);
   if ($("attendanceDate")) $("attendanceDate").value = todayISO;
