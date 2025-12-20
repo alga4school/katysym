@@ -1,3 +1,6 @@
+// LANG (global)
+let currentLang = "kk";
+let currentLang = document.body.dataset.lang || "kk";
 let __isSavingAttendance = false;
 // ============================
 // SETTINGS (СІЗДІҢ URL / KEY)
@@ -828,6 +831,10 @@ if (cls !== normalizeClassValue(reportClass)) return;
 // INIT
 // ============================
 document.addEventListener("DOMContentLoaded", async () => {
+  currentLang = document.body?.dataset?.lang || "kk";
+  applyI18n();
+  // қалған код төменде...
+});
   document.getElementById("goAttendance")?.addEventListener("click", () => showView("viewAttendance"));
   document.getElementById("goReports")?.addEventListener("click", () => showView("viewReports"));
   document.getElementById("backHome1")?.addEventListener("click", () => showView("viewHome"));
@@ -885,6 +892,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
