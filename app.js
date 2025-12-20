@@ -1,7 +1,7 @@
 // ============================
 // SETTINGS (СІЗДІҢ URL / KEY)
 // ============================
-const WEBAPP_URL = "https://old-recipe-0d35eduqatysu.alga4school.workers.dev/";
+const WEBAPP_URL = "https://attendance-proxy.workers.dev";
 const API_KEY = "school2025";
 
 // ============================
@@ -212,6 +212,11 @@ async function apiPost(body) {
   if (!data.ok) throw new Error(data.error || "API error");
   return data;
 }
+document.addEventListener("DOMContentLoaded", async () => {
+  currentLang = document.body?.dataset?.lang || "kk";
+  applyI18n();
+  // қалған код
+});
 
 // ============================
 // STATE
@@ -234,12 +239,6 @@ function showView(id){
 }
 
 // ===== I18N =====
-document.addEventListener("DOMContentLoaded", async () => {
-  currentLang = document.body?.dataset?.lang || "kk";
-  applyI18n();
-  // қалған код
-});
-
 function applyI18n() {
   const dict = I18N[currentLang] || I18N.kk;
 
@@ -909,6 +908,7 @@ if (cls !== normalizeClassValue(reportClass)) return;
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
