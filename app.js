@@ -1,7 +1,10 @@
+// LANG (global)
+let currentLang = document.body.dataset.lang || "kk";
+let __isSavingAttendance = false;
 // ============================
 // SETTINGS (СІЗДІҢ URL / KEY)
 // ============================
-const WEBAPP_URL = "https://old-recipe-0d35eduqatysu.alga4school.workers.dev/";
+const WEBAPP_URL = "https://old-recipe-0d35eduqatysu.alga4school.workers.dev/?mode=classes&key=school2025";
 const API_KEY = "school2025";
 
 // ============================
@@ -19,7 +22,6 @@ const EXCEPTIONS = ["auyrdy", "sebep", "sebsez", "keshikti"];
 // ============================
 // I18N
 // ============================
-let currentLang = "kk";
 const I18N = {
   kk: {
     // ===== UI =====
@@ -212,22 +214,12 @@ async function apiPost(body) {
   if (!data.ok) throw new Error(data.error || "API error");
   return data;
 }
-document.addEventListener("DOMContentLoaded", async () => {
-  currentLang = document.body?.dataset?.lang || "kk";
-  applyI18n();
-  // қалған код
-});
 
 // ============================
 // STATE
 // ============================
 let allStudents = [];
-// LANG (global)
 let statusMap = new Map();
-
-// LANG (global)
-let currentLang = document.body.dataset.lang || "kk";
-let __isSavingAttendance = false;
 
 // ============================
 // VIEW SWITCH
@@ -239,6 +231,14 @@ function showView(id){
 }
 
 // ===== I18N =====
+let currentLang = "kk";
+
+document.addEventListener("DOMContentLoaded", async () => {
+  currentLang = document.body?.dataset?.lang || "kk";
+  applyI18n();
+  // қалған код
+});
+
 function applyI18n() {
   const dict = I18N[currentLang] || I18N.kk;
 
@@ -826,6 +826,9 @@ if (cls !== normalizeClassValue(reportClass)) return;
     .catch(err => alert(err.message));
 }
 
+// ✅ LANG (global) - міндетті түрде жоғарыда тұрсын
+let currentLang = "kk";
+
 // ============================
 // INIT
 // ============================
@@ -893,7 +896,7 @@ if (cls !== normalizeClassValue(reportClass)) return;
 
     const st = await apiGet("students");
     allStudents = st.students || [];
-  }
+
     // statusMap бар деп есептейміз
     allStudents.forEach((s) => statusMap.set(s.id, "katysty"));
 
@@ -908,13 +911,6 @@ if (cls !== normalizeClassValue(reportClass)) return;
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
-
-
-
-
-
-
-
 
 
 
