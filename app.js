@@ -1,4 +1,3 @@
-let currentLang = "kk";
 // ============================
 // SETTINGS (СІЗДІҢ URL / KEY)
 // ============================
@@ -20,6 +19,7 @@ const EXCEPTIONS = ["auyrdy", "sebep", "sebsez", "keshikti"];
 // ============================
 // I18N
 // ============================
+let currentLang = "kk";
 const I18N = {
   kk: {
     // ===== UI =====
@@ -909,6 +909,7 @@ if (cls !== normalizeClassValue(reportClass)) return;
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
