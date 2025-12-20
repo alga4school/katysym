@@ -234,8 +234,6 @@ function showView(id){
 }
 
 // ===== I18N =====
-let currentLang = "kk";
-
 document.addEventListener("DOMContentLoaded", async () => {
   currentLang = document.body?.dataset?.lang || "kk";
   applyI18n();
@@ -911,6 +909,7 @@ if (cls !== normalizeClassValue(reportClass)) return;
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
