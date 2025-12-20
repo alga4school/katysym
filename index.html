@@ -1,3 +1,22 @@
+<!doctype html>
+<html lang="kk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Қатысу — Сабаққа қатысу журналы</title>
+    <link rel="manifest" href="/katysym/manifest.json" />
+    <link rel="stylesheet" href="/katysym/style.css" />
+  </head>
+  <body data-lang="kk">
+    <!-- Minimal container. Full UI is rendered by scripts in `app.js` or inline script. -->
+    <div id="app">
+      <main>
+        <h1>Сабаққа қатысу</h1>
+        <p>Осы бет — встраиваемая версия. Установите `WEBAPP_URL` в конфиге.</p>
+      </main>
+    </div>
+
+    <script>
 // ============================
 // CONFIG
 // ============================
@@ -56,19 +75,13 @@ function showView(id) {
 function setLang(lang) {
   currentLang = lang;
   document.body.dataset.lang = lang;
-
-  // data-i18n бар элементтердің текстін ауыстыру (сізде html ішінде мәтіннің көбі already бар,
-  // бірақ болашақта толық i18n жасаймыз десеңіз — осы қалады)
 }
 
 function normalizeClassValue(v) {
-  return String(v ?? "")
-    .replace(/\s+/g, "")
-    .toUpperCase();
+  return String(v ?? "").replace(/\s+/g, "").toUpperCase();
 }
 
 function splitClass(cls) {
-  // "7А" / "7A" / "0Ә" сияқты
   const s = normalizeClassValue(cls);
   if (!s || s === "ALL") return { grade: "ALL", class_letter: "ALL" };
   const grade = s.match(/^\d+/)?.[0] ?? "";
@@ -78,114 +91,50 @@ function splitClass(cls) {
 
 async function apiGet(params) {
   const url = new URL(WEBAPP_URL);
-
-  // егер WEBAPP_URL ішінде already ?key=... бар болса — қоспай кетеді
   if (!url.searchParams.get("key")) url.searchParams.set("key", API_KEY);
-
   Object.entries(params).forEach(([k, v]) => {
     if (v !== undefined && v !== null && v !== "") url.searchParams.set(k, String(v));
   });
-
   const resp = await fetch(url.toString(), { method: "GET" });
   const text = await resp.text();
-
   let json;
-  try {
-    json = JSON.parse(text);
-  } catch {
+  try { json = JSON.parse(text); } catch {
     throw new Error("API JSON емес жауап берді: " + text.slice(0, 120));
   }
-
   if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${text.slice(0, 120)}`);
   if (json && json.ok === false) throw new Error(json.error || "API error");
-
   return json;
 }
 
 async function apiPost(body) {
   const url = new URL(WEBAPP_URL);
   if (!url.searchParams.get("key")) url.searchParams.set("key", API_KEY);
-
   const resp = await fetch(url.toString(), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-
   const text = await resp.text();
   let json;
-  try {
-    json = JSON.parse(text);
-  } catch {
+  try { json = JSON.parse(text); } catch {
     throw new Error("API JSON емес жауап берді: " + text.slice(0, 120));
   }
-
   if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${text.slice(0, 120)}`);
   if (json && json.ok === false) throw new Error(json.error || "API error");
-
   return json;
 }
 
-// ============================
-// UI RENDER
-// ============================
-function renderAttendanceTable(list) {
-  const tbody = document.querySelector("#attendanceTable tbody");
-  if (!tbody) return;
+// minimal init placeholder; full app lives in `app.js`
+document.addEventListener("DOMContentLoaded", () => {
+  // If developer prefers the standalone inline script, the rest of UI functions can be placed here.
+  // Otherwise the project uses `app.js` as the main implementation — include it instead.
+});
+    </script>
 
-  tbody.innerHTML = "";
-
-  if (!list.length) {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td colspan="4" style="padding:14px;opacity:.8">${I18N[currentLang].noStudents}</td>`;
-    tbody.appendChild(tr);
-    return;
-  }
-
-  list.forEach((s, i) => {
-    const tr = document.createElement("tr");
-    const cls = `${s.grade}${s.class_letter}`;
-
-    const options = Object.keys(STATUS)
-      .map((code) => {
-        const label = STATUS[code][currentLang];
-        const sel = code === "katysty" ? "selected" : "";
-        return `<option value="${code}" ${sel}>${label}</option>`;
-      })
-      .join("");
-
-    tr.innerHTML = `
-      <td>${i + 1}</td>
-      <td>${escapeHtml(s.full_name)}</td>
-      <td>${escapeHtml(cls)}</td>
-      <td>
-        <select class="statusSelect" data-sid="${escapeHtml(s.id)}">
-          ${options}
-        </select>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-function escapeHtml(s) {
-  return String(s ?? "").replace(/[&<>"']/g, (c) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;",
-  }[c]));
-}
-
-function applySearchFilter() {
-  const q = normalizeClassValue($("searchInput")?.value || "");
-  const filtered = !q
-    ? studentsCache
-    : studentsCache.filter((s) => normalizeClassValue(s.full_name).includes(q));
-  renderAttendanceTable(filtered);
-}
-
+    <!-- Prefer including `app.js` for the full-featured UI. -->
+    <script src="/katysym/app.js"></script>
+  </body>
+</html>
 // ============================
 // DATA LOAD
 // ============================
