@@ -1,6 +1,4 @@
-// LANG (global)
-let currentLang = document.body.dataset.lang || "kk";
-let __isSavingAttendance = false;
+let currentLang = "kk";
 // ============================
 // SETTINGS (СІЗДІҢ URL / KEY)
 // ============================
@@ -219,7 +217,12 @@ async function apiPost(body) {
 // STATE
 // ============================
 let allStudents = [];
+// LANG (global)
 let statusMap = new Map();
+
+// LANG (global)
+let currentLang = document.body.dataset.lang || "kk";
+let __isSavingAttendance = false;
 
 // ============================
 // VIEW SWITCH
@@ -826,9 +829,6 @@ if (cls !== normalizeClassValue(reportClass)) return;
     .catch(err => alert(err.message));
 }
 
-// ✅ LANG (global) - міндетті түрде жоғарыда тұрсын
-let currentLang = "kk";
-
 // ============================
 // INIT
 // ============================
@@ -911,6 +911,7 @@ let currentLang = "kk";
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
