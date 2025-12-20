@@ -1,0 +1,12 @@
+{
+  "name": "Сабаққа қатысу журналы",
+  "short_name": "Қатысу",
+  "start_url": "/katysym/",
+  "scope": "/katysym/",
+  "display": "standalone",
+  "background_color": "#0b1220",
+  "theme_color": "#0b1220",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" }
+  ]
+}
