@@ -231,13 +231,12 @@ function showView(id){
 }
 
 // ===== I18N =====
-let currentLang = "kk";
 
 document.addEventListener("DOMContentLoaded", async () => {
   currentLang = document.body?.dataset?.lang || "kk";
   applyI18n();
-  // қалған код
-});
+  // қалған код (инициализация продолжается ниже)
+;
 
 function applyI18n() {
   const dict = I18N[currentLang] || I18N.kk;
@@ -826,11 +825,8 @@ if (cls !== normalizeClassValue(reportClass)) return;
     .catch(err => alert(err.message));
 }
 
-// ✅ LANG (global) - міндетті түрде жоғарыда тұрсын
-let currentLang = "kk";
-
 // ============================
-// INIT
+// INIT (runs inside DOMContentLoaded above)
 // ============================
 
   // Навигация
@@ -841,7 +837,7 @@ let currentLang = "kk";
 
   // Тілді ауыстыру
   document.getElementById("langToggle")?.addEventListener("click", () => {
-    setLang( === "kk" ? "ru" : "kk");
+    setLang(currentLang === "kk" ? "ru" : "kk");
   });
 
   // Бүгінгі күнді қою
