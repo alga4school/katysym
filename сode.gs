@@ -172,34 +172,55 @@ function getReport_(p){
     totals[sid][code] = (totals[sid][code] || 0) + 1;
   }
 
-  return { students, daily, totals };
-  // rowsFiltered — фильтрден өткен жазбалар
+  // Дополнительные расчеты для top и lists
+  const rowsFiltered = data.slice(1).filter(r => {
+    let d = r[idx.date];
+    if (d instanceof Date) {
+      d = Utilities.formatDate(d, Session.getScriptTimeZone(), "yyyy-MM-dd");
+    } else {
+      d = String(d || "").slice(0,10);
+    }
+    if (!d) return false;
+    if (from && d < from) return false;
+    if (to && d > to) return false;
+    const rg = normClass(r[idx.grade]);
+    const rl = normClass(r[idx.class_letter]);
+    if (grade !== 'ALL' && rg !== grade) return false;
+    if (letter !== 'ALL' && rl !== letter) return false;
+    const sid = String(r[idx.student_id]);
+    return mapStudents.has(sid);
+  });
 
-const list = { late: [], sick: [], excused: [], unexcused: [] };
+  const list = { late: [], sick: [], excused: [], unexcused: [] };
+  rowsFiltered.forEach(r => {
+    const st = String(r[idx.status_code] || "");
+    const item = {
+      full_name: r[idx.full_name],
+      grade: r[idx.grade],
+      class_letter: r[idx.class_letter],
+    };
+    if (st === "keshikti") list.late.push(item);
+    if (st === "auyrdy")   list.sick.push(item);
+    if (st === "sebep")    list.excused.push(item);
+    if (st === "sebsez")   list.unexcused.push(item);
+  });
 
-rowsFiltered.forEach(r => {
-  const st = String(r[idx.status_code] || "");
+  // Top late and unexcused
+  const topLate = Object.entries(totals).map(([sid, codes]) => ({
+    id: sid,
+    count: codes.keshikti || 0,
+    name: mapStudents.get(sid)?.full_name || '',
+    class: `${mapStudents.get(sid)?.grade || ''}${mapStudents.get(sid)?.class_letter || ''}`
+  })).filter(x => x.count > 4).sort((a,b) => b.count - a.count).slice(0,10);
 
-  const item = {
-    full_name: r[idx.full_name],
-    grade: r[idx.grade],
-    class_letter: r[idx.class_letter],
-  };
+  const topUnexcused = Object.entries(totals).map(([sid, codes]) => ({
+    id: sid,
+    count: codes.sebsez || 0,
+    name: mapStudents.get(sid)?.full_name || '',
+    class: `${mapStudents.get(sid)?.grade || ''}${mapStudents.get(sid)?.class_letter || ''}`
+  })).filter(x => x.count > 4).sort((a,b) => b.count - a.count).slice(0,10);
 
-  if (st === "keshikti") list.late.push(item);
-  if (st === "auyrdy")   list.sick.push(item);
-  if (st === "sebep")    list.excused.push(item);
-  if (st === "sebsez")   list.unexcused.push(item);
-});
-
-// ✅ return тек функцияның ішінде болуы керек!
-return {
-  totals: totals,
-  topLate: topLate,
-  topUnexcused: topUnexcused,
-  lists: list
-};
-
+  return { students, daily, totals, topLate, topUnexcused, lists: list };
 }
 
 /*************************
