@@ -588,6 +588,35 @@ input, select{
 .sum-item.excused .circle{ border-color:#3b82f6; color:#3b82f6; }
 .sum-item.unexcused .circle{ border-color:#ef4444; color:#ef4444; }
 
+.reports-bg {
+  background: #e3f2fd;
+}
+
+@media (max-width: 768px) {
+  .topbar {
+    padding: 8px 12px;
+  }
+  .brand-text {
+    font-size: 14px;
+  }
+  .controls {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .field {
+    width: 100%;
+  }
+  .kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .tables-grid {
+    grid-template-columns: 1fr;
+  }
+  .dayGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 
 
 
