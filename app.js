@@ -881,10 +881,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     applyI18n();
     renderAttendanceTable();
-  } catch (e) {
+    } catch (e) {
     alert("API error: " + e.message);
   }
- }
+}); // ✅ end DOMContentLoaded
+
 
 
 
