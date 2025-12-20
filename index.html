@@ -239,23 +239,23 @@
                 </div>
                 <div class="field">
                   <label class="label">Класс</label>
-                  <select id="classSelect">
+                  <select id="rep_classSelect">
                     <option value="">Выберите класс</option>
                   </select>
                 </div>
                 <div class="field">
                   <label class="label">Дата</label>
-                  <input type="date" id="attendanceDate" />
+                  <input type="date" id="rep_attendanceDate" />
                 </div>
                 <div class="field grow">
                   <label class="label">Поиск</label>
-                  <input type="text" id="searchInput" placeholder="Имя ученика" />
+                  <input type="text" id="rep_searchInput" placeholder="Имя ученика" />
                 </div>
-                <button id="saveAttendanceBtn" class="btn primary">Сохранить</button>
+                <button id="rep_saveAttendanceBtn" class="btn primary">Сохранить</button>
               </div>
-              <div class="save-status" id="saveStatus"></div>
+              <div class="save-status" id="rep_saveStatus"></div>
               <div class="table-wrap">
-                <table class="table" id="attendanceTable">
+                <table class="table" id="rep_attendanceTable">
                   <thead>
                     <tr><th>#</th><th data-i18n="student">Ученик</th><th data-i18n="class">Класс</th><th>Статус</th></tr>
                   </thead>
@@ -509,7 +509,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (document.getElementById("rep_customStart")) document.getElementById("rep_customStart").value = iso;
   if (document.getElementById("rep_customEnd")) document.getElementById("rep_customEnd").value = iso;
   if (document.getElementById("rep_yearInput")) document.getElementById("rep_yearInput").value = today.getFullYear();
-  if (document.getElementById("rep_quarterYearInput")) document.getElementById("rep_quarterYearInput").value = today.getFullYear();
+  if (document.getElementById("rep_attendanceDate")) document.getElementById("rep_attendanceDate").value = iso;
 
   document.querySelectorAll('#periodType, #rep_periodType').forEach(periodEl => {
     periodEl?.addEventListener('change', () => {
@@ -544,20 +544,22 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   document.getElementById("saveAttendanceBtn")?.addEventListener("click", saveAttendance);
+  document.getElementById("rep_saveAttendanceBtn")?.addEventListener("click", saveAttendance);
   document.getElementById("updateStatsBtn")?.addEventListener("click", updateStats);
   document.getElementById("exportCsvBtn")?.addEventListener("click", exportCsv);
   document.getElementById("searchInput")?.addEventListener("input", renderAttendanceTable);
+  document.getElementById("rep_searchInput")?.addEventListener("input", renderAttendanceTable);
 
   try {
     const cls = await apiGet("classes");
     window.__classesLoaded = true;
     window.__classList = cls.classes || [];
-    renderClassesTo(document.getElementById("classSelect"), window.__classList, false);
+    renderClassesTo(document.getElementById("rep_classSelect"), window.__classList, false);
     renderClassesTo(document.getElementById("reportClass"), window.__classList, true);
     const st = await apiGet("students");
     allStudents = st.students || [];
     allStudents.forEach(s => statusMap.set(s.id, "katysty"));
-    document.getElementById("classSelect")?.addEventListener("change", () => {
+    document.getElementById("rep_classSelect")?.addEventListener("change", () => {
       allStudents.forEach(s => statusMap.set(s.id, "katysty"));
       renderAttendanceTable();
     });
@@ -586,7 +588,7 @@ function applyI18n() {
     });
   });
   if (window.__classesLoaded) {
-    renderClassesTo(document.getElementById("classSelect"), window.__classList, false);
+    renderClassesTo(document.getElementById("rep_classSelect"), window.__classList, false);
     renderClassesTo(document.getElementById("reportClass"), window.__classList, true);
   }
   renderAttendanceTable();
@@ -672,10 +674,10 @@ function buildStatusCell(studentId){
 }
 
 function renderAttendanceTable(){
-  const tbody = document.querySelector("#attendanceTable tbody");
+  const tbody = elActive('attendanceTable')?.querySelector('tbody');
   if (!tbody) return;
-  const classSelect = document.getElementById("classSelect");
-  const searchInput = document.getElementById("searchInput");
+  const classSelect = elActive('classSelect');
+  const searchInput = elActive('searchInput');
   const selectedClass = classSelect?.value || "";
   const q = (searchInput?.value || "").trim().toLowerCase();
   let filtered = allStudents.slice();
@@ -704,10 +706,10 @@ function renderAttendanceTable(){
 
 // SAVE
 async function saveAttendance() {
-  const btn = document.getElementById("saveAttendanceBtn");
-  const dateEl = document.getElementById("attendanceDate");
-  const classSelect = document.getElementById("classSelect");
-  const saveStatus = document.getElementById("saveStatus");
+  const btn = elActive('saveAttendanceBtn');
+  const dateEl = elActive('attendanceDate');
+  const classSelect = elActive('classSelect');
+  const saveStatus = elActive('saveStatus');
   const date = dateEl?.value;
   const cls = classSelect?.value;
   if (!date) return alert(I18N[currentLang].needDate);
