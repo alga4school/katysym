@@ -894,7 +894,7 @@ if (cls !== normalizeClassValue(reportClass)) return;
 
     const st = await apiGet("students");
     allStudents = st.students || [];
-
+  }
     // statusMap бар деп есептейміз
     allStudents.forEach((s) => statusMap.set(s.id, "katysty"));
 
@@ -909,6 +909,7 @@ if (cls !== normalizeClassValue(reportClass)) return;
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
