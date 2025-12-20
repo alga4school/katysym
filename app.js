@@ -1,5 +1,4 @@
 // LANG (global)
-let currentLang = "kk";
 let currentLang = document.body.dataset.lang || "kk";
 let __isSavingAttendance = false;
 // ============================
@@ -231,14 +230,14 @@ function showView(id){
   window.scrollTo({top:0, behavior:"smooth"});
 }
 
-// ============================
-// I18N APPLY
-// ============================
-function setLang(lang){
-  currentLang = lang;
-  document.body.dataset.lang = lang;
+// ===== I18N =====
+let currentLang = "kk";
+
+document.addEventListener("DOMContentLoaded", async () => {
+  currentLang = document.body?.dataset?.lang || "kk";
   applyI18n();
-}
+  // қалған код
+});
 
 function applyI18n() {
   const dict = I18N[currentLang] || I18N.kk;
@@ -833,10 +832,6 @@ let currentLang = "kk";
 // ============================
 // INIT
 // ============================
-document.addEventListener("DOMContentLoaded", async () => {
-  // тіл (body дайын болғанда ғана оқимыз)
-  currentLang = document.body?.dataset?.lang || "kk";
-  applyI18n();
 
   // Навигация
   document.getElementById("goAttendance")?.addEventListener("click", () => showView("viewAttendance"));
@@ -846,7 +841,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Тілді ауыстыру
   document.getElementById("langToggle")?.addEventListener("click", () => {
-    setLang(currentLang === "kk" ? "ru" : "kk");
+    setLang( === "kk" ? "ru" : "kk");
   });
 
   // Бүгінгі күнді қою
@@ -916,6 +911,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
