@@ -67,8 +67,8 @@ toLabel: "Аяқталу күні",
     studentNamePlaceholder: "Оқушы аты",
 
     // ===== BUTTONS =====
-  btnUpdate: " Көрсету",
-btnExport: " CSV жүктеу",
+  btnUpdate: " 📈 Көрсету",
+btnExport: "⬇️ CSV жүктеу",
 btnAdd: "➕ Қосу",
 btnClear: "🧹 Тазалау",
 saveBtn: "💾 Сақтау",
@@ -144,7 +144,7 @@ topUnexcused: "🚫 Көп себепсіз (TOP)",
     homeBtn: "←🏠 Главная",
 
     // ===== TITLES =====
-    reportsTitle: "📊Отчёты и статистика",
+    reportsTitle: "Отчёты и статистика",
     dailyControlTitle: "📚 Ежедневный контроль",
 
     // ===== FORMS / LABELS =====
@@ -269,13 +269,13 @@ function saveHolidays(set) {
 }
 
 let HOLIDAYS = loadHolidays();
-
 function renderHolidays() {
   const el = document.getElementById("holidaysList");
   if (!el) return;
 
   if (!HOLIDAYS.size) {
-    el.innerHTML = "<em>Таңдалмаған</em>";
+    const txt = I18N[currentLang]?.noHolidays || (currentLang === "ru" ? "Не выбрано" : "Таңдалмаған");
+    el.innerHTML = `<em data-i18n="noHolidays">${txt}</em>`;
     return;
   }
 
@@ -861,63 +861,15 @@ function renderDayIssuesForRange(report, range) {
 // 6) Update Stats (CLEAN)
 async function updateStats() {
   const range = getRangeFromPeriod();
-  updateSchoolDaysUI();
-  
-function iso(d){ return d.toISOString().slice(0,10); }
-function d0(s){ return new Date(s + "T00:00:00"); }
-
-// inclusive range helper
-function betweenInclusive(dateISO, fromISO, toISO){
-  const t = d0(dateISO).getTime();
-  return t >= d0(fromISO).getTime() && t <= d0(toISO).getTime();
-}
-
-// Ресми каникулдар (2025-2026)
-const OFFICIAL_BREAKS_2025_2026 = [
-  { from:"2025-10-27", to:"2025-11-02" }, // күзгі
-  { from:"2025-12-29", to:"2026-01-07" }, // қысқы
-  { from:"2026-03-19", to:"2026-03-29" }, // көктемгі
-  // 1-сынып қосымша (қаласаң ғана есепке қос)
-  // { from:"2026-02-09", to:"2026-02-15" },
-];
-
-// берілген күн каникулға түссе — true
-function isOfficialBreakDay(dateISO){
-  return OFFICIAL_BREAKS_2025_2026.some(b => betweenInclusive(dateISO, b.from, b.to));
-}
-
-// демалыс күндері (сенбі/жексенбі)
-const WEEKEND_DAYS = new Set([0,6]); // Sun=0, Sat=6
-
-function isWeekend(dateISO){
-  const day = d0(dateISO).getDay();
-  return WEEKEND_DAYS.has(day);
-}
-
   if (!range) {
-   const type = document.getElementById("periodType").value;
-
-let range = { from: null, to: null };
-
-if (type === "day") {
-  const d = document.getElementById("customStart")?.value
-         || document.getElementById("attendanceDate")?.value;
-
-  if (!d) {
-    alert(I18N[currentLang].needDate);
+    alert(I18N[currentLang]?.needPeriod || "Период выберите");
     return;
   }
 
-  range.from = d;
-  range.to = d;
-}
+  updateSchoolDaysUI();
 
-    return;
-  }
-
-  const reportClass = document.getElementById("reportClass").value || "ALL";
-  let grade = "ALL";
-  let class_letter = "ALL";
+  const reportClass = document.getElementById("reportClass")?.value || "ALL";
+  let grade = "ALL", class_letter = "ALL";
 
   if (reportClass !== "ALL") {
     const p = parseClass(reportClass);
@@ -932,6 +884,61 @@ if (type === "day") {
       grade,
       class_letter,
     });
+
+    renderDayIssuesForRange(report, range);
+    renderStats(report, range); // сенде қалай аталады — соны қалдыр
+  } catch (e) {
+    alert("API error: " + e.message);
+  }
+}
+
+ // ===== DATE HELPERS =====
+function iso(d){ return d.toISOString().slice(0,10); }
+function d0(s){ return new Date(s + "T00:00:00"); }
+
+function betweenInclusive(dateISO, fromISO, toISO){
+  const t = d0(dateISO).getTime();
+  return t >= d0(fromISO).getTime() && t <= d0(toISO).getTime();
+}
+
+// ===== OFFICIAL BREAKS 2025-2026 =====
+const OFFICIAL_BREAKS_2025_2026 = [
+  { from:"2025-10-27", to:"2025-11-02" }, // күзгі
+  { from:"2025-12-29", to:"2026-01-07" }, // қысқы
+  { from:"2026-03-19", to:"2026-03-29" }, // көктемгі
+];
+
+function isOfficialBreakDay(dateISO){
+  return OFFICIAL_BREAKS_2025_2026.some(b => betweenInclusive(dateISO, b.from, b.to));
+}
+
+// ===== WEEKEND (5 day school) =====
+const WEEKEND_DAYS = new Set([0, 6]); // Жексенбі + Сенбі
+function isWeekend(dateISO){
+  return WEEKEND_DAYS.has(d0(dateISO).getDay());
+}
+
+// ===== SCHOOL DAYS COUNT =====
+function countSchoolDays(fromISO, toISO){
+  let c = 0;
+  let d = d0(fromISO);
+  const end = d0(toISO);
+
+  while (d <= end){
+    const dayISO = iso(d);
+    if (!isWeekend(dayISO) && !isOfficialBreakDay(dayISO) && !HOLIDAYS.has(dayISO)) c++;
+    d.setDate(d.getDate() + 1);
+  }
+  return c;
+}
+
+function updateSchoolDaysUI(){
+  const el = document.getElementById("schoolDaysCount");
+  if (!el) return;
+  const r = getRangeFromPeriod();
+  el.textContent = r ? countSchoolDays(r.from, r.to) : 0;
+}
+
 
     // ✅ БАРЛЫҚ МЕРЗІМГЕ БІРДЕЙ (күн / апта / ай / жыл / барлық сынып)
     renderDayIssuesForRange(report, range);
@@ -1160,6 +1167,7 @@ document.getElementById("customStart")?.addEventListener("change", () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
