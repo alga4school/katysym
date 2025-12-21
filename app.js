@@ -11,7 +11,6 @@ document.body.dataset.lang = currentLang;
 let __isSavingAttendance = false;
 
   applyI18n();
-}
 
 // ============================
 // SETTINGS (СЕРВЕР / KEY)
@@ -1012,6 +1011,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
