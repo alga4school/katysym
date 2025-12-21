@@ -10,8 +10,6 @@ document.body.dataset.lang = currentLang;
 
 let __isSavingAttendance = false;
 
-  applyI18n();
-
 // ============================
 // SETTINGS (СЕРВЕР / KEY)
 // ============================
@@ -321,9 +319,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.getItem("lang") ||
     document.body?.dataset?.lang ||
     "kk";
-
   document.body.dataset.lang = currentLang;
-
   applyI18n();
 });
 
@@ -341,24 +337,24 @@ function applyI18n() {
     if (dict[key] != null) el.placeholder = dict[key];
   });
 
- document.querySelectorAll("#periodType, #rep_periodType").forEach(period => {
-  if (!period) return;
-  [...period.options].forEach(opt => {
-    const key = opt.dataset.i18n;
-    if (key && dict[key] != null) opt.textContent = dict[key];
+  document.querySelectorAll("#periodType, #rep_periodType").forEach(period => {
+    if (!period) return;
+    [...period.options].forEach(opt => {
+      const key = opt.dataset.i18n;
+      if (key && dict[key] != null) opt.textContent = dict[key];
+    });
   });
-});
-}
 
-
+  // ✅ МЫНАУ — ФУНКЦИЯНЫҢ ІШІНДЕ БОЛУЫ КЕРЕК
   if (window.__classesLoaded) {
     renderClassesTo(document.getElementById("classSelect"), window.__classList, false);
     renderClassesTo(document.getElementById("reportClass"), window.__classList, true);
   }
 
-  renderAttendanceTable();
+  if (typeof renderAttendanceTable === "function") {
+    renderAttendanceTable();
+  }
 }
-
 
 function statusLabel(code){
   const item = STATUS[code] || STATUS.katysty;
@@ -1011,6 +1007,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
