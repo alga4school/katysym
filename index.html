@@ -71,7 +71,7 @@
       <div id="viewAttendance" class="view">
         <div class="reports-bg">
           <div class="reports-head">
-            <h2 class="view-title light" id="attendanceTitle">📚 Күнделікті бақылау / Ежедневный контроль</h2>
+            <h2 class="view-title light" id="attendanceTitle" data-i18n="dailyControlTitle">📚 Күнделікті бақылау</h2>
             <button id="backHome1" class="btn link light" data-i18n="homeBtn">← Басты бет</button>
           </div>
           <div class="reports-shell">
@@ -89,7 +89,7 @@
                 </div>
                 <div class="field grow">
                   <label class="label" data-i18n="search">Іздеу</label>
-                  <input type="text" id="searchInput" placeholder="Оқушы аты" />
+               <input type="text" id="searchInput" data-i18n-placeholder="studentNamePlaceholder" placeholder="Оқушы аты" />
                 </div>
                 <button id="saveAttendanceBtn" class="btn primary">💾 Сақтау</button>
               </div>
@@ -97,7 +97,7 @@
               <div class="table-wrap">
                 <table class="table" id="attendanceTable">
                   <thead>
-                    <tr><th>#</th><th data-i18n="student">Оқушы</th><th data-i18n="class">Сынып</th><th>Белгі</th></tr>
+                    <tr><th>#</th><th data-i18n="student">Оқушы</th><th data-i18n="class">Сынып</th><th data-i18n="mark">Белгі</th>
                   </thead>
                   <tbody></tbody>
                 </table>
