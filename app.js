@@ -618,7 +618,6 @@ async function saveAttendance() {
 
 
 /* ================== ПЕРИОД ================== */
-/* ================== ПЕРИОД ================== */
 function getRangeFromPeriod() {
   const type = document.getElementById("periodType")?.value || "day";
   const today = new Date();
@@ -695,8 +694,6 @@ function getRangeFromPeriod() {
 
   return null;
 }
-
-
 
 function sumTotals(report){
   const totals = { total:0, katysty:0, keshikti:0, sebep:0, sebsez:0, auyrdy:0 };
@@ -1161,6 +1158,7 @@ document.getElementById("customStart")?.addEventListener("change", () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
