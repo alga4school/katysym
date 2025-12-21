@@ -343,13 +343,14 @@ function applyI18n() {
     if (dict[key] != null) el.placeholder = dict[key];
   });
 
-  const period = document.getElementById("periodType");
-  if (period) {
-    [...period.options].forEach(opt => {
-      const key = opt.dataset.i18n;
-      if (key && dict[key] != null) opt.textContent = dict[key];
-    });
-  }
+ document.querySelectorAll("#periodType, #rep_periodType").forEach(period => {
+  if (!period) return;
+  [...period.options].forEach(opt => {
+    const key = opt.dataset.i18n;
+    if (key && dict[key] != null) opt.textContent = dict[key];
+  });
+});
+
 
   // керек болса: renderAttendanceTable();
 }
@@ -1015,6 +1016,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
