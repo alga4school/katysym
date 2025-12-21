@@ -1,10 +1,11 @@
 // LANG (global)
 let currentLang = document.body.dataset.lang || "kk";
 let __isSavingAttendance = false;
+
 // ============================
-// SETTINGS (СІЗДІҢ URL / KEY)
+// SETTINGS (СЕРВЕР / KEY)
 // ============================
-const WEBAPP_URL = "https://old-recipe-0d35eduqatysu.alga4school.workers.dev/?mode=classes&key=school2025";
+const WEBAPP_URL = "https://old-recipe-0d35eduqatysu.alga4school.workers.dev/";
 const API_KEY = "school2025";
 
 // ============================
@@ -983,6 +984,7 @@ if (cls !== normalizeClassValue(reportClass)) return;
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
