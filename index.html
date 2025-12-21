@@ -118,13 +118,15 @@
             <div class="field">
               <label class="label" data-i18n="periodLabel">Кезең</label>
               <select id="periodType">
-                <option value="day" data-i18n="pDay">Күні</option>
-                <option value="week" data-i18n="pWeek">Апта</option>
-                <option value="month" data-i18n="pMonth">Ай</option>
-                <option value="quarter" data-i18n="pQuarter">Тоқсан</option>
-                <option value="year" data-i18n="pYear">Жыл</option>
-                <option value="all" data-i18n="pAll">Барлығы</option>
-              </select>
+  <option value="day" data-i18n="pDay">Күні</option>
+  <option value="week" data-i18n="pWeek">Апта</option>
+  <option value="month" data-i18n="pMonth">Ай</option>
+  <option value="quarter" data-i18n="pQuarter">Тоқсан</option>
+  <option value="year" data-i18n="pYear">Жыл</option>
+  <option value="custom" data-i18n="pCustom">Кезең (қолмен)</option>
+  <option value="all" data-i18n="pAll">Барлығы</option>
+</select>
+
             </div>
             <div class="field" id="monthControl" style="display:none;">
               <label class="label">Ай</label>
@@ -151,14 +153,21 @@
               <input type="date" id="customEnd" />
             </div>
             <div class="field">
-              <label class="label">Сынып</label>
-              <select id="reportClass">
-                <option value="ALL">Барлық сынып</option>
-              </select>
-            </div>
-              <button id="updateStatsBtn" class="btn primary" type="button">📈 <span data-i18n="btnUpdate">Көрсету</span></button>
-              <button id="exportCsvBtn" class="btn ghost" type="button">⬇️ <span data-i18n="btnExport">CSV жүктеу</span></button>
-            </div>
+  <label class="label" data-i18n="classLabel">Сынып</label>
+  <select id="reportClass">
+    <option value="ALL" data-i18n="allClasses">Барлық сынып</option>
+  </select>
+</div>
+
+<div class="report-actions">
+  <button id="updateStatsBtn" class="btn primary" type="button">
+    📈 <span data-i18n="btnUpdate">Көрсету</span>
+  </button>
+  <button id="exportCsvBtn" class="btn ghost" type="button">
+    ⬇️ <span data-i18n="btnExport">CSV жүктеу</span>
+  </button>
+</div>
+
           </div>
           <div class="holidayBox-top">
             <div class="holidayRow">
