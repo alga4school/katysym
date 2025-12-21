@@ -1,45 +1,31 @@
 <!doctype html>
 <html lang="kk">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Қатысу — Сабаққа қатысу журналы</title>
-    <link rel="manifest" href="/katysym/manifest.json" />
-    <link rel="stylesheet" href="/katysym/style.css" />
-  </head>
-  <body data-lang="kk">
-    <!-- Full UI container -->
-    <div id="app">
-      <!-- Topbar -->
-      <div class="topbar">
-        <div class="brand">
-          <div class="logo-img" style="border-radius: 50%; width: 40px; height: 40px; background: #007bff; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">📚</div>
-          <div class="brand-text">
-            <div class="school-name" data-i18n="attendance">"№4 Алға орта мектебі" КММ</div>
-            <div style="font-size: 12px; color: #666;" data-i18n="school"></div>
-          </div>
-       </div>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Қатысу — Сабаққа қатысу журналы</title>
+  <link rel="manifest" href="/katysym/manifest.json">
+  <link rel="stylesheet" href="/katysym/style.css">
+</head>
 
-    <button id="langToggle" class="lang-toggle" type="button" aria-label="Switch language">
-      <span class="pill">KK / RU</span>
-    </button>
-  </header>
+<body data-lang="kk">
 
-  <main class="app">
-      </div>
-  <body>      
-  <!-- ✅ HEADER: логотип + мектеп атауы + тіл батырмасы -->
-<header class="topbar">
-  <div class="brand">
-    <img src="/katysym/img/logo.png" alt="logo" class="brand-logo">
-    <div class="brand-text">
-      <div class="brand-title" data-i18n="schoolName">
-        №4 Алға орта мектебі
+  <!-- ✅ HEADER (БІР РЕТ ҚАНА) -->
+  <header class="topbar">
+    <div class="brand">
+      <img src="/katysym/img/logo.png" alt="logo" class="brand-logo">
+      <div class="brand-text">
+        <div class="brand-title" data-i18n="schoolName">
+          №4 Алға орта мектебі КММ
+        </div>
       </div>
     </div>
+    <button id="langToggle" class="lang-btn">KK / RU</button>
+  </header>
+
+  <!-- ✅ APP CONTENT -->
+  <div id="app">
   </div>
-  <button id="langToggle" class="lang-btn">KK / RU</button>
-</header>
       <!-- Views -->
       <div id="viewHome" class="view active">
         <div class="app">
