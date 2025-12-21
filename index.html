@@ -15,11 +15,17 @@
         <div class="brand">
           <div class="logo-img" style="border-radius: 50%; width: 40px; height: 40px; background: #007bff; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">📚</div>
           <div class="brand-text">
-            <div class="school-name" data-i18n="attendance">Журнал посещаемости</div>
+            <div class="school-name" data-i18n="attendance">Ақтөбе облысының білім басқармасы Алға ауданының білім бөлімі" ММ "№4 Алға орта мектебі" КММ</div>
             <div style="font-size: 12px; color: #666;" data-i18n="school">Мектеп</div>
           </div>
-        </div>
-        <button id="langToggle" class="lang-toggle pill">RU</button>
+       </div>
+
+    <button id="langToggle" class="lang-toggle" type="button" aria-label="Switch language">
+      <span class="pill">KK / RU</span>
+    </button>
+  </header>
+
+  <main class="app">
       </div>
 
       <!-- Views -->
@@ -28,7 +34,7 @@
           <div class="home-card">
             <div class="banner">
               <div class="banner-overlay">
-                <h1 class="banner-title">№4 Орта мектеб / Средняя школа №4</h1>
+                <h1 class="banner-title">Сабаққа қатысу журналы №4</h1>
                 <p class="banner-text" id="homeBannerText">
                   <span data-i18n="attendance">Журнал посещаемости</span><br>
                   <span data-i18n="attendanceDesc">Оқушылардың сабаққа қатысуын есепке алудың автоматтандырылған жүйесі</span>
@@ -150,7 +156,9 @@
                 <option value="ALL">Барлық сынып</option>
               </select>
             </div>
-            <button id="updateStatsBtn" class="btn primary">📈 Көрсету ⬇️ CSV жүктеу</button>
+              <button id="updateStatsBtn" class="btn primary" type="button">📈 <span data-i18n="btnUpdate">Көрсету</span></button>
+              <button id="exportCsvBtn" class="btn ghost" type="button">⬇️ <span data-i18n="btnExport">CSV жүктеу</span></button>
+            </div>
           </div>
           <div class="holidayBox-top">
             <div class="holidayRow">
