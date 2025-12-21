@@ -918,6 +918,12 @@ if (cls !== normalizeClassValue(reportClass)) return;
 // INIT (runs inside DOMContentLoaded above)
 // ============================
 document.addEventListener("DOMContentLoaded", async () => {
+currentLang =
+  localStorage.getItem("lang") ||
+  document.body?.dataset?.lang ||
+  "kk";
+document.body.dataset.lang = currentLang;
+applyI18n();
 
   // Навигация
   document.getElementById("goAttendance")?.addEventListener("click", () => showView("viewAttendance"));
@@ -993,6 +999,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
