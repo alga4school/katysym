@@ -316,7 +316,7 @@ function showView(id){
   document.getElementById(id)?.classList.add("active");
   window.scrollTo({top:0, behavior:"smooth"});
 }
-
+// ===== I18N =====
 document.addEventListener("DOMContentLoaded", async () => {
   currentLang =
     localStorage.getItem("lang") ||
@@ -1015,6 +1015,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
