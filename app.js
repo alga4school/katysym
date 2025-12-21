@@ -924,6 +924,7 @@ if (cls !== normalizeClassValue(reportClass)) return;
 // ============================
 // INIT (runs inside DOMContentLoaded above)
 // ============================
+document.addEventListener("DOMContentLoaded", async () => {
 
   // Навигация
   document.getElementById("goAttendance")?.addEventListener("click", () => showView("viewAttendance"));
@@ -940,96 +941,65 @@ if (cls !== normalizeClassValue(reportClass)) return;
   const today = new Date();
   const iso = today.toISOString().slice(0, 10);
 
-  const elAttendanceDate = document.getElementById("attendanceDate");
-  if (elAttendanceDate) elAttendanceDate.value = iso;
-
-  const elCustomStart = document.getElementById("customStart");
-  if (elCustomStart) elCustomStart.value = iso;
-
-  const elCustomEnd = document.getElementById("customEnd");
-  if (elCustomEnd) elCustomEnd.value = iso;
-
-  const elYearInput = document.getElementById("yearInput");
-  if (elYearInput) elYearInput.value = today.getFullYear();
-
-  const elQuarterYearInput = document.getElementById("quarterYearInput");
-  if (elQuarterYearInput) elQuarterYearInput.value = today.getFullYear();
+  document.getElementById("attendanceDate") && (document.getElementById("attendanceDate").value = iso);
+  document.getElementById("customStart") && (document.getElementById("customStart").value = iso);
+  document.getElementById("customEnd") && (document.getElementById("customEnd").value = iso);
+  document.getElementById("yearInput") && (document.getElementById("yearInput").value = today.getFullYear());
+  document.getElementById("quarterYearInput") && (document.getElementById("quarterYearInput").value = today.getFullYear());
 
   // Период өзгерсе — контролдарды көрсету/жасыру
- document.getElementById("periodType")?.addEventListener("change", () => {
-  const type = document.getElementById("periodType")?.value;
+  document.getElementById("periodType")?.addEventListener("change", () => {
+    const type = document.getElementById("periodType")?.value;
 
-  ["monthControl", "quarterControl", "yearControl", "customControl"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = "none";
+    ["monthControl", "quarterControl", "yearControl", "customControl"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = "none";
+    });
+
+    if (type === "month") document.getElementById("monthControl") && (document.getElementById("monthControl").style.display = "flex");
+    if (type === "quarter") document.getElementById("quarterControl") && (document.getElementById("quarterControl").style.display = "flex");
+    if (type === "year") document.getElementById("yearControl") && (document.getElementById("yearControl").style.display = "flex");
+
+    if (type === "custom" || type === "week") {
+      document.getElementById("customControl") && (document.getElementById("customControl").style.display = "flex");
+    }
   });
 
-  if (type === "month") {
-    document.getElementById("monthControl") && (document.getElementById("monthControl").style.display = "flex");
-  }
+  // Батырмалар
+  document.getElementById("saveAttendanceBtn")?.addEventListener("click", saveAttendance);
+  document.getElementById("updateStatsBtn")?.addEventListener("click", updateStats);
+  document.getElementById("exportCsvBtn")?.addEventListener("click", exportCsv);
+  document.getElementById("searchInput")?.addEventListener("input", renderAttendanceTable);
 
-  if (type === "quarter") {
-    document.getElementById("quarterControl") && (document.getElementById("quarterControl").style.display = "flex");
-  }
+  // ✅ Бет ашылғанда period control-дар бірден дұрыс көрінсін
+  document.getElementById("periodType")?.dispatchEvent(new Event("change"));
+  document.getElementById("rep_periodType")?.dispatchEvent(new Event("change")); // болса ғана
 
-  if (type === "year") {
-    document.getElementById("yearControl") && (document.getElementById("yearControl").style.display = "flex");
-  }
+  // API: сыныптар, оқушылар
+  try {
+    const cls = await apiGet("classes");
+    window.__classesLoaded = true;
+    window.__classList = cls.classes || [];
 
-  // ✅ custom ТЕ ОСЫНДА, week ТЕ ОСЫНДА
-  if (type === "custom" || type === "week") {
-    document.getElementById("customControl") && (document.getElementById("customControl").style.display = "flex");
+    renderClassesTo(document.getElementById("classSelect"), window.__classList, false);
+    renderClassesTo(document.getElementById("reportClass"), window.__classList, true);
+
+    const st = await apiGet("students");
+    allStudents = st.students || [];
+
+    allStudents.forEach(s => statusMap.set(s.id, "katysty"));
+
+    document.getElementById("classSelect")?.addEventListener("change", () => {
+      allStudents.forEach(s => statusMap.set(s.id, "katysty"));
+      renderAttendanceTable();
+    });
+
+    applyI18n();
+    renderAttendanceTable();
+  } catch (e) {
+    alert("API error: " + e.message);
   }
 });
-
-// Батырмалар
-document.getElementById("saveAttendanceBtn")?.addEventListener("click", saveAttendance);
-document.getElementById("updateStatsBtn")?.addEventListener("click", updateStats);
-document.getElementById("exportCsvBtn")?.addEventListener("click", exportCsv);
-document.getElementById("searchInput")?.addEventListener("input", renderAttendanceTable);
-
-// ✅ Бет ашылғанда period control-дар бірден дұрыс көрінсін
-document.getElementById("periodType")?.dispatchEvent(new Event("change"));
-document.getElementById("rep_periodType")?.dispatchEvent(new Event("change")); // егер бар болса
-
-// API: сыныптар, оқушылар
-try {
-  const cls = await apiGet("classes");
-  window.__classesLoaded = true;
-  window.__classList = cls.classes || [];
-
-  renderClassesTo(document.getElementById("classSelect"), window.__classList, false);
-  renderClassesTo(document.getElementById("reportClass"), window.__classList, true);
-
-  const st = await apiGet("students");
-  allStudents = st.students || [];
-
-  allStudents.forEach((s) => statusMap.set(s.id, "katysty"));
-
-  document.getElementById("classSelect")?.addEventListener("change", () => {
-    allStudents.forEach((s) => statusMap.set(s.id, "katysty"));
-    renderAttendanceTable();
-  });
-
-  applyI18n();
-  renderAttendanceTable();
-} catch (e) {
-  alert("API error: " + e.message);
-}
-}); // ✅ end DOMContentLoaded
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
