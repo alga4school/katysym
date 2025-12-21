@@ -332,6 +332,27 @@ function updateSchoolDaysUI() {
   const r = getRangeFromPeriod();
   el.textContent = r ? countSchoolDays(r.from, r.to) : 0;
 }
+function countSchoolDays(fromISO, toISO){
+  let c = 0;
+  let d = d0(fromISO);
+  const end = d0(toISO);
+
+  while (d <= end){
+    const dayISO = iso(d);
+
+    // 1) сенбі/жексенбі емес
+    if (!isWeekend(dayISO)) {
+      // 2) ресми каникул емес
+      if (!isOfficialBreakDay(dayISO)) {
+        // 3) сен қосқан HOLIDAYS (қолмен белгіленген) емес (егер сенде бар болса)
+        if (!HOLIDAYS?.has?.(dayISO)) c++;
+      }
+    }
+
+    d.setDate(d.getDate() + 1);
+  }
+  return c;
+}
 
 // ============================
 // API
@@ -624,9 +645,22 @@ function getRangeFromPeriod() {
     return { from:`${y}-01-01`, to:`${y}-12-31` };
   }
 
-  if (type === "quarter") {
-    const q = Number(quarterInput.value || 0);
-    const y = Number(quarterYearInput.value || 2025);
+if (type === "quarter") {
+  const q = Number(document.getElementById("quarterInput")?.value || 1);
+  range = quarterRange_2025_2026(q);
+}
+function quarterRange_2025_2026(q){
+  // Құжат бойынша: оқу жылы 2025-09-01 басталып, 2026-05-25 аяқталады
+  // Каникулдар: 27.10–02.11, 29.12–07.01, 19.03–29.03
+  // Сондықтан тоқсан шекарасы каникулға тіреліп бөлінеді:
+
+  if (q === 1) return { from:"2025-09-01", to:"2025-10-26" }; // күзгі каникулға дейін
+  if (q === 2) return { from:"2025-11-03", to:"2025-12-28" }; // қысқы каникулға дейін
+  if (q === 3) return { from:"2026-01-08", to:"2026-03-18" }; // көктемгі каникулға дейін
+  if (q === 4) return { from:"2026-03-30", to:"2026-05-25" }; // оқу жылы соңына дейін
+  // fallback
+  return { from:"2025-09-01", to:"2026-05-25" };
+}
 
     const Q = {
       1:{from:`${y}-09-01`,to:`${y}-10-26`},
@@ -813,9 +847,56 @@ function renderDayIssuesForRange(report, range) {
 async function updateStats() {
   const range = getRangeFromPeriod();
   updateSchoolDaysUI();
+  
+function iso(d){ return d.toISOString().slice(0,10); }
+function d0(s){ return new Date(s + "T00:00:00"); }
+
+// inclusive range helper
+function betweenInclusive(dateISO, fromISO, toISO){
+  const t = d0(dateISO).getTime();
+  return t >= d0(fromISO).getTime() && t <= d0(toISO).getTime();
+}
+
+// Ресми каникулдар (2025-2026)
+const OFFICIAL_BREAKS_2025_2026 = [
+  { from:"2025-10-27", to:"2025-11-02" }, // күзгі
+  { from:"2025-12-29", to:"2026-01-07" }, // қысқы
+  { from:"2026-03-19", to:"2026-03-29" }, // көктемгі
+  // 1-сынып қосымша (қаласаң ғана есепке қос)
+  // { from:"2026-02-09", to:"2026-02-15" },
+];
+
+// берілген күн каникулға түссе — true
+function isOfficialBreakDay(dateISO){
+  return OFFICIAL_BREAKS_2025_2026.some(b => betweenInclusive(dateISO, b.from, b.to));
+}
+
+// демалыс күндері (сенбі/жексенбі)
+const WEEKEND_DAYS = new Set([0,6]); // Sun=0, Sat=6
+
+function isWeekend(dateISO){
+  const day = d0(dateISO).getDay();
+  return WEEKEND_DAYS.has(day);
+}
 
   if (!range) {
-    alert(I18N[currentLang].needPeriod);
+   const type = document.getElementById("periodType").value;
+
+let range = { from: null, to: null };
+
+if (type === "day") {
+  const d = document.getElementById("customStart")?.value
+         || document.getElementById("attendanceDate")?.value;
+
+  if (!d) {
+    alert(I18N[currentLang].needDate);
+    return;
+  }
+
+  range.from = d;
+  range.to = d;
+}
+
     return;
   }
 
@@ -1023,7 +1104,6 @@ document.getElementById("periodType")?.addEventListener("change", () => {
   }
 });
 
-
   // Батырмалар
 document.getElementById("customStart")?.addEventListener("change", () => {
   const type = document.getElementById("periodType")?.value;
@@ -1065,6 +1145,7 @@ document.getElementById("customStart")?.addEventListener("change", () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
