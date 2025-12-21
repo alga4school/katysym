@@ -330,33 +330,6 @@ function countSchoolDays(from, to) {
   return c;
 }
 
-function updateSchoolDaysUI() {
-  const el = document.getElementById("schoolDaysCount");
-  const r = getRangeFromPeriod();
-  el.textContent = r ? countSchoolDays(r.from, r.to) : 0;
-}
-function countSchoolDays(fromISO, toISO){
-  let c = 0;
-  let d = d0(fromISO);
-  const end = d0(toISO);
-
-  while (d <= end){
-    const dayISO = iso(d);
-
-    // 1) сенбі/жексенбі емес
-    if (!isWeekend(dayISO)) {
-      // 2) ресми каникул емес
-      if (!isOfficialBreakDay(dayISO)) {
-        // 3) сен қосқан HOLIDAYS (қолмен белгіленген) емес (егер сенде бар болса)
-        if (!HOLIDAYS?.has?.(dayISO)) c++;
-      }
-    }
-
-    d.setDate(d.getDate() + 1);
-  }
-  return c;
-}
-
 // ============================
 // API
 // ============================
@@ -1168,6 +1141,7 @@ document.getElementById("customStart")?.addEventListener("change", () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
