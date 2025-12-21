@@ -956,22 +956,32 @@ if (cls !== normalizeClassValue(reportClass)) return;
   if (elQuarterYearInput) elQuarterYearInput.value = today.getFullYear();
 
   // Период өзгерсе — контролдарды көрсету/жасыру
-  document.getElementById("periodType")?.addEventListener("change", () => {
-    const type = document.getElementById("periodType")?.value;
+ document.getElementById("periodType")?.addEventListener("change", () => {
+  const type = document.getElementById("periodType")?.value;
 
-    ["monthControl", "quarterControl", "yearControl", "customControl"].forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = "none";
-    });
-
-    if (type === "month") document.getElementById("monthControl") && (document.getElementById("monthControl").style.display = "flex");
-    if (type === "quarter") document.getElementById("quarterControl") && (document.getElementById("quarterControl").style.display = "flex");
-    if (type === "year") document.getElementById("yearControl") && (document.getElementById("yearControl").style.display = "flex");
-    if (type === "custom") document.getElementById("customControl") && (document.getElementById("customControl").style.display = "flex");
-    if (type === "custom" || type === "week") {
-      document.getElementById("customControl") && (document.getElementById("customControl").style.display = "flex");
-}
+  ["monthControl", "quarterControl", "yearControl", "customControl"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = "none";
   });
+
+  if (type === "month") {
+    document.getElementById("monthControl") && (document.getElementById("monthControl").style.display = "flex");
+  }
+
+  if (type === "quarter") {
+    document.getElementById("quarterControl") && (document.getElementById("quarterControl").style.display = "flex");
+  }
+
+  if (type === "year") {
+    document.getElementById("yearControl") && (document.getElementById("yearControl").style.display = "flex");
+  }
+
+  // ✅ custom ТЕ ОСЫНДА, week ТЕ ОСЫНДА
+  if (type === "custom" || type === "week") {
+    document.getElementById("customControl") && (document.getElementById("customControl").style.display = "flex");
+  }
+});
+
 // Батырмалар
 document.getElementById("saveAttendanceBtn")?.addEventListener("click", saveAttendance);
 document.getElementById("updateStatsBtn")?.addEventListener("click", updateStats);
@@ -1007,6 +1017,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
