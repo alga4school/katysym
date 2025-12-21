@@ -15,8 +15,8 @@
     <div class="brand">
       <img src="/katysym/img/logo.png" alt="logo" class="brand-logo">
       <div class="brand-text">
-        <div class="brand-title" data-i18n="schoolName">
-          №4 Алға орта мектебі КММ
+    <div class="brand-title" data-i18n="schoolName"></div>
+        
         </div>
       </div>
     </div>
@@ -89,7 +89,10 @@
                   <label class="label" data-i18n="search">Іздеу</label>
                <input type="text" id="searchInput" data-i18n-placeholder="studentNamePlaceholder" placeholder="Оқушы аты" />
                 </div>
-                <button id="saveAttendanceBtn" class="btn primary">💾 Сақтау</button>
+               <button id="saveAttendanceBtn" class="btn primary">
+  💾 <span data-i18n="saveBtn">Сақтау</span>
+</button>
+
               </div>
               <div class="save-status" id="saveStatus"></div>
               <div class="table-wrap">
@@ -109,8 +112,8 @@
       <div id="viewReports" class="view">
         <div class="panel">
           <div class="view-head">
-            <h2 class="view-title">📊 Есептер мен статистика</h2>
-            <button id="backHome2" class="btn link">← Басты бет</button>
+          <h2 class="view-title">📊 <span data-i18n="reportsTitle">Есептер мен статистика</span></h2>
+<button id="backHome2" class="btn link" data-i18n="homeBtn">← Басты бет</button>
           </div>
           <div class="controls">
             <div class="field">
