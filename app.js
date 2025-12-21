@@ -1,6 +1,25 @@
+// ============================
 // LANG (global)
-let currentLang = document.body.dataset.lang || "kk";
+// ============================
+let currentLang =
+  localStorage.getItem("lang") ||
+  document.body.dataset.lang ||
+  "kk";
+
+document.body.dataset.lang = currentLang;
+
 let __isSavingAttendance = false;
+
+// ============================
+// LANG FUNCTIONS
+// ============================
+function setLang(lang) {
+  currentLang = (lang === "ru") ? "ru" : "kk";
+  document.body.dataset.lang = currentLang;
+  localStorage.setItem("lang", currentLang);
+
+  applyI18n();
+}
 
 // ============================
 // SETTINGS (СЕРВЕР / KEY)
@@ -984,6 +1003,7 @@ if (cls !== normalizeClassValue(reportClass)) return;
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
