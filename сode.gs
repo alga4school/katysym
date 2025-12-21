@@ -246,4 +246,3 @@ function testOpen(){
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   Logger.log(ss.getName());
 }
-
