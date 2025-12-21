@@ -31,6 +31,8 @@ const EXCEPTIONS = ["auyrdy", "sebep", "sebsez", "keshikti"];
 // ============================
 // I18N
 // ============================
+let currentLang = document.body.dataset.lang || "kk";
+
 const I18N = {
   kk: {
     // ===== UI =====
@@ -1000,6 +1002,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
