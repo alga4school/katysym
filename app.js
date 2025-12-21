@@ -35,6 +35,7 @@ const EXCEPTIONS = ["auyrdy", "sebep", "sebsez", "keshikti"];
 const I18N = {
   kk: {
     // ===== UI =====
+    schoolName: "№4 Алға орта мектебі" КММ',
     backHome: "Басты бет",
     reportsTitle: "Есептер мен статистика",
     dailyControlTitle: "📚 Күнделікті бақылау",
@@ -108,6 +109,7 @@ const I18N = {
 
   ru: {
     // ===== UI =====
+    schoolName: 'КГУ "Алгинская средняя школа №4"',
     backHome: "Главная",
     reportsTitle: "Отчеты и статистика",
     dailyControlTitle: "📚 Ежедневный контроль",
@@ -998,6 +1000,7 @@ applyI18n();
     alert("API error: " + e.message);
   }
 });
+
 
 
 
