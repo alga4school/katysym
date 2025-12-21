@@ -295,6 +295,7 @@ function renderHolidays() {
   });
 }
 
+
 function initHolidayUI() {
   document.getElementById("addHolidayBtn").onclick = () => {
     const d = document.getElementById("holidayPick").value;
@@ -1167,6 +1168,7 @@ document.getElementById("customStart")?.addEventListener("change", () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
