@@ -47,6 +47,7 @@ const I18N = {
     // ===== UI =====
     backHome: "Басты бет",
     reportsTitle: "Есептер мен статистика",
+    dailyControlTitle: "📚 Күнделікті бақылау",
 
     periodLabel: "Кезең",
     pDay: "Күні",
@@ -55,7 +56,7 @@ const I18N = {
     pQuarter: "Тоқсан",
     pYear: "Жыл",
     pAll: "Барлығы",
-
+    
     btnUpdate: "Көрсету",
     btnExport: "CSV жүктеу",
 
@@ -94,7 +95,9 @@ const I18N = {
     save: "Сақтау",
     note: "Ескерту",
     select: "Таңдаңыз",
-    
+    studentNamePlaceholder: "Оқушы аты",
+    mark: "Белгі",
+
     // ===== MAIN PAGE =====
     attendance: "Журнал посещаемости",
     attendanceDesc: "Оқушылардың сабаққа қатысуын есепке алудың автоматтандырылған жүйесі",
@@ -117,6 +120,7 @@ const I18N = {
     // ===== UI =====
     backHome: "Главная",
     reportsTitle: "Отчеты и статистика",
+    dailyControlTitle: "📚 Ежедневный контроль",
 
     periodLabel: "Период",
     pDay: "День",
@@ -138,7 +142,8 @@ const I18N = {
     student:"Ученик",
     class:"Класс",
     dayIssuesNote:"Примечание: “Присутствовал(а)” не показывается.",
-
+studentNamePlaceholder: "Имя ученика",
+mark: "Отметка",
     // ===== HOLIDAYS =====
     holidaysLabel: "Неучебные дни (праздники/каникулы):",
     btnAdd: "Добавить",
@@ -324,10 +329,11 @@ function applyI18n() {
     if (dict[key] != null) el.textContent = dict[key];
   });
 
-  document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
-    const key = el.dataset.i18nPlaceholder;
-    if (dict[key] != null) el.placeholder = dict[key];
-  });
+ document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+  const key = el.dataset.i18nPlaceholder;
+  if (dict[key] != null) el.placeholder = dict[key];
+});
+
 
   const period = document.getElementById("periodType");
   if (period) {
@@ -1007,6 +1013,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
