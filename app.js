@@ -35,7 +35,7 @@ const EXCEPTIONS = ["auyrdy", "sebep", "sebsez", "keshikti"];
 const I18N = {
   kk: {
     // ===== UI =====
-    schoolName: "№4 Алға орта мектебі" КММ',
+    schoolName: "",
     backHome: "Басты бет",
     reportsTitle: "Есептер мен статистика",
     dailyControlTitle: "📚 Күнделікті бақылау",
@@ -1000,6 +1000,7 @@ applyI18n();
     alert("API error: " + e.message);
   }
 });
+
 
 
 
