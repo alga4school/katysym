@@ -326,7 +326,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.body.dataset.lang = currentLang;
 
   applyI18n();
-  // қалған код...
 });
 
 // ===== I18N =====
@@ -350,9 +349,6 @@ function applyI18n() {
     if (key && dict[key] != null) opt.textContent = dict[key];
   });
 });
-
-
-  // керек болса: renderAttendanceTable();
 }
 
 
@@ -1016,6 +1012,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
