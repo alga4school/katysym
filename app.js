@@ -1027,8 +1027,13 @@ applyI18n();
   }
 });
 
-
   // Батырмалар
+document.getElementById("customStart")?.addEventListener("change", () => {
+  const type = document.getElementById("periodType")?.value;
+  if (type === "day") {
+    document.getElementById("customEnd").value = document.getElementById("customStart").value;
+  }
+});
   document.getElementById("saveAttendanceBtn")?.addEventListener("click", saveAttendance);
   document.getElementById("updateStatsBtn")?.addEventListener("click", updateStats);
   document.getElementById("exportCsvBtn")?.addEventListener("click", exportCsv);
@@ -1063,6 +1068,7 @@ applyI18n();
     alert("API error: " + e.message);
   }
 });
+
 
 
 
