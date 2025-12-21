@@ -10,14 +10,6 @@ document.body.dataset.lang = currentLang;
 
 let __isSavingAttendance = false;
 
-// ============================
-// LANG FUNCTIONS
-// ============================
-function setLang(lang) {
-  currentLang = (lang === "ru") ? "ru" : "kk";
-  document.body.dataset.lang = currentLang;
-  localStorage.setItem("lang", currentLang);
-
   applyI18n();
 }
 
@@ -189,6 +181,18 @@ mark: "Отметка",
   }
 };
 
+// ============================
+// LANG FUNCTIONS
+// ============================
+function setLang(lang) {
+  currentLang = (lang === "ru") ? "ru" : "kk";
+  document.body.dataset.lang = currentLang;
+  localStorage.setItem("lang", currentLang);
+
+  // ✅ Қорғаныс: applyI18n бар болса ғана шақыр
+  if (typeof applyI18n === "function") applyI18n();
+}
+
 /* ================== НАСТРОЙКИ ================== */
 const WEEKEND_DAYS = new Set([5, 6]); // Пятница + Суббота
 const HOLIDAYS_KEY = "katysym_holidays_v1";
@@ -313,14 +317,19 @@ function showView(id){
   window.scrollTo({top:0, behavior:"smooth"});
 }
 
-// ===== I18N =====
-
 document.addEventListener("DOMContentLoaded", async () => {
-  currentLang = document.body?.dataset?.lang || "kk";
-  applyI18n();
-  // қалған код (инициализация продолжается ниже)
-;
+  currentLang =
+    localStorage.getItem("lang") ||
+    document.body?.dataset?.lang ||
+    "kk";
 
+  document.body.dataset.lang = currentLang;
+
+  applyI18n();
+  // қалған код...
+});
+
+// ===== I18N =====
 function applyI18n() {
   const dict = I18N[currentLang] || I18N.kk;
 
@@ -329,11 +338,10 @@ function applyI18n() {
     if (dict[key] != null) el.textContent = dict[key];
   });
 
- document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
-  const key = el.dataset.i18nPlaceholder;
-  if (dict[key] != null) el.placeholder = dict[key];
-});
-
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+    const key = el.dataset.i18nPlaceholder;
+    if (dict[key] != null) el.placeholder = dict[key];
+  });
 
   const period = document.getElementById("periodType");
   if (period) {
@@ -343,19 +351,13 @@ function applyI18n() {
     });
   }
 
+  // керек болса: renderAttendanceTable();
+}
+
+
   if (window.__classesLoaded) {
     renderClassesTo(document.getElementById("classSelect"), window.__classList, false);
     renderClassesTo(document.getElementById("reportClass"), window.__classList, true);
-  }
-
-  // Update attendance page title
-  const attendanceTitle = document.getElementById("attendanceTitle");
-  if (attendanceTitle) {
-    if (currentLang === "ru") {
-      attendanceTitle.textContent = "📚 Ежедневный контроль / Daily Control";
-    } else {
-      attendanceTitle.textContent = "📚 Күнделікті бақылау / Ежедневный контроль";
-    }
   }
 
   renderAttendanceTable();
@@ -1013,6 +1015,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
