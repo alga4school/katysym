@@ -41,7 +41,7 @@ const I18N = {
     homeBtn: "←🏠 Басты бет",
 
     // ===== TITLES =====
-    reportsTitle: "📊Есептер мен статистика",
+    reportsTitle: "Есептер мен статистика",
     dailyControlTitle: "📚Күнделікті бақылау",
 
     // ===== FORMS / LABELS =====
@@ -58,7 +58,8 @@ const I18N = {
     search: "Іздеу",
     chooseClass: "Сыныпты таңдаңыз",
     allClasses: "Барлық сынып",
-
+fromLabel: "Басталу күні",
+toLabel: "Аяқталу күні",
     student: "Оқушы",
     mark: "Белгі",
     colCount: "Саны",
@@ -66,8 +67,8 @@ const I18N = {
     studentNamePlaceholder: "Оқушы аты",
 
     // ===== BUTTONS =====
-  btnUpdate: "📈 Көрсету",
-btnExport: "⬇️ CSV жүктеу",
+  btnUpdate: " Көрсету",
+btnExport: " CSV жүктеу",
 btnAdd: "➕ Қосу",
 btnClear: "🧹 Тазалау",
 saveBtn: "💾 Сақтау",
@@ -160,7 +161,8 @@ topUnexcused: "🚫 Көп себепсіз (TOP)",
     search: "Поиск",
     chooseClass: "Выберите класс",
     allClasses: "Все классы",
-
+fromLabel: "Дата начала",
+toLabel: "Дата окончания",
     student: "Ученик",
     mark: "Отметка",
     colCount: "Кол-во",
@@ -1158,6 +1160,7 @@ document.getElementById("customStart")?.addEventListener("change", () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
