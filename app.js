@@ -968,41 +968,46 @@ if (cls !== normalizeClassValue(reportClass)) return;
     if (type === "quarter") document.getElementById("quarterControl") && (document.getElementById("quarterControl").style.display = "flex");
     if (type === "year") document.getElementById("yearControl") && (document.getElementById("yearControl").style.display = "flex");
     if (type === "custom") document.getElementById("customControl") && (document.getElementById("customControl").style.display = "flex");
-    if (type === "week") document.getElementById("customControl") && (document.getElementById("customControl").style.display = "none");
+    if (type === "custom" || type === "week") {
+      document.getElementById("customControl") && (document.getElementById("customControl").style.display = "flex");
+}
+  });
+// Батырмалар
+document.getElementById("saveAttendanceBtn")?.addEventListener("click", saveAttendance);
+document.getElementById("updateStatsBtn")?.addEventListener("click", updateStats);
+document.getElementById("exportCsvBtn")?.addEventListener("click", exportCsv);
+document.getElementById("searchInput")?.addEventListener("input", renderAttendanceTable);
+
+// ✅ Бет ашылғанда period control-дар бірден дұрыс көрінсін
+document.getElementById("periodType")?.dispatchEvent(new Event("change"));
+document.getElementById("rep_periodType")?.dispatchEvent(new Event("change")); // егер бар болса
+
+// API: сыныптар, оқушылар
+try {
+  const cls = await apiGet("classes");
+  window.__classesLoaded = true;
+  window.__classList = cls.classes || [];
+
+  renderClassesTo(document.getElementById("classSelect"), window.__classList, false);
+  renderClassesTo(document.getElementById("reportClass"), window.__classList, true);
+
+  const st = await apiGet("students");
+  allStudents = st.students || [];
+
+  allStudents.forEach((s) => statusMap.set(s.id, "katysty"));
+
+  document.getElementById("classSelect")?.addEventListener("change", () => {
+    allStudents.forEach((s) => statusMap.set(s.id, "katysty"));
+    renderAttendanceTable();
   });
 
-  // Батырмалар
-  document.getElementById("saveAttendanceBtn")?.addEventListener("click", saveAttendance);
-  document.getElementById("updateStatsBtn")?.addEventListener("click", updateStats);
-  document.getElementById("exportCsvBtn")?.addEventListener("click", exportCsv);
-  document.getElementById("searchInput")?.addEventListener("input", renderAttendanceTable);
-
-  // API: сыныптар, оқушылар
-  try {
-    const cls = await apiGet("classes");
-    window.__classesLoaded = true;
-    window.__classList = cls.classes || [];
-
-    renderClassesTo(document.getElementById("classSelect"), window.__classList, false);
-    renderClassesTo(document.getElementById("reportClass"), window.__classList, true);
-
-    const st = await apiGet("students");
-    allStudents = st.students || [];
-
-    // statusMap бар деп есептейміз
-    allStudents.forEach((s) => statusMap.set(s.id, "katysty"));
-
-    document.getElementById("classSelect")?.addEventListener("change", () => {
-      allStudents.forEach((s) => statusMap.set(s.id, "katysty"));
-      renderAttendanceTable();
-    });
-
-    applyI18n();
-    renderAttendanceTable();
-  } catch (e) {
-    alert("API error: " + e.message);
-  }
+  applyI18n();
+  renderAttendanceTable();
+} catch (e) {
+  alert("API error: " + e.message);
+}
 }); // ✅ end DOMContentLoaded
+
 
 
 
