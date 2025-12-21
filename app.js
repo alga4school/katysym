@@ -618,68 +618,84 @@ async function saveAttendance() {
 
 
 /* ================== ПЕРИОД ================== */
+/* ================== ПЕРИОД ================== */
 function getRangeFromPeriod() {
-  const type = document.getElementById("periodType").value;
+  const type = document.getElementById("periodType")?.value || "day";
   const today = new Date();
-  const toISO = d => d.toISOString().slice(0,10);
+  const toISO = d => d.toISOString().slice(0, 10);
 
-  if (type === "custom") {
-    const s = customStart.value, e = customEnd.value;
-    if (!s || !e) return null;
-    return { from:s, to:e };
+  const sEl = document.getElementById("customStart");
+  const eEl = document.getElementById("customEnd");
+  const monthEl = document.getElementById("monthInput");
+  const yearEl = document.getElementById("yearInput");
+  const qEl = document.getElementById("quarterInput");
+  const qYearEl = document.getElementById("quarterYearInput");
+
+  // ✅ DAY: бір күн
+  if (type === "day") {
+    const d = sEl?.value || document.getElementById("rep_attendanceDate")?.value || "";
+    if (!d) return null;
+    if (eEl) eEl.value = d;
+    return { from: d, to: d };
   }
 
+  // ✅ WEEK: соңғы 7 күн (бүгінді қоса)
   if (type === "week") {
-    const end = today, start = new Date();
+    const end = today;
+    const start = new Date();
     start.setDate(start.getDate() - 6);
-    return { from:toISO(start), to:toISO(end) };
+    return { from: toISO(start), to: toISO(end) };
   }
 
+  // ✅ MONTH
   if (type === "month") {
-    const [y,m] = monthInput.value.split("-");
-    return { from:`${y}-${m}-01`, to:toISO(new Date(y,m,0)) };
+    const val = monthEl?.value || "";
+    const [y, m] = val.split("-");
+    if (!y || !m) return null;
+    const last = new Date(Number(y), Number(m), 0); // last day of month
+    return { from: `${y}-${m}-01`, to: toISO(last) };
   }
 
+  // ✅ YEAR
   if (type === "year") {
-    const y = quarterYearInput.value || today.getFullYear();
-    return { from:`${y}-01-01`, to:`${y}-12-31` };
+    const y = Number(yearEl?.value || today.getFullYear());
+    return { from: `${y}-01-01`, to: `${y}-12-31` };
   }
 
-if (type === "quarter") {
-  const q = Number(document.getElementById("quarterInput")?.value || 1);
-  range = quarterRange_2025_2026(q);
-}
-function quarterRange_2025_2026(q){
-  // Құжат бойынша: оқу жылы 2025-09-01 басталып, 2026-05-25 аяқталады
-  // Каникулдар: 27.10–02.11, 29.12–07.01, 19.03–29.03
-  // Сондықтан тоқсан шекарасы каникулға тіреліп бөлінеді:
+  // ✅ QUARTER (2025–2026 оқу жылы құжатқа сай)
+  if (type === "quarter") {
+    const q = Number(qEl?.value || 1);
 
-  if (q === 1) return { from:"2025-09-01", to:"2025-10-26" }; // күзгі каникулға дейін
-  if (q === 2) return { from:"2025-11-03", to:"2025-12-28" }; // қысқы каникулға дейін
-  if (q === 3) return { from:"2026-01-08", to:"2026-03-18" }; // көктемгі каникулға дейін
-  if (q === 4) return { from:"2026-03-30", to:"2026-05-25" }; // оқу жылы соңына дейін
-  // fallback
-  return { from:"2025-09-01", to:"2026-05-25" };
-}
+    // 1-тоқсан: 2025-09-01 — 2025-10-26
+    // күзгі каникул: 2025-10-27 — 2025-11-02
+    // 2-тоқсан: 2025-11-03 — 2025-12-28
+    // қысқы каникул: 2025-12-29 — 2026-01-07
+    // 3-тоқсан: 2026-01-08 — 2026-03-18
+    // көктемгі каникул: 2026-03-19 — 2026-03-29
+    // 4-тоқсан: 2026-03-30 — 2026-05-25
 
     const Q = {
-      1:{from:`${y}-09-01`,to:`${y}-10-26`},
-      2:{from:`${y}-11-01`,to:`${y}-12-28`},
-      3:{from:`${y+1}-01-07`,to:`${y+1}-03-22`},
-      4:{from:`${y+1}-03-30`,to:`${y+1}-05-25`}
+      1: { from: "2025-09-01", to: "2025-10-26" },
+      2: { from: "2025-11-03", to: "2025-12-28" },
+      3: { from: "2026-01-08", to: "2026-03-18" },
+      4: { from: "2026-03-30", to: "2026-05-25" },
     };
-
-    if (q === 0) {
-      const t = today.toISOString().slice(0,10);
-      for (const k in Q)
-        if (t>=Q[k].from && t<=Q[k].to) return Q[k];
-    }
-    return Q[q];
+    return Q[q] || null;
   }
 
-  if (type === "all") return {from:"2000-01-01",to:"2100-01-01"};
+  // ✅ ALL
+  if (type === "all") return { from: "2000-01-01", to: "2100-01-01" };
+
+  // ✅ CUSTOM (егер сіз қалдырсаңыз)
+  if (type === "custom") {
+    const s = sEl?.value, e = eEl?.value;
+    if (!s || !e) return null;
+    return { from: s, to: e };
+  }
+
   return null;
 }
+
 
 
 function sumTotals(report){
@@ -1145,6 +1161,7 @@ document.getElementById("customStart")?.addEventListener("change", () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
