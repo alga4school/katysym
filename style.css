@@ -106,6 +106,42 @@ body{
   padding:18px;
 }
 
+.install-card {
+  margin: 20px auto;
+  max-width: 980px;
+  background: #f0f4ff;
+  border: 1px solid #d1ddf7;
+}
+
+.install-instructions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  padding: 16px 0;
+}
+
+.install-item {
+  padding: 12px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.install-item h4 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.install-steps {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #666;
+  white-space: pre-line;
+}
+
 .btn{
   border:1px solid var(--line);
   background:#fff;
@@ -221,7 +257,20 @@ input, select{
 .hint.light{color: rgba(255,255,255,.92)}
 
 .reports-bg{background:#f4f6ff;}
-.reports-head{padding:0 22px}
+.reports-head{
+  padding: 20px 22px;
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  border-radius: 0 0 12px 12px;
+  margin-bottom: 12px;
+}
+.reports-head .view-title {
+  color: white;
+  margin: 0;
+  font-size: 22px;
+}
+.reports-head .btn.link.light {
+  color: white;
+}
 .reports-shell{padding: 10px 22px 22px}
 .reports-card{
   background:#fff;
@@ -614,6 +663,43 @@ input, select{
   }
   .dayGrid {
     grid-template-columns: repeat(2, 1fr);
+  }
+  
+  /* Mobile button optimization */
+  #updateStatsBtn, #exportCsvBtn {
+    flex: 1;
+    min-width: 120px;
+  }
+  
+  .report-actions {
+    margin-left: 0;
+    flex: 1;
+  }
+  
+  .install-instructions {
+    grid-template-columns: 1fr;
+  }
+  
+  .home-actions {
+    flex-direction: column;
+  }
+  
+  .home-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .table {
+    font-size: 12px;
+  }
+  
+  .table th, .table td {
+    padding: 8px 6px;
+  }
+  
+  .btn {
+    padding: 10px 12px;
+    font-size: 14px;
   }
 }
 
