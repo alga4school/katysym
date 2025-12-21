@@ -13,10 +13,10 @@
       <!-- Topbar -->
       <div class="topbar">
         <div class="brand">
-          <div class="logo-img" style="border-radius: 50%; width: 40px; height: 40px; background: #007bff; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">🏫</div>
+          <div class="logo-img" style="border-radius: 50%; width: 40px; height: 40px; background: #007bff; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">📚</div>
           <div class="brand-text">
-            <div class="school-name">Қатысу</div>
-            <div>Журнал посещаемости</div>
+            <div class="school-name" data-i18n="attendance">Журнал посещаемости</div>
+            <div style="font-size: 12px; color: #666;" data-i18n="school">Мектеп</div>
           </div>
         </div>
         <button id="langToggle" class="lang-toggle pill">RU</button>
@@ -28,13 +28,35 @@
           <div class="home-card">
             <div class="banner">
               <div class="banner-overlay">
-                <h1 class="banner-title">Ақтөбе облысының білім басқармасы Алға ауданының білім бөлімі" ММ "№4 Алға орта мектебі" КММ</h1>
-                <p class="banner-text">KK / RU<br>Сабаққа қатысу журналы<br>Оқушылардың сабаққа қатысуын есепке алудың автоматтандырылған жүйесі</p>
+                <h1 class="banner-title">№4 Орта мектеб / Средняя школа №4</h1>
+                <p class="banner-text" id="homeBannerText">
+                  <span data-i18n="attendance">Журнал посещаемости</span><br>
+                  <span data-i18n="attendanceDesc">Оқушылардың сабаққа қатысуын есепке алудың автоматтандырылған жүйесі</span>
+                </p>
               </div>
             </div>
             <div class="home-actions">
-              <button id="goAttendance" class="btn primary">📚 Сабаққа қатысуды белгілеу</button>
-              <button id="goReports" class="btn">📊 Есептер мен статистика</button>
+              <button id="goAttendance" class="btn primary" data-i18n="markAttendance">📚 Сабаққа қатысуды белгілеу</button>
+              <button id="goReports" class="btn" data-i18n="reports">📊 Есептер мен статистика</button>
+            </div>
+          </div>
+          
+          <!-- PWA Install Instructions -->
+          <div class="home-card install-card">
+            <h3 style="margin: 0 0 16px 0; font-size: 18px;" data-i18n="installPWA">📱 Приложение ретінде орнату</h3>
+            <div class="install-instructions">
+              <div class="install-item">
+                <h4 data-i18n="installAndroid">📱 Android (Samsung және т.б.)</h4>
+                <p class="install-steps" data-i18n="installAndroidSteps">1. Төмен оң жағындағы үш нүкте (⋮) басыңыз<br>2. 'Қосымшаға орнату' немесе 'Экранға орнату' таңдаңыз</p>
+              </div>
+              <div class="install-item">
+                <h4 data-i18n="installIOS">🍎 iPhone (iOS)</h4>
+                <p class="install-steps" data-i18n="installIOSSteps">1. Төмен оң жағындағы 'Ортасындағы' батырма басыңыз<br>2. 'Негіздің экранына қосу' таңдаңыз<br>3. 'Қосу' басыңыз</p>
+              </div>
+              <div class="install-item">
+                <h4 data-i18n="installPC">💻 Компьютер</h4>
+                <p class="install-steps" data-i18n="installPCSteps">1. Адресі барлау ішіндегі орнату батырмасын басыңыз<br>2. Немесе параметрлер > Қосымшалар > Орнату</p>
+              </div>
             </div>
           </div>
         </div>
@@ -43,24 +65,24 @@
       <div id="viewAttendance" class="view">
         <div class="reports-bg">
           <div class="reports-head">
-            <h2 class="view-title light">📚 Күнделікті бақылау / Ежедневный контроль</h2>
-            <button id="backHome1" class="btn link light">← Басты бет</button>
+            <h2 class="view-title light" id="attendanceTitle">📚 Күнделікті бақылау / Ежедневный контроль</h2>
+            <button id="backHome1" class="btn link light" data-i18n="homeBtn">← Басты бет</button>
           </div>
           <div class="reports-shell">
             <div class="reports-card">
               <div class="controls">
                 <div class="field">
-                  <label class="label">Күні</label>
+                  <label class="label" data-i18n="date">Күні</label>
                   <input type="date" id="attendanceDate" />
                 </div>
                 <div class="field">
-                  <label class="label">Сынып</label>
+                  <label class="label" data-i18n="class">Сынып</label>
                   <select id="classSelect">
-                    <option value="">Сыныпты таңдаңыз</option>
+                    <option value="" data-i18n="chooseClass">Сыныпты таңдаңыз</option>
                   </select>
                 </div>
                 <div class="field grow">
-                  <label class="label">Іздеу</label>
+                  <label class="label" data-i18n="search">Іздеу</label>
                   <input type="text" id="searchInput" placeholder="Оқушы аты" />
                 </div>
                 <button id="saveAttendanceBtn" class="btn primary">💾 Сақтау</button>
@@ -69,12 +91,12 @@
               <div class="table-wrap">
                 <table class="table" id="attendanceTable">
                   <thead>
-                    <tr><th>#</th><th>Оқушы</th><th>Сынып</th><th>Белгі</th></tr>
+                    <tr><th>#</th><th data-i18n="student">Оқушы</th><th data-i18n="class">Сынып</th><th>Белгі</th></tr>
                   </thead>
                   <tbody></tbody>
                 </table>
               </div>
-              <p class="hint">Ескерту: барлығы әдепкіде «Қатысты». Тек қажет болса ғана «Ауырды / Себепті / Себепсіз / Кешікті» таңдаңыз.</p>
+              <p class="hint" data-i18n="note">Ескерту: барлығы әдепкіде «Қатысты». Тек қажет болса ғана «Ауырды / Себепті / Себепсіз / Кешікті» таңдаңыз.</p>
             </div>
           </div>
         </div>
@@ -234,7 +256,7 @@ let __isSavingAttendance = false;
 // ============================
 // SETTINGS (СІЗДІҢ URL / KEY)
 // ============================
-const WEBAPP_URL = "https://old-recipe-0d35eduqatysu.alga4school.workers.dev/";
+const WEBAPP_URL = "PASTE_YOUR_WORKER_OR_SCRIPT_URL_HERE";
 const API_KEY = "school2025";
 
 // ============================
