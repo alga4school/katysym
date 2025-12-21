@@ -100,6 +100,15 @@ body{
   text-shadow: 0 6px 20px rgba(0,0,0,.35);
 }
 
+.report-actions{
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+  align-items:center;
+  margin-top:8px;
+}
+
+
 .home-actions{
   display:flex;
   gap:12px;
@@ -702,6 +711,7 @@ input, select{
     font-size: 14px;
   }
 }
+
 
 
 
