@@ -315,15 +315,6 @@ function showView(id){
   document.getElementById(id)?.classList.add("active");
   window.scrollTo({top:0, behavior:"smooth"});
 }
-// ===== I18N =====
-document.addEventListener("DOMContentLoaded", async () => {
-  currentLang =
-    localStorage.getItem("lang") ||
-    document.body?.dataset?.lang ||
-    "kk";
-  document.body.dataset.lang = currentLang;
-  applyI18n();
-});
 
 // ===== I18N =====
 function applyI18n() {
@@ -1002,6 +993,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
