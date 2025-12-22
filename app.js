@@ -930,6 +930,7 @@ async function updateStats() {
   }
 
   try {
+    
     // ✅ API үшін диапазон: to = келесі күн (end-exclusive болса да дұрыс)
     const apiFrom = range.from;
     const apiTo = addDaysISO(range.to, 1);
@@ -981,33 +982,19 @@ function betweenInclusive(dateISO, fromISO, toISO){
 
 function exportCsv() {
   const range = getRangeFromPeriod();
-  if (!range) {
-    alert(I18N[currentLang]?.needPeriod || "Кезеңді таңдаңыз");
-    return;
-  }
+  if (!range) { alert(...); return; }
 
   const reportClass = document.getElementById("reportClass")?.value || "ALL";
   let grade = "ALL", class_letter = "ALL";
+  if (reportClass !== "ALL") { ... }
 
-  if (reportClass !== "ALL") {
-    const p = parseClass(reportClass);
-    grade = p.grade;
-    class_letter = p.letter;
-  }
+  const apiFrom = range.from;
+  const apiTo = addDaysISO(range.to, 1);
 
-  // ✅ API үшін диапазон: to = келесі күн (end exclusive болса да дұрыс)
-const apiFrom = range.from;
-let apiTo = range.to;
-
-// ✅ API "to" күнін қоспай есептесе – әрқашан to+1 күн жібереміз
-if (apiTo) {
-  const d = new Date(apiTo + "T00:00:00");
-  d.setDate(d.getDate() + 1);
-  apiTo = d.toISOString().slice(0, 10);
+  apiGet("report", { from: apiFrom, to: apiTo, grade, class_letter })
+    .then(report => { ... });
 }
 
-apiGet("report", { from: apiFrom, to: apiTo, grade, class_letter })
-  .then(report => {
       const students = report?.students || [];
       const daily = report?.daily || {};
       const totals = report?.totals || {};
@@ -1242,6 +1229,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
