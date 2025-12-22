@@ -914,8 +914,6 @@ function betweenInclusive(dateISO, fromISO, toISO){
   return t >= d0(fromISO).getTime() && t <= d0(toISO).getTime();
 }
 
-
-
 function exportCsv() {
   const range = getRangeFromPeriod();
   if (!range) {
@@ -959,32 +957,26 @@ function exportCsv() {
       const headerDaily = ["date","student","class","status_code","status_kk","status_ru"];
       const rowsDaily = [];
 
-      // daily форматы: daily[dateISO][studentId] = {status_code,...}
-     // daily форматы: daily[dateISO][studentId] = {status_code,...}
-Object.entries(daily).forEach(([dateISO, byId]) => {
+      Object.entries(daily).forEach(([dateISO, byId]) => {
+        students.forEach(s => {
+          const cls = getStudentClass(s);
 
-  // ✅ МІНЕ ОСЫ ЖЕРДЕ students.forEach БОЛУЫ КЕРЕК
-  students.forEach(s => {
+          // Фильтр класс если выбран
+          if (reportClass !== "ALL" && norm(cls) !== wantedClassNorm) return;
 
-    const cls = getStudentClass(s);
+          const st = byId?.[String(s.id)];
+          const code = getCode(st);
 
-    // ✅ СҮЗГІНІ ОСЫ ЖЕРГЕ ҚОЯСЫЗ (cls-тен кейін)
-    if (reportClass !== "ALL" && norm(cls) !== wantedClassNorm) return;
-
-    const st = byId?.[String(s.id)];
-    const code = getCode(st);
-
-    rowsDaily.push([
-      dateISO,
-      s.full_name,
-      cls,
-      code,
-      getKk(st),
-      getRu(st),
-    ]);
-  });
-
-});
+          rowsDaily.push([
+            dateISO,
+            s.full_name,
+            cls,
+            code,
+            getKk(st),
+            getRu(st),
+          ]);
+        });
+      });
 
       // Егер daily жоқ/бос болса — totals шығарамыз
       let header = headerDaily;
@@ -992,29 +984,29 @@ Object.entries(daily).forEach(([dateISO, byId]) => {
 
       if (!rowsDaily.length) {
         const headerTotals = ["student","class","katysty","keshikti","auyrdy","sebep","sebsez","total"];
-      const rowsTotals = [];
+        const rowsTotals = [];
 
-students.forEach(s => {
-  const cls = getStudentClass(s);
+        students.forEach(s => {
+          const cls = getStudentClass(s);
 
-  if (reportClass !== "ALL" && norm(cls) !== wantedClassNorm) return;
+          if (reportClass !== "ALL" && norm(cls) !== wantedClassNorm) return;
 
-  const t = totals?.[String(s.id)] || {};
-  const katysty  = Number(t.katysty || 0);
-  const keshikti = Number(t.keshikti || 0);
-  const auyrdy   = Number(t.auyrdy || 0);
-  const sebep    = Number(t.sebep || 0);
-  const sebsez   = Number(t.sebsez || 0);
-  const total    = katysty + keshikti + auyrdy + sebep + sebsez;
+          const t = totals?.[String(s.id)] || {};
+          const katysty  = Number(t.katysty || 0);
+          const keshikti = Number(t.keshikti || 0);
+          const auyrdy   = Number(t.auyrdy || 0);
+          const sebep    = Number(t.sebep || 0);
+          const sebsez   = Number(t.sebsez || 0);
+          const total    = katysty + keshikti + auyrdy + sebep + sebsez;
 
-  if (total === 0) return;
+          if (total === 0) return;
 
-  rowsTotals.push([
-    s.full_name,
-    cls,
-    katysty, keshikti, auyrdy, sebep, sebsez, total
-  ]);
-});
+          rowsTotals.push([
+            s.full_name,
+            cls,
+            katysty, keshikti, auyrdy, sebep, sebsez, total
+          ]);
+        });
 
         if (!rowsTotals.length) {
           alert(currentLang === "ru"
@@ -1054,6 +1046,7 @@ students.forEach(s => {
     })
     .catch(err => alert(err.message));
 }
+
 // ============================
 // INIT (runs inside DOMContentLoaded above)
 // ============================
@@ -1155,6 +1148,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
