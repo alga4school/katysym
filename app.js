@@ -198,13 +198,12 @@ excused: "📄 По уважительной",
 unexcused: "❌ Без уважительной",
 
     // ===== TOP TABLES =====
-    topLate: "Часто опаздывают (TOP)",
-    topUnexcused: "Много без причины (TOP)",
-
-    // ===== HOLIDAYS =====
    topLate: "🔥 Часто опаздывают (TOP)",
 topUnexcused: "🚫 Много без причины (TOP)",
 
+    // ===== HOLIDAYS =====
+ holidaysLabel: "Нерабочие дни (праздники / каникулы):",
+  schoolDaysLabel: "Количество учебных дней:",
     // ===== MESSAGES =====
     saveOk: "✅ Сохранено:",
     saveErr: "❌ Ошибка:",
@@ -844,16 +843,18 @@ function renderDayIssuesForRange(report, range) {
 
   const issues = buildIssuesForRange(report, range);
 
-  // егер бәрі бос болса — жасырамыз
+  // бәрі бос болса — жасырамыз
   if (!(issues.late.length || issues.sick.length || issues.exc.length || issues.unex.length)) {
     hideDayIssues();
     return;
   }
 
+  // ✅ КҮНДІКТЕ ДЕ 4 КАТЕГОРИЯ
   fill3("tblLate", issues.late);
   fill3("tblSick", issues.sick);
   fill3("tblExcused", issues.exc);
   fill3("tblUnexcused", issues.unex);
+
   box.style.display = "block";
 }
 
@@ -882,8 +883,11 @@ async function updateStats() {
       class_letter,
     });
 
-    // ✅ МЫНА БӨЛІК ОСЫ ЖЕРДЕ БОЛУЫ КЕРЕК
+    // ✅ Day Issues шығару
     renderDayIssuesForRange(report, range);
+
+    // ✅ ОСЫ ЖЕРГЕ ҚОСЫҢЫЗ:
+    updateSchoolDaysUI();
 
     const t = sumTotals(report);
     document.getElementById("totalLessons").textContent = t.total;
@@ -899,7 +903,6 @@ async function updateStats() {
     alert((currentLang === "ru" ? "Ошибка отчёта: " : "Есеп қатесі: ") + e.message);
   }
 }
-
 
  // ===== DATE HELPERS =====
 function iso(d){ return d.toISOString().slice(0,10); }
@@ -1146,6 +1149,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
