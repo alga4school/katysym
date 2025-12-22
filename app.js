@@ -825,7 +825,7 @@ function renderDayIssuesForRange(report, range) {
 async function updateStats() {
   const range = getRangeFromPeriod();
   if (!range) {
-    alert(I18N[currentLang]?.needPeriod || (currentLang === "ru" ? "Укажите период" : "Кезеңді таңдаңыз"));
+    alert(I18N[currentLang]?.needPeriod || "Периодты таңдаңыз");
     return;
   }
 
@@ -848,6 +848,7 @@ async function updateStats() {
       class_letter,
     });
 
+    // ✅ МЫНА БӨЛІК ОСЫ ЖЕРДЕ БОЛУЫ КЕРЕК
     renderDayIssuesForRange(report, range);
 
     const t = sumTotals(report);
@@ -1146,6 +1147,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
