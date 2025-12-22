@@ -887,54 +887,108 @@ function isOfficialBreakDay(dateISO){
   return OFFICIAL_BREAKS_2025_2026.some(b => betweenInclusive(dateISO, b.from, b.to));
 }
 
-// ===== WEEKEND (5 day school) =====
+/* ================== НАСТРОЙКИ ================== */
 const WEEKEND_DAYS = new Set([0, 6]); // Жексенбі + Сенбі
-function isWeekend(dateISO){
-  return WEEKEND_DAYS.has(d0(dateISO).getDay());
+const HOLIDAYS_KEY = "katysym_holidays_v1";
+
+/* ===== OFFICIAL BREAKS 2025-2026 (каникул) ===== */
+const OFFICIAL_BREAKS_2025_2026 = [
+  { from:"2025-10-27", to:"2025-11-02" }, // күзгі
+  { from:"2025-12-29", to:"2026-01-07" }, // қысқы
+  { from:"2026-03-19", to:"2026-03-29" }, // көктемгі
+  // 1-сынып қосымша (керек болса ғана қос):
+  // { from:"2026-02-09", to:"2026-02-15" },
+];
+
+function d0(s){ return new Date(s + "T00:00:00"); }
+function betweenInclusive(dateISO, fromISO, toISO){
+  const t = d0(dateISO).getTime();
+  return t >= d0(fromISO).getTime() && t <= d0(toISO).getTime();
+}
+function isOfficialBreakDay(dateISO){
+  return OFFICIAL_BREAKS_2025_2026.some(b => betweenInclusive(dateISO, b.from, b.to));
 }
 
-// ===== SCHOOL DAYS COUNT =====
-function countSchoolDays(fromISO, toISO){
-  let c = 0;
-  let d = d0(fromISO);
-  const end = d0(toISO);
+/* ================== HOLIDAYS (manual) ================== */
+function loadHolidays() {
+  try { return new Set(JSON.parse(localStorage.getItem(HOLIDAYS_KEY) || "[]")); }
+  catch { return new Set(); }
+}
+function saveHolidays(set) {
+  localStorage.setItem(HOLIDAYS_KEY, JSON.stringify([...set].sort()));
+}
+let HOLIDAYS = loadHolidays();
 
-  while (d <= end){
-    const dayISO = iso(d);
-    if (!isWeekend(dayISO) && !isOfficialBreakDay(dayISO) && !HOLIDAYS.has(dayISO)) c++;
-    d.setDate(d.getDate() + 1);
+/* ================== UI: render holidays ================== */
+function renderHolidays() {
+  const el = document.getElementById("holidaysList");
+  if (!el) return;
+
+  if (!HOLIDAYS.size) {
+    const txt = I18N[currentLang]?.noHolidays || (currentLang === "ru" ? "Не выбрано" : "Таңдалмаған");
+    el.innerHTML = `<em data-i18n="noHolidays">${txt}</em>`;
+    return;
+  }
+
+  el.innerHTML = [...HOLIDAYS].map(d => `
+    <span class="holidayTag">${d}
+      <button data-date="${d}" class="delHolidayBtn">×</button>
+    </span>
+  `).join(" ");
+
+  el.querySelectorAll(".delHolidayBtn").forEach(btn => {
+    btn.onclick = () => {
+      HOLIDAYS.delete(btn.dataset.date);
+      saveHolidays(HOLIDAYS);
+      renderHolidays();
+      updateSchoolDaysUI();
+    };
+  });
+}
+
+function initHolidayUI() {
+  document.getElementById("addHolidayBtn").onclick = () => {
+    const d = document.getElementById("holidayPick").value;
+    if (!d) return;
+    HOLIDAYS.add(d);
+    saveHolidays(HOLIDAYS);
+    renderHolidays();
+    updateSchoolDaysUI();
+  };
+
+  document.getElementById("clearHolidaysBtn").onclick = () => {
+    HOLIDAYS.clear();
+    saveHolidays(HOLIDAYS);
+    renderHolidays();
+    updateSchoolDaysUI();
+  };
+
+  renderHolidays();
+}
+
+/* ================== SCHOOL DAY CHECK ================== */
+function isSchoolDayISO(dateISO) {
+  const day = d0(dateISO).getDay();
+
+  // демалыс
+  if (WEEKEND_DAYS.has(day)) return false;
+
+  // ресми каникул
+  if (isOfficialBreakDay(dateISO)) return false;
+
+  // қолмен белгіленген holiday
+  if (HOLIDAYS.has(dateISO)) return false;
+
+  return true;
+}
+
+function countSchoolDays(fromISO, toISO) {
+  let c = 0;
+  for (let d = d0(fromISO); d <= d0(toISO); d.setDate(d.getDate() + 1)) {
+    const iso = d.toISOString().slice(0,10);
+    if (isSchoolDayISO(iso)) c++;
   }
   return c;
-}
-
-function updateSchoolDaysUI(){
-  const el = document.getElementById("schoolDaysCount");
-  if (!el) return;
-  const r = getRangeFromPeriod();
-  el.textContent = r ? countSchoolDays(r.from, r.to) : 0;
-}
-
-
-    // ✅ БАРЛЫҚ МЕРЗІМГЕ БІРДЕЙ (күн / апта / ай / жыл / барлық сынып)
-    renderDayIssuesForRange(report, range);
-
-    const t = sumTotals(report);
-
-    document.getElementById("totalLessons").textContent = t.total;
-    document.getElementById("totalPresent").textContent = t.katysty;
-    document.getElementById("totalLate").textContent = t.keshikti;
-    document.getElementById("totalSick").textContent = t.auyrdy;
-    document.getElementById("totalExcused").textContent = t.sebep;
-    document.getElementById("totalUnexcused").textContent = t.sebsez;
-
-    fillTable("topLateTable", buildTop(report, "keshikti"));
-    fillTable("topUnexcusedTable", buildTop(report, "sebsez"));
-  } catch (e) {
-    alert(
-      (currentLang === "ru" ? "Ошибка отчёта: " : "Есеп қатесі: ") +
-        e.message
-    );
-  }
 }
 
 function exportCsv(){
@@ -1147,6 +1201,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
