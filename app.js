@@ -936,10 +936,9 @@ function exportCsv() {
       const daily = report?.daily || {};
       const totals = report?.totals || {};
 
-      // ---------- helpers ----------
+      // helpers
       const norm = (s) => String(s || "").replace(/\s+/g, "").toUpperCase();
       const wantedClassNorm = (reportClass === "ALL") ? "" : norm(reportClass);
-
       const getStudentClass = (s) => `${s.grade}${s.class_letter}`;
       const getCode = (st) => (st?.status_code || "katysty");
 
@@ -947,13 +946,12 @@ function exportCsv() {
         const code = getCode(st);
         return st?.status_kk || STATUS[code]?.kk || STATUS.katysty.kk;
       };
-
       const getRu = (st) => {
         const code = getCode(st);
         return st?.status_ru || STATUS[code]?.ru || STATUS.katysty.ru;
       };
 
-      // ---------- build DAILY rows ----------
+      // DAILY rows
       const headerDaily = ["date","student","class","status_code","status_kk","status_ru"];
       const rowsDaily = [];
 
@@ -961,7 +959,7 @@ function exportCsv() {
         students.forEach(s => {
           const cls = getStudentClass(s);
 
-          // Фильтр класс если выбран
+          // class filter
           if (reportClass !== "ALL" && norm(cls) !== wantedClassNorm) return;
 
           const st = byId?.[String(s.id)];
@@ -978,7 +976,7 @@ function exportCsv() {
         });
       });
 
-      // Егер daily жоқ/бос болса — totals шығарамыз
+      // if daily empty → totals export
       let header = headerDaily;
       let rows = rowsDaily;
 
@@ -988,7 +986,6 @@ function exportCsv() {
 
         students.forEach(s => {
           const cls = getStudentClass(s);
-
           if (reportClass !== "ALL" && norm(cls) !== wantedClassNorm) return;
 
           const t = totals?.[String(s.id)] || {};
@@ -1001,11 +998,7 @@ function exportCsv() {
 
           if (total === 0) return;
 
-          rowsTotals.push([
-            s.full_name,
-            cls,
-            katysty, keshikti, auyrdy, sebep, sebsez, total
-          ]);
+          rowsTotals.push([s.full_name, cls, katysty, keshikti, auyrdy, sebep, sebsez, total]);
         });
 
         if (!rowsTotals.length) {
@@ -1019,7 +1012,7 @@ function exportCsv() {
         rows = rowsTotals;
       }
 
-      // ---------- CSV ----------
+      // CSV
       const sep = ";";
       const csv = "\ufeff" + [header, ...rows]
         .map(r => r.map(x => {
@@ -1148,6 +1141,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
