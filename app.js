@@ -908,6 +908,7 @@ function renderDayIssuesForRange(report, range) {
 
 // 6) Update Stats (CLEAN)
 // 6) Update Stats (CLEAN)
+
 async function updateStats() {
   const range = getRangeFromPeriod();
   if (!range) {
@@ -925,12 +926,25 @@ async function updateStats() {
   }
 
   try {
-    const report = await apiGet("report", {
-      from: range.from,
-      to: range.to,
-      grade,
-      class_letter,
-    });
+    // ✅ API үшін диапазонды түзету (күндік режимде to = келесі күн)
+// ✅ API үшін диапазон: to = келесі күн (end exclusive болса да дұрыс)
+let apiFrom = range.from;
+let apiTo = range.to;
+
+if (apiTo) {
+  const d = new Date(apiTo + "T00:00:00");
+  d.setDate(d.getDate() + 1);
+  apiTo = d.toISOString().slice(0, 10);
+}
+
+const report = await apiGet("report", {
+  from: apiFrom,
+  to: apiTo,
+  grade,
+  class_letter,
+});
+
+
 
     // ✅ Day Issues шығару
     renderDayIssuesForRange(report, range);
@@ -1214,6 +1228,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
