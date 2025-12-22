@@ -247,9 +247,9 @@ function setLang(lang) {
   currentLang = (lang === "ru") ? "ru" : "kk";
   document.body.dataset.lang = currentLang;
   localStorage.setItem("lang", currentLang);
+}
 
 /* ================== SCHOOL CALENDAR / HOLIDAYS (ONE COPY ONLY) ================== */
-
 // Сенбі/жексенбі — демалыс (5 күндік оқу)
 const WEEKEND_DAYS = new Set([0, 6]); // Sun=0, Sat=6
 
@@ -1126,6 +1126,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
