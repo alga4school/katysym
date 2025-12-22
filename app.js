@@ -859,6 +859,7 @@ function renderDayIssuesForRange(report, range) {
 }
 
 // 6) Update Stats (CLEAN)
+// 6) Update Stats (CLEAN)
 async function updateStats() {
   const range = getRangeFromPeriod();
   if (!range) {
@@ -960,7 +961,7 @@ function exportCsv() {
 
       // daily форматы: daily[dateISO][studentId] = {status_code,...}
       Object.entries(daily).forEach(([dateISO, byId]) => {
-        students.forEach(s => {
+        
           const cls = getStudentClass(s);
 
           // Фильтр класс если выбран
@@ -988,7 +989,7 @@ function exportCsv() {
         const headerTotals = ["student","class","katysty","keshikti","auyrdy","sebep","sebsez","total"];
         const rowsTotals = [];
 
-        students.forEach(s => {
+        
           const cls = getStudentClass(s);
 
           if (reportClass !== "ALL" && norm(cls) !== wantedClassNorm) return;
@@ -1149,6 +1150,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
