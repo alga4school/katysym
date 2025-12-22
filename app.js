@@ -1050,74 +1050,60 @@ function exportCsv() {
 // INIT (runs inside DOMContentLoaded above)
 // ============================
 document.addEventListener("DOMContentLoaded", async () => {
-  // тіл
-  currentLang =
-    localStorage.getItem("lang") ||
-    document.body?.dataset?.lang ||
-    "kk";
-  document.body.dataset.lang = currentLang;
-  applyI18n();
 
-  // навигация
+  // Навигация
   document.getElementById("goAttendance")?.addEventListener("click", () => showView("viewAttendance"));
   document.getElementById("goReports")?.addEventListener("click", () => showView("viewReports"));
   document.getElementById("backHome1")?.addEventListener("click", () => showView("viewHome"));
   document.getElementById("backHome2")?.addEventListener("click", () => showView("viewHome"));
 
-  // тіл ауыстыру
+  // Тілді ауыстыру
   document.getElementById("langToggle")?.addEventListener("click", () => {
     setLang(currentLang === "kk" ? "ru" : "kk");
   });
 
-  // бүгінгі күнді қою
+  // Бүгінгі күнді қою
   const today = new Date();
-  const isoToday = today.toISOString().slice(0, 10);
+  const iso = today.toISOString().slice(0, 10);
 
-  document.getElementById("attendanceDate")?.setAttribute("value", isoToday);
-  if (document.getElementById("attendanceDate")) document.getElementById("attendanceDate").value = isoToday;
+  document.getElementById("attendanceDate") && (document.getElementById("attendanceDate").value = iso);
+  document.getElementById("customStart") && (document.getElementById("customStart").value = iso);
+  document.getElementById("customEnd") && (document.getElementById("customEnd").value = iso);
 
-  if (document.getElementById("customStart")) document.getElementById("customStart").value = isoToday;
-  if (document.getElementById("customEnd")) document.getElementById("customEnd").value = isoToday;
+  document.getElementById("yearInput") && (document.getElementById("yearInput").value = today.getFullYear());
+  document.getElementById("quarterYearInput") && (document.getElementById("quarterYearInput").value = today.getFullYear());
 
-  if (document.getElementById("yearInput")) document.getElementById("yearInput").value = today.getFullYear();
-  if (document.getElementById("quarterYearInput")) document.getElementById("quarterYearInput").value = today.getFullYear();
+  // Период өзгерсе — контролдарды көрсету/жасыру
+ document.getElementById("periodType")?.addEventListener("change", () => {
+  const type = document.getElementById("periodType")?.value;
 
-  // период UI
-  document.getElementById("periodType")?.addEventListener("change", () => {
-    const type = document.getElementById("periodType")?.value;
-
-    ["monthControl","quarterControl","yearControl","customControl"].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = "none";
-    });
-
-    if (type === "month") document.getElementById("monthControl") && (document.getElementById("monthControl").style.display = "flex");
-    if (type === "quarter") document.getElementById("quarterControl") && (document.getElementById("quarterControl").style.display = "flex");
-    if (type === "year") document.getElementById("yearControl") && (document.getElementById("yearControl").style.display = "flex");
-
-    // ✅ күн/апта үшін дата көрсетеміз
-    if (type === "day" || type === "week") {
-      document.getElementById("customControl") && (document.getElementById("customControl").style.display = "flex");
-    }
+  ["monthControl", "quarterControl", "yearControl", "customControl"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = "none";
   });
 
-  // day таңдаса — end = start
-  document.getElementById("customStart")?.addEventListener("change", () => {
-    const type = document.getElementById("periodType")?.value;
-    if (type === "day") {
-      const v = document.getElementById("customStart").value;
-      document.getElementById("customEnd").value = v;
-    }
-  });
+  if (type === "month") document.getElementById("monthControl") && (document.getElementById("monthControl").style.display = "flex");
+  if (type === "quarter") document.getElementById("quarterControl") && (document.getElementById("quarterControl").style.display = "flex");
+  if (type === "year") document.getElementById("yearControl") && (document.getElementById("yearControl").style.display = "flex");
 
-  // батырмалар
+  if (type === "custom" || type === "week") {
+    document.getElementById("customControl") && (document.getElementById("customControl").style.display = "flex");
+  }
+});
+
+  // Батырмалар
   document.getElementById("saveAttendanceBtn")?.addEventListener("click", saveAttendance);
   document.getElementById("updateStatsBtn")?.addEventListener("click", updateStats);
   document.getElementById("exportCsvBtn")?.addEventListener("click", exportCsv);
   document.getElementById("searchInput")?.addEventListener("input", renderAttendanceTable);
 
-  // period бірден дұрыс көрінсін
+  // ✅ Алғашқы жүктегенде дұрыс көрсетілсін
   document.getElementById("periodType")?.dispatchEvent(new Event("change"));
+
+  // ✅ Бет ашылғанда тіл бірден қолданылсын
+  applyI18n();
+});
+
 
   // API
   try {
@@ -1143,6 +1129,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
