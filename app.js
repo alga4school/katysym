@@ -906,7 +906,13 @@ function renderDayIssuesForRange(report, range) {
   box.style.display = "block";
 }
 
-// 6) Update Stats (CLEAN)
+// ===== DATE HELPERS =====
+function addDaysISO(iso, days) {
+  const d = new Date(iso + "T00:00:00");
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
 async function updateStats() {
   const range = getRangeFromPeriod();
   if (!range) {
@@ -924,31 +930,24 @@ async function updateStats() {
   }
 
   try {
-    
- // ✅ API үшін диапазонды түзету (күндік режимде to = келесі күн)
-let apiFrom = range.from;
-let apiTo = range.to;
+    // ✅ API үшін диапазон: to = келесі күн (end-exclusive болса да дұрыс)
+    const apiFrom = range.from;
+    const apiTo = addDaysISO(range.to, 1);
 
-const periodType = document.getElementById("periodType")?.value;
-if (periodType === "day" && apiFrom === apiTo) {
-  const d = new Date(apiTo + "T00:00:00");
-  d.setDate(d.getDate() + 1);
-  apiTo = d.toISOString().slice(0, 10);
-}
+    const report = await apiGet("report", {
+      from: apiFrom,
+      to: apiTo,
+      grade,
+      class_letter,
+    });
 
-const report = await apiGet("report", {
-  from: apiFrom,
-  to: apiTo,
-  grade,
-  class_letter,
-});
-
-    // ✅ Day Issues шығару
+    // ✅ Күндік блок (кешіккен/ауырған/себепті/себепсіз)
     renderDayIssuesForRange(report, range);
 
-    // ✅ ОСЫ ЖЕРГЕ ҚОСЫҢЫЗ:
+    // ✅ Оқу күндерінің саны
     updateSchoolDaysUI();
 
+    // ✅ KPI
     const t = sumTotals(report);
     document.getElementById("totalLessons").textContent = t.total;
     document.getElementById("totalPresent").textContent = t.katysty;
@@ -957,9 +956,15 @@ const report = await apiGet("report", {
     document.getElementById("totalExcused").textContent = t.sebep;
     document.getElementById("totalUnexcused").textContent = t.sebsez;
 
-   fillTable("topLateTable", buildTopFromDaily(report, "keshikti", 3, 10));
-fillTable("topUnexcusedTable", buildTopFromDaily(report, "sebsez", 3, 10));
-    
+    // ✅ TOP (3+)
+    fillTable("topLateTable", buildTopFromDaily(report, "keshikti", 3, 10));
+    fillTable("topUnexcusedTable", buildTopFromDaily(report, "sebsez", 3, 10));
+
+    // 🔍 Диагностика (қаласаңыз уақытша қалдырыңыз)
+    // console.log("RANGE(UI)", range);
+    // console.log("RANGE(API)", { from: apiFrom, to: apiTo });
+    // console.log("DAILY keys sample", report?.daily ? Object.keys(report.daily).slice(0, 5) : null);
+
   } catch (e) {
     alert((currentLang === "ru" ? "Ошибка отчёта: " : "Есеп қатесі: ") + e.message);
   }
@@ -991,9 +996,10 @@ function exportCsv() {
   }
 
   // ✅ API үшін диапазон: to = келесі күн (end exclusive болса да дұрыс)
-let apiFrom = range.from;
+const apiFrom = range.from;
 let apiTo = range.to;
 
+// ✅ API "to" күнін қоспай есептесе – әрқашан to+1 күн жібереміз
 if (apiTo) {
   const d = new Date(apiTo + "T00:00:00");
   d.setDate(d.getDate() + 1);
@@ -1236,6 +1242,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
