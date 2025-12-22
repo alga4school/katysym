@@ -991,12 +991,16 @@ function countSchoolDays(fromISO, toISO) {
   return c;
 }
 
-function exportCsv(){
+function exportCsv() {
   const range = getRangeFromPeriod();
-  if (!range) return alert(I18N[currentLang].needPeriod);
+  if (!range) {
+    alert(I18N[currentLang]?.needPeriod || "Кезеңді таңдаңыз");
+    return;
+  }
 
-  const reportClass = document.getElementById("reportClass").value || "ALL";
-  let grade="ALL", class_letter="ALL";
+  const reportClass = document.getElementById("reportClass")?.value || "ALL";
+  let grade = "ALL", class_letter = "ALL";
+
   if (reportClass !== "ALL") {
     const p = parseClass(reportClass);
     grade = p.grade;
@@ -1005,42 +1009,54 @@ function exportCsv(){
 
   apiGet("report", { from: range.from, to: range.to, grade, class_letter })
     .then(report => {
+      const students = report?.students || [];
+      const daily = report?.daily || {};
+      const totals = report?.totals || {};
 
-      // 1) пробуем детальный экспорт (daily)
+      // ---------- helpers ----------
+      const norm = (s) => String(s || "").replace(/\s+/g, "").toUpperCase();
+      const wantedClassNorm = (reportClass === "ALL") ? "" : norm(reportClass);
+
+      const getStudentClass = (s) => `${s.grade}${s.class_letter}`;
+      const getCode = (st) => (st?.status_code || "katysty");
+
+      const getKk = (st) => {
+        const code = getCode(st);
+        return st?.status_kk || STATUS[code]?.kk || STATUS.katysty.kk;
+      };
+
+      const getRu = (st) => {
+        const code = getCode(st);
+        return st?.status_ru || STATUS[code]?.ru || STATUS.katysty.ru;
+      };
+
+      // ---------- build DAILY rows ----------
       const headerDaily = ["date","student","class","status_code","status_kk","status_ru"];
       const rowsDaily = [];
-      const byId = new Map((report.students || []).map(s => [String(s.id), s]));
 
-      const wantedDates = (range.from === range.to)
-        ? [range.from]
-        : eachDateISO(range.from, range.to);
+      // daily форматы: daily[dateISO][studentId] = {status_code,...}
+      Object.entries(daily).forEach(([dateISO, byId]) => {
+        students.forEach(s => {
+          const cls = getStudentClass(s);
 
-      wantedDates.forEach(dateISO => {
-        const daily = report.daily?.[dateISO];
-        if (!daily) return;
+          // Фильтр класс если выбран
+          if (reportClass !== "ALL" && norm(cls) !== wantedClassNorm) return;
 
-        Object.entries(daily).forEach(([sid, st]) => {
-          const s = byId.get(String(sid));
-          if (!s) return;
+          const st = byId?.[String(s.id)];
+          const code = getCode(st);
 
-          if (reportClass !== "ALL") {
-           const cls = normalizeClassValue(`${s.grade}${s.class_letter}`);
-if (cls !== normalizeClassValue(reportClass)) return;
+          rowsDaily.push([
+            dateISO,
+            s.full_name,
+            cls,
+            code,
+            getKk(st),
+            getRu(st),
+          ]);
+        });
+      });
 
-     const code = st?.status_code || "katysty";
-const kkLabel = STATUS[code]?.kk || STATUS.katysty.kk;
-const ruLabel = STATUS[code]?.ru || STATUS.katysty.ru;
-
-rowsDaily.push([
-  dateISO,
-  s.full_name,
-  `${s.grade}${s.class_letter}`,
-  code,
-  kkLabel,
-  ruLabel
-]);
-
-      // 2) если daily пустой — делаем экспорт итогов по ученику (totals)
+      // Егер daily жоқ/бос болса — totals шығарамыз
       let header = headerDaily;
       let rows = rowsDaily;
 
@@ -1048,8 +1064,12 @@ rowsDaily.push([
         const headerTotals = ["student","class","katysty","keshikti","auyrdy","sebep","sebsez","total"];
         const rowsTotals = [];
 
-        (report.students || []).forEach(s => {
-          const t = report.totals?.[String(s.id)] || {};
+        students.forEach(s => {
+          const cls = getStudentClass(s);
+
+          if (reportClass !== "ALL" && norm(cls) !== wantedClassNorm) return;
+
+          const t = totals?.[String(s.id)] || {};
           const katysty  = Number(t.katysty || 0);
           const keshikti = Number(t.keshikti || 0);
           const auyrdy   = Number(t.auyrdy || 0);
@@ -1057,11 +1077,11 @@ rowsDaily.push([
           const sebsez   = Number(t.sebsez || 0);
           const total    = katysty + keshikti + auyrdy + sebep + sebsez;
 
-          if (total === 0) return; // чтобы не выгружать совсем пустых
+          if (total === 0) return;
 
           rowsTotals.push([
             s.full_name,
-            `${s.grade}${s.class_letter}`,
+            cls,
             katysty, keshikti, auyrdy, sebep, sebsez, total
           ]);
         });
@@ -1077,23 +1097,24 @@ rowsDaily.push([
         rows = rowsTotals;
       }
 
-      // Excel-friendly CSV
+      // ---------- CSV ----------
       const sep = ";";
       const csv = "\ufeff" + [header, ...rows]
         .map(r => r.map(x => {
           const v = String(x ?? "");
           return (v.includes(sep) || v.includes('"') || v.includes("\n"))
-            ? `"${v.replace(/"/g,'""')}"`
+            ? `"${v.replace(/"/g, '""')}"`
             : v;
         }).join(sep))
         .join("\n");
 
-      const blob = new Blob([csv], { type:"text/csv;charset=utf-8;" });
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
+
       const a = document.createElement("a");
       a.href = url;
 
-      const clsPart = (reportClass === "ALL") ? "ALL" : reportClass.replace(/\s+/g,"");
+      const clsPart = (reportClass === "ALL") ? "ALL" : reportClass.replace(/\s+/g, "");
       a.download = `attendance_${clsPart}_${range.from}_to_${range.to}.csv`;
 
       document.body.appendChild(a);
@@ -1103,7 +1124,6 @@ rowsDaily.push([
     })
     .catch(err => alert(err.message));
 }
-
 // ============================
 // INIT (runs inside DOMContentLoaded above)
 // ============================
@@ -1201,6 +1221,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
