@@ -6,6 +6,8 @@
   <title>Қатысу — Сабаққа қатысу журналы</title>
   <link rel="manifest" href="/katysym/manifest.json">
   <link rel="stylesheet" href="/katysym/style.css">
+  <link rel="icon" href="/katysym/img/logo.png">
+
 </head>
 
 <body data-lang="kk">
@@ -169,112 +171,112 @@
   </button>
 </div>
 
-  <!-- ✅ MAIN CONTAINER: сенің сайттың бүкіл беттері осының ішінде -->
-  <div id="app" class="main-container">
-
-    <!-- ... сенің viewHome, viewAttendance, viewReports т.б ... -->
-
-    <!-- ✅ МЫНА БӨЛІК СЕНДІКІ (Reports ішіндегі бөлім) -->
-    <div class="holidayBox-top">
-      <div class="holidayRow">
-        <div class="holidayList">
-          <span data-i18n="holidaysLabel"> Оқымайтын күндер (мереке/каникул):</span>
-          <span id="holidaysList"><em data-i18n="noHolidays">Таңдалмаған</em></span>
-          <span data-i18n="schoolDaysLabel">Оқу күндерінің саны:</span>
-        </div>
-        <div class="holidayBtns">
-          <input type="date" id="holidayPick" />
-          <button id="addHolidayBtn" class="btn" data-i18n="btnAdd">Қосу</button>
-<button id="clearHolidaysBtn" class="btn" data-i18n="btnClear">Тазалау</button>
-        </div>
-        <div class="holidayDays">
-          <span data-i18n="schoolDaysLabel">Оқу күндерінің саны:</span>
-          <span id="schoolDaysCount">0</span>
-        </div>
-      </div>
+<!-- ===== HOLIDAYS ===== -->
+<div class="holidayBox-top">
+  <div class="holidayRow">
+    <div class="holidayList">
+      <span data-i18n="holidaysLabel">Оқымайтын күндер (мереке/каникул):</span>
+      <span id="holidaysList"><em data-i18n="noHolidays">Таңдалмаған</em></span>
     </div>
 
-    <div class="kpis">
-      <div class="kpi">
-        <div class="kpi-label" data-i18n="kpiTotal">Барлық белгі</div>
-        <div class="kpi-val" id="totalLessons">0</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label" data-i18n="kpiPresent">Қатысты</div>
-        <div class="kpi-val" id="totalPresent">0</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label" data-i18n="kpiLate">Кешікті</div>
-        <div class="kpi-val" id="totalLate">0</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label" data-i18n="kpiSick">Ауырды</div>
-        <div class="kpi-val" id="totalSick">0</div>
-      </div>
-      <div class="kpi">
-  <div class="kpi-label" data-i18n="kpiExcused">Себепті</div>
-        <div class="kpi-val" id="totalExcused">0</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label" data-i18n="kpiUnexcused">Себепсіз</div>
-        <div class="kpi-val" id="totalUnexcused">0</div>
-      </div>
+    <div class="holidayBtns">
+      <input type="date" id="holidayPick" />
+      <button id="addHolidayBtn" class="btn" data-i18n="btnAdd">Қосу</button>
+      <button id="clearHolidaysBtn" class="btn" data-i18n="btnClear">Тазалау</button>
     </div>
 
-    <div class="dayIssuesBox" id="dayIssuesBox" style="display:none;">
-      <h3 data-i18n="dayIssuesTitle">📌 Сабақтан қалғандар (күндік)</h3>
-      <div class="dayGrid">
-        <div class="mini-card">
-          <h4 class="mini-title" data-i18n="late">⏰Кешіккендер</h4>
-          <table class="table mini" id="tblLate"><tbody></tbody></table>
-        </div>
-        <div class="mini-card">
-          <h4 class="mini-title" data-i18n="sick">🤒Ауырғандар</h4>
-          <table class="table mini" id="tblSick"><tbody></tbody></table>
-        </div>
-        <div class="mini-card">
-          <h4 class="mini-title" data-i18n="excused">📄Себепті</h4>
-          <table class="table mini" id="tblExcused"><tbody></tbody></table>
-        </div>
-        <div class="mini-card">
-          <h4 class="mini-title" data-i18n="unexcused">❌ Себепсіз</h4>
-          <table class="table mini" id="tblUnexcused"><tbody></tbody></table>
-        </div>
-      </div>
-      <p class="hint" data-i18n="dayIssuesNote">Ескерту: “Қатысты” оқушылар көрсетілмейді.</p>
+    <div class="holidayDays">
+      <span data-i18n="schoolDaysLabel">Оқу күндерінің саны:</span>
+      <span id="schoolDaysCount">0</span>
     </div>
+  </div>
+</div>
 
-    <div class="tables-grid">
-      <div class="mini-card">
-        <h4 class="mini-title" data-i18n="topLate">🔥 Көп кешігу (TOP)</h4>
-        <table class="table mini" id="topLateTable">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th data-i18n="student">Оқушы</th>
-              <th data-i18n="class">Сынып</th>
-              <th data-i18n="colCount">Саны</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
+<!-- ===== KPI ===== -->
+<div class="kpis">
+  <div class="kpi">
+    <div class="kpi-label" data-i18n="kpiTotal">📊 Барлық белгі</div>
+    <div class="kpi-val" id="totalLessons">0</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label" data-i18n="kpiPresent">✅ Қатысты</div>
+    <div class="kpi-val" id="totalPresent">0</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label" data-i18n="kpiLate">⏰ Кешікті</div>
+    <div class="kpi-val" id="totalLate">0</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label" data-i18n="kpiSick">🤒 Ауырды</div>
+    <div class="kpi-val" id="totalSick">0</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label" data-i18n="kpiExcused">📄 Себепті</div>
+    <div class="kpi-val" id="totalExcused">0</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label" data-i18n="kpiUnexcused">❌ Себепсіз</div>
+    <div class="kpi-val" id="totalUnexcused">0</div>
+  </div>
+</div>
 
-      <div class="mini-card">
-        <h4 class="mini-title" data-i18n="topUnexcused">🚫 Көп себепсіз (TOP)</h4>
-        <table class="table mini" id="topUnexcusedTable">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th data-i18n="student">Оқушы</th>
-              <th data-i18n="class">Сынып</th>
-              <th data-i18n="colCount">Саны</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
+<!-- ===== DAY ISSUES ===== -->
+<div class="dayIssuesBox" id="dayIssuesBox" style="display:none;">
+  <h3 data-i18n="dayIssuesTitle">📌 Сабақтан қалғандар (күндік)</h3>
+  <div class="dayGrid">
+    <div class="mini-card">
+      <h4 class="mini-title" data-i18n="late">⏰ Кешіккендер</h4>
+      <table class="table mini" id="tblLate"><tbody></tbody></table>
     </div>
+    <div class="mini-card">
+      <h4 class="mini-title" data-i18n="sick">🤒 Ауырғандар</h4>
+      <table class="table mini" id="tblSick"><tbody></tbody></table>
+    </div>
+    <div class="mini-card">
+      <h4 class="mini-title" data-i18n="excused">📄 Себепті</h4>
+      <table class="table mini" id="tblExcused"><tbody></tbody></table>
+    </div>
+    <div class="mini-card">
+      <h4 class="mini-title" data-i18n="unexcused">❌ Себепсіз</h4>
+      <table class="table mini" id="tblUnexcused"><tbody></tbody></table>
+    </div>
+  </div>
+  <p class="hint" data-i18n="dayIssuesNote">Ескерту: “Қатысты” оқушылар көрсетілмейді.</p>
+</div>
+
+<!-- ===== TOP TABLES ===== -->
+<div class="tables-grid">
+  <div class="mini-card">
+    <h4 class="mini-title" data-i18n="topLate">🔥 Көп кешігу (TOP)</h4>
+    <table class="table mini" id="topLateTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th data-i18n="student">Оқушы</th>
+          <th data-i18n="class">Сынып</th>
+          <th data-i18n="colCount">Саны</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="mini-card">
+    <h4 class="mini-title" data-i18n="topUnexcused">🚫 Көп себепсіз (TOP)</h4>
+    <table class="table mini" id="topUnexcusedTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th data-i18n="student">Оқушы</th>
+          <th data-i18n="class">Сынып</th>
+          <th data-i18n="colCount">Саны</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
 
   </div> <!-- ✅ main container end -->
 
