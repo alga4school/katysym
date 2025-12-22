@@ -1091,44 +1091,42 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-  // Батырмалар
-  document.getElementById("saveAttendanceBtn")?.addEventListener("click", saveAttendance);
-  document.getElementById("updateStatsBtn")?.addEventListener("click", updateStats);
-  document.getElementById("exportCsvBtn")?.addEventListener("click", exportCsv);
-  document.getElementById("searchInput")?.addEventListener("input", renderAttendanceTable);
+// Батырмалар
+document.getElementById("saveAttendanceBtn")?.addEventListener("click", saveAttendance);
+document.getElementById("updateStatsBtn")?.addEventListener("click", updateStats);
+document.getElementById("exportCsvBtn")?.addEventListener("click", exportCsv);
+document.getElementById("searchInput")?.addEventListener("input", renderAttendanceTable);
 
-  // ✅ Алғашқы жүктегенде дұрыс көрсетілсін
-  document.getElementById("periodType")?.dispatchEvent(new Event("change"));
+// ✅ Бет ашылғанда period control-дар бірден дұрыс көрінсін
+document.getElementById("periodType")?.dispatchEvent(new Event("change"));
+document.getElementById("rep_periodType")?.dispatchEvent(new Event("change")); // егер бар болса
 
-  // ✅ Бет ашылғанда тіл бірден қолданылсын
-  applyI18n();
-});
+// API: сыныптар, оқушылар
+try {
+  const cls = await apiGet("classes");
+  window.__classesLoaded = true;
+  window.__classList = cls.classes || [];
 
+  renderClassesTo(document.getElementById("classSelect"), window.__classList, false);
+  renderClassesTo(document.getElementById("reportClass"), window.__classList, true);
 
-  // API
-  try {
-    const cls = await apiGet("classes");
-    window.__classesLoaded = true;
-    window.__classList = cls.classes || [];
+  const st = await apiGet("students");
+  allStudents = st.students || [];
 
-    renderClassesTo(document.getElementById("classSelect"), window.__classList, false);
-    renderClassesTo(document.getElementById("reportClass"), window.__classList, true);
+  allStudents.forEach((s) => statusMap.set(s.id, "katysty"));
 
-    const st = await apiGet("students");
-    allStudents = st.students || [];
-    allStudents.forEach(s => statusMap.set(s.id, "katysty"));
-
-    document.getElementById("classSelect")?.addEventListener("change", () => {
-      allStudents.forEach(s => statusMap.set(s.id, "katysty"));
-      renderAttendanceTable();
-    });
-
-    applyI18n();
+  document.getElementById("classSelect")?.addEventListener("change", () => {
+    allStudents.forEach((s) => statusMap.set(s.id, "katysty"));
     renderAttendanceTable();
-  } catch (e) {
-    alert("API error: " + e.message);
-  }
-});
+  });
+
+  applyI18n();
+  renderAttendanceTable();
+} catch (e) {
+  alert("API error: " + e.message);
+}
+}); // ✅ end DOMContentLoaded
+
 
 
 
