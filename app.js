@@ -5,9 +5,7 @@ let currentLang =
   localStorage.getItem("lang") ||
   document.body.dataset.lang ||
   "kk";
-
 document.body.dataset.lang = currentLang;
-
 let __isSavingAttendance = false;
 
 // ============================
@@ -249,9 +247,6 @@ function setLang(lang) {
   localStorage.setItem("lang", currentLang);
   applyI18n();
 }
-
-/* ================== SCHOOL CALENDAR / HOLIDAYS (ONE COPY ONLY) ================== */
-
 
 /* ================== SCHOOL CALENDAR / HOLIDAYS (ONE COPY ONLY) ================== */
 // Сенбі/жексенбі — демалыс (5 күндік оқу)
@@ -713,17 +708,17 @@ function sumTotals(report){
 }
 
 /* ================== TOP ================== */
-function buildTop(report, code, limit=10) {␊
-  return (report.students||[])␊
-    .map(s=>({␊
-      name:s.full_name,␊
-      cls:`${s.grade}${s.class_letter}`,␊
-      count:Number(report.totals?.[String(s.id)]?.[code]||0)␊
-    }))␊
+function buildTop(report, code, limit=10) {
+  return (report.students||[])
+    .map(s=>({
+      name:s.full_name,
+      cls:`${s.grade}${s.class_letter}`,
+      count:Number(report.totals?.[String(s.id)]?.[code]||0)
+    }))
     .filter(x=>x.count>=3) // 3+ рет
-    .sort((a,b)=>b.count-a.count)␊
-    .slice(0,limit);␊
-}␊
+    .sort((a,b)=>b.count-a.count)
+    .slice(0,limit);
+}
 
 function fillTable(tableId, rows){
   const tbody = document.querySelector(`#${tableId} tbody`);
@@ -1071,8 +1066,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const iso = today.toISOString().slice(0, 10);
 
   document.getElementById("attendanceDate") && (document.getElementById("attendanceDate").value = iso);
- document.getElementById("customStart") && (document.getElementById("customStart").value = iso);␊
-  document.getElementById("customEnd") && (document.getElementById("customEnd").value = iso);␊
+ document.getElementById("customStart") && (document.getElementById("customStart").value = iso);
+  document.getElementById("customEnd") && (document.getElementById("customEnd").value = iso);
   document.getElementById("yearInput") && (document.getElementById("yearInput").value = today.getFullYear());
   document.getElementById("quarterYearInput") && (document.getElementById("quarterYearInput").value = today.getFullYear());
 
@@ -1151,6 +1146,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
