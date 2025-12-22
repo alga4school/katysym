@@ -907,8 +907,6 @@ function renderDayIssuesForRange(report, range) {
 }
 
 // 6) Update Stats (CLEAN)
-// 6) Update Stats (CLEAN)
-
 async function updateStats() {
   const range = getRangeFromPeriod();
   if (!range) {
@@ -1238,6 +1236,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
