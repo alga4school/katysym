@@ -248,34 +248,50 @@ function setLang(lang) {
   document.body.dataset.lang = currentLang;
   localStorage.setItem("lang", currentLang);
 
-  // ✅Қорғаныс: applyI18n бар болса ғана шақыр
-  if (typeof applyI18n === "function") applyI18n();
-}
+/* ================== SCHOOL CALENDAR / HOLIDAYS (ONE COPY ONLY) ================== */
 
-/* ================== НАСТРОЙКИ ================== */
-const WEEKEND_DAYS = new Set([5, 6]); // Пятница + Суббота
+// Сенбі/жексенбі — демалыс (5 күндік оқу)
+const WEEKEND_DAYS = new Set([0, 6]); // Sun=0, Sat=6
+
 const HOLIDAYS_KEY = "katysym_holidays_v1";
 
-/* ================== HOLIDAYS ================== */
+// Ресми каникул (2025-2026)
+const OFFICIAL_BREAKS_2025_2026 = [
+  { from: "2025-10-27", to: "2025-11-02" }, // күзгі
+  { from: "2025-12-29", to: "2026-01-07" }, // қысқы
+  { from: "2026-03-19", to: "2026-03-29" }, // көктемгі
+  // 1-сынып қосымша керек болса қос:
+  // { from:"2026-02-09", to:"2026-02-15" },
+];
+
+function d0(iso) { return new Date(iso + "T00:00:00"); }
+function iso(d) { return d.toISOString().slice(0, 10); }
+
+function betweenInclusive(dateISO, fromISO, toISO) {
+  const t = d0(dateISO).getTime();
+  return t >= d0(fromISO).getTime() && t <= d0(toISO).getTime();
+}
+function isOfficialBreakDay(dateISO) {
+  return OFFICIAL_BREAKS_2025_2026.some(b => betweenInclusive(dateISO, b.from, b.to));
+}
+
+// ===== manual holidays (қолмен белгілеу) =====
 function loadHolidays() {
-  try {
-    return new Set(JSON.parse(localStorage.getItem(HOLIDAYS_KEY) || "[]"));
-  } catch {
-    return new Set();
-  }
+  try { return new Set(JSON.parse(localStorage.getItem(HOLIDAYS_KEY) || "[]")); }
+  catch { return new Set(); }
 }
 function saveHolidays(set) {
   localStorage.setItem(HOLIDAYS_KEY, JSON.stringify([...set].sort()));
 }
-
 let HOLIDAYS = loadHolidays();
+
 function renderHolidays() {
   const el = document.getElementById("holidaysList");
   if (!el) return;
 
   if (!HOLIDAYS.size) {
-    const txt = I18N[currentLang]?.noHolidays || (currentLang === "ru" ? "Не выбрано" : "Таңдалмаған");
-    el.innerHTML = `<em data-i18n="noHolidays">${txt}</em>`;
+    // i18n үшін: ішіндегі мәтін data-i18n арқылы ауысуы керек
+    el.innerHTML = `<em data-i18n="noHolidays">${I18N[currentLang]?.noHolidays || ""}</em>`;
     return;
   }
 
@@ -291,43 +307,60 @@ function renderHolidays() {
       saveHolidays(HOLIDAYS);
       renderHolidays();
       updateSchoolDaysUI();
+      // тіл ауысқанда мәтін де дұрыс болсын:
+      applyI18n();
     };
   });
 }
 
-
 function initHolidayUI() {
-  document.getElementById("addHolidayBtn").onclick = () => {
-    const d = document.getElementById("holidayPick").value;
+  const addBtn = document.getElementById("addHolidayBtn");
+  const clrBtn = document.getElementById("clearHolidaysBtn");
+  const pick = document.getElementById("holidayPick");
+
+  if (addBtn) addBtn.onclick = () => {
+    const d = pick?.value;
     if (!d) return;
     HOLIDAYS.add(d);
     saveHolidays(HOLIDAYS);
     renderHolidays();
     updateSchoolDaysUI();
+    applyI18n();
   };
 
-  document.getElementById("clearHolidaysBtn").onclick = () => {
+  if (clrBtn) clrBtn.onclick = () => {
     HOLIDAYS.clear();
     saveHolidays(HOLIDAYS);
     renderHolidays();
     updateSchoolDaysUI();
+    applyI18n();
   };
 
   renderHolidays();
 }
 
-function isSchoolDayISO(iso) {
-  if (HOLIDAYS.has(iso)) return false;
-  const d = new Date(iso + "T00:00:00");
-  return !WEEKEND_DAYS.has(d.getDay());
+function isSchoolDayISO(dateISO) {
+  const day = d0(dateISO).getDay();
+  if (WEEKEND_DAYS.has(day)) return false;
+  if (isOfficialBreakDay(dateISO)) return false;
+  if (HOLIDAYS.has(dateISO)) return false;
+  return true;
 }
 
-function countSchoolDays(from, to) {
+function countSchoolDays(fromISO, toISO) {
   let c = 0;
-  for (let d = new Date(from); d <= new Date(to); d.setDate(d.getDate() + 1)) {
-    if (isSchoolDayISO(d.toISOString().slice(0,10))) c++;
+  for (let d = d0(fromISO); d <= d0(toISO); d.setDate(d.getDate() + 1)) {
+    const dayISO = iso(d);
+    if (isSchoolDayISO(dayISO)) c++;
   }
   return c;
+}
+
+function updateSchoolDaysUI() {
+  const el = document.getElementById("schoolDaysCount");
+  if (!el) return;
+  const r = getRangeFromPeriod();
+  el.textContent = r ? countSchoolDays(r.from, r.to) : 0;
 }
 
 // ============================
@@ -402,6 +435,10 @@ function applyI18n() {
   if (typeof renderAttendanceTable === "function") {
     renderAttendanceTable();
   }
+      // applyI18n() соңына қос:
+renderHolidays();
+updateSchoolDaysUI();
+
 }
 
 function statusLabel(code){
@@ -829,8 +866,6 @@ async function updateStats() {
     return;
   }
 
-  updateSchoolDaysUI();
-
   const reportClass = document.getElementById("reportClass")?.value || "ALL";
   let grade = "ALL", class_letter = "ALL";
 
@@ -876,120 +911,7 @@ function betweenInclusive(dateISO, fromISO, toISO){
   return t >= d0(fromISO).getTime() && t <= d0(toISO).getTime();
 }
 
-// ===== OFFICIAL BREAKS 2025-2026 =====
-const OFFICIAL_BREAKS_2025_2026 = [
-  { from:"2025-10-27", to:"2025-11-02" }, // күзгі
-  { from:"2025-12-29", to:"2026-01-07" }, // қысқы
-  { from:"2026-03-19", to:"2026-03-29" }, // көктемгі
-];
 
-function isOfficialBreakDay(dateISO){
-  return OFFICIAL_BREAKS_2025_2026.some(b => betweenInclusive(dateISO, b.from, b.to));
-}
-
-/* ================== НАСТРОЙКИ ================== */
-const WEEKEND_DAYS = new Set([0, 6]); // Жексенбі + Сенбі
-const HOLIDAYS_KEY = "katysym_holidays_v1";
-
-/* ===== OFFICIAL BREAKS 2025-2026 (каникул) ===== */
-const OFFICIAL_BREAKS_2025_2026 = [
-  { from:"2025-10-27", to:"2025-11-02" }, // күзгі
-  { from:"2025-12-29", to:"2026-01-07" }, // қысқы
-  { from:"2026-03-19", to:"2026-03-29" }, // көктемгі
-  // 1-сынып қосымша (керек болса ғана қос):
-  // { from:"2026-02-09", to:"2026-02-15" },
-];
-
-function d0(s){ return new Date(s + "T00:00:00"); }
-function betweenInclusive(dateISO, fromISO, toISO){
-  const t = d0(dateISO).getTime();
-  return t >= d0(fromISO).getTime() && t <= d0(toISO).getTime();
-}
-function isOfficialBreakDay(dateISO){
-  return OFFICIAL_BREAKS_2025_2026.some(b => betweenInclusive(dateISO, b.from, b.to));
-}
-
-/* ================== HOLIDAYS (manual) ================== */
-function loadHolidays() {
-  try { return new Set(JSON.parse(localStorage.getItem(HOLIDAYS_KEY) || "[]")); }
-  catch { return new Set(); }
-}
-function saveHolidays(set) {
-  localStorage.setItem(HOLIDAYS_KEY, JSON.stringify([...set].sort()));
-}
-let HOLIDAYS = loadHolidays();
-
-/* ================== UI: render holidays ================== */
-function renderHolidays() {
-  const el = document.getElementById("holidaysList");
-  if (!el) return;
-
-  if (!HOLIDAYS.size) {
-    const txt = I18N[currentLang]?.noHolidays || (currentLang === "ru" ? "Не выбрано" : "Таңдалмаған");
-    el.innerHTML = `<em data-i18n="noHolidays">${txt}</em>`;
-    return;
-  }
-
-  el.innerHTML = [...HOLIDAYS].map(d => `
-    <span class="holidayTag">${d}
-      <button data-date="${d}" class="delHolidayBtn">×</button>
-    </span>
-  `).join(" ");
-
-  el.querySelectorAll(".delHolidayBtn").forEach(btn => {
-    btn.onclick = () => {
-      HOLIDAYS.delete(btn.dataset.date);
-      saveHolidays(HOLIDAYS);
-      renderHolidays();
-      updateSchoolDaysUI();
-    };
-  });
-}
-
-function initHolidayUI() {
-  document.getElementById("addHolidayBtn").onclick = () => {
-    const d = document.getElementById("holidayPick").value;
-    if (!d) return;
-    HOLIDAYS.add(d);
-    saveHolidays(HOLIDAYS);
-    renderHolidays();
-    updateSchoolDaysUI();
-  };
-
-  document.getElementById("clearHolidaysBtn").onclick = () => {
-    HOLIDAYS.clear();
-    saveHolidays(HOLIDAYS);
-    renderHolidays();
-    updateSchoolDaysUI();
-  };
-
-  renderHolidays();
-}
-
-/* ================== SCHOOL DAY CHECK ================== */
-function isSchoolDayISO(dateISO) {
-  const day = d0(dateISO).getDay();
-
-  // демалыс
-  if (WEEKEND_DAYS.has(day)) return false;
-
-  // ресми каникул
-  if (isOfficialBreakDay(dateISO)) return false;
-
-  // қолмен белгіленген holiday
-  if (HOLIDAYS.has(dateISO)) return false;
-
-  return true;
-}
-
-function countSchoolDays(fromISO, toISO) {
-  let c = 0;
-  for (let d = d0(fromISO); d <= d0(toISO); d.setDate(d.getDate() + 1)) {
-    const iso = d.toISOString().slice(0,10);
-    if (isSchoolDayISO(iso)) c++;
-  }
-  return c;
-}
 
 function exportCsv() {
   const range = getRangeFromPeriod();
@@ -1221,6 +1143,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
