@@ -641,21 +641,24 @@ function getRangeFromPeriod() {
     return { from: d, to: d };
   }
 
-  // ✅ WEEK: соңғы 5 оқу күні (дүйсенбі–жұма), 7 күн емес
-  if (type === "week") {
-    const end = new Date();
-    // бүгіннен артқа 7 күн қарап, тек оқу күндерін жинаймыз
-    const days = [];
-    for (let i = 0; i < 14 && days.length < 5; i++) {
-      const t = new Date();
-      t.setDate(t.getDate() - i);
-      const dow = t.getDay(); // 0 Sun .. 6 Sat
-      if (dow !== 0 && dow !== 6) days.push(toISO(t));
-    }
-    const from = days[days.length - 1];
-    const to = days[0];
-    return { from, to };
-  }
+  // ✅ WEEK: таңдалған күннен бастап 7 күн (from..to = 7 күн)
+if (type === "week") {
+  const startISO = document.getElementById("customStart")?.value;
+  if (!startISO) return null;
+
+  const start = new Date(startISO + "T00:00:00");
+  const end = new Date(start);
+  end.setDate(end.getDate() + 6); // 7 күн = start + 6
+
+  const from = startISO;
+  const to = end.toISOString().slice(0, 10);
+
+  // UI-дағы "Аяқталу күні" де дұрыс тұрсын
+  const endInput = document.getElementById("customEnd");
+  if (endInput) endInput.value = to;
+
+  return { from, to };
+}
 
   // ✅ MONTH
   if (type === "month") {
@@ -707,30 +710,75 @@ function sumTotals(report){
 }
 
 /* ================== TOP ================== */
-function buildTop(report, code, limit=10) {
-  return (report.students||[])
-    .map(s=>({
-      name:s.full_name,
-      cls:`${s.grade}${s.class_letter}`,
-      count:Number(report.totals?.[String(s.id)]?.[code]||0)
-    }))
-    .filter(x=>x.count>=3) // 3+ рет
-    .sort((a,b)=>b.count-a.count)
-    .slice(0,limit);
+// ✅ daily арқылы нақты санау (тоқсан/ай/жыл бәріне дұрыс)
+function buildTopFromDaily(report, code, minCount = 3, limit = 10) {
+  const students = report?.students || [];
+  const daily = report?.daily || {};
+
+  // id -> student
+  const stById = new Map(students.map(s => [String(s.id), s]));
+
+  // id -> count
+  const counts = new Map();
+
+  Object.entries(daily).forEach(([dateISO, byId]) => {
+    if (!byId) return;
+    Object.entries(byId).forEach(([sid, st]) => {
+      const c = st?.status_code || "katysty";
+      if (c !== code) return;
+      counts.set(String(sid), (counts.get(String(sid)) || 0) + 1);
+    });
+  });
+
+  // build rows
+  const rows = [];
+  counts.forEach((cnt, sid) => {
+    if (cnt < minCount) return;
+
+    const s = stById.get(String(sid));
+    const name = s ? s.full_name : sid;
+    const cls = s ? `${s.grade}${s.class_letter}` : "";
+
+    rows.push({ name, cls, count: cnt });
+  });
+
+  rows.sort((a, b) => b.count - a.count);
+  return rows.slice(0, limit);
 }
 
-function fillTable(tableId, rows){
+
+function fillTable(tableId, rows) {
   const tbody = document.querySelector(`#${tableId} tbody`);
   if (!tbody) return;
+
   tbody.innerHTML = "";
-  rows.forEach((r,i)=>{
+
+  if (!rows || rows.length === 0) {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${i+1}</td><td>${r.name}</td><td>${r.cls}</td><td>${r.count}</td>`;
+    tr.innerHTML = `<td colspan="4" style="text-align:center; color:#888; padding:12px;">
+      ${currentLang === "ru" ? "Нет данных (нужно ≥ 3 раз)" : "Дерек жоқ (≥ 3 рет болуы керек)"}
+    </td>`;
+    tbody.appendChild(tr);
+    return;
+  }
+
+  rows.forEach((r, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${i + 1}</td><td>${r.name}</td><td>${r.cls}</td><td>${r.count}</td>`;
     tbody.appendChild(tr);
   });
 }
 
-function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));}
+function escapeHtml(s){
+  return String(s ?? '')
+    .replace(/[&<>"']/g, c => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      "\"":"&quot;",
+      "'":"&#39;"
+    }[c]));
+}
 
 // ============================
 // REPORTS
@@ -898,8 +946,8 @@ async function updateStats() {
     document.getElementById("totalExcused").textContent = t.sebep;
     document.getElementById("totalUnexcused").textContent = t.sebsez;
 
-    fillTable("topLateTable", buildTop(report, "keshikti"));
-    fillTable("topUnexcusedTable", buildTop(report, "sebsez"));
+   fillTable("topLateTable", buildTopFromDaily(report, "keshikti", 3, 10));
+fillTable("topUnexcusedTable", buildTopFromDaily(report, "sebsez", 3, 10));
   } catch (e) {
     alert((currentLang === "ru" ? "Ошибка отчёта: " : "Есеп қатесі: ") + e.message);
   }
@@ -1055,6 +1103,30 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("langToggle")?.addEventListener("click", () => {
     setLang(currentLang === "kk" ? "ru" : "kk");
   });
+  
+applyI18n();
+  initHolidayUI();
+  updateSchoolDaysUI();
+
+  document.getElementById("customStart")?.addEventListener("change", () => {
+  const type = document.getElementById("periodType")?.value;
+  const startISO = document.getElementById("customStart")?.value;
+  const endInput = document.getElementById("customEnd");
+
+  if (!startISO || !endInput) { updateSchoolDaysUI(); return; }
+
+  if (type === "day") {
+    endInput.value = startISO;
+  }
+
+  if (type === "week") {
+    const d = new Date(startISO + "T00:00:00");
+    d.setDate(d.getDate() + 6);
+    endInput.value = d.toISOString().slice(0,10);
+  }
+
+  updateSchoolDaysUI();
+});
 
   // Бүгінгі күнді қою
   const today = new Date();
@@ -1097,6 +1169,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (toLabel) toLabel.style.display = "";
     if (toInput) toInput.style.display = "";
   }
+   updateSchoolDaysUI();
 });
 
 // Батырмалар
@@ -1141,6 +1214,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
