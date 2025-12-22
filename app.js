@@ -926,12 +926,13 @@ async function updateStats() {
   }
 
   try {
-    // ✅ API үшін диапазонды түзету (күндік режимде to = келесі күн)
-// ✅ API үшін диапазон: to = келесі күн (end exclusive болса да дұрыс)
+    
+ // ✅ API үшін диапазонды түзету (күндік режимде to = келесі күн)
 let apiFrom = range.from;
 let apiTo = range.to;
 
-if (apiTo) {
+const periodType = document.getElementById("periodType")?.value;
+if (periodType === "day" && apiFrom === apiTo) {
   const d = new Date(apiTo + "T00:00:00");
   d.setDate(d.getDate() + 1);
   apiTo = d.toISOString().slice(0, 10);
@@ -943,8 +944,6 @@ const report = await apiGet("report", {
   grade,
   class_letter,
 });
-
-
 
     // ✅ Day Issues шығару
     renderDayIssuesForRange(report, range);
@@ -962,6 +961,7 @@ const report = await apiGet("report", {
 
    fillTable("topLateTable", buildTopFromDaily(report, "keshikti", 3, 10));
 fillTable("topUnexcusedTable", buildTopFromDaily(report, "sebsez", 3, 10));
+    
   } catch (e) {
     alert((currentLang === "ru" ? "Ошибка отчёта: " : "Есеп қатесі: ") + e.message);
   }
@@ -992,8 +992,18 @@ function exportCsv() {
     class_letter = p.letter;
   }
 
-  apiGet("report", { from: range.from, to: range.to, grade, class_letter })
-    .then(report => {
+  // ✅ API үшін диапазон: to = келесі күн (end exclusive болса да дұрыс)
+let apiFrom = range.from;
+let apiTo = range.to;
+
+if (apiTo) {
+  const d = new Date(apiTo + "T00:00:00");
+  d.setDate(d.getDate() + 1);
+  apiTo = d.toISOString().slice(0, 10);
+}
+
+apiGet("report", { from: apiFrom, to: apiTo, grade, class_letter })
+  .then(report => {
       const students = report?.students || [];
       const daily = report?.daily || {};
       const totals = report?.totals || {};
@@ -1228,6 +1238,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
