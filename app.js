@@ -851,8 +851,6 @@ function buildIssuesForRange(report, range) {
       if (Number(t.sebep || 0) > 0) exc.push({ name: s.full_name, cls });
       if (Number(t.sebsez || 0) > 0) unex.push({ name: s.full_name, cls });
     });
-    return { late, sick, exc, unex };
-  }
 
   const seen = {
     keshikti: new Set(),
@@ -888,10 +886,6 @@ function buildIssuesForRange(report, range) {
     });
   }
 
-  return { late, sick, exc, unex };
-}
-
-
   // бір адам мерзім ішінде бірнеше рет кездесуі мүмкін → қайталамас үшін Set
   const seen = {
     keshikti: new Set(),
@@ -924,9 +918,7 @@ function buildIssuesForRange(report, range) {
       if (code === "sebsez") unex.push(row);
     });
   }
-
   return { late, sick, exc, unex };
-}
 
 // 5) dayIssuesBox көрсету (ЕНДІ: кез келген мерзімде, кез келген класс/ALL үшін)
 function renderDayIssuesForRange(report, range) {
@@ -1284,6 +1276,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
