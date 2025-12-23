@@ -913,12 +913,12 @@ function renderDayIssuesForRange(report, range) {
 }
 
 // ===== DATE HELPERS =====
+
 function addDaysISO(iso, days) {
   const d = new Date(iso + "T00:00:00");
   d.setDate(d.getDate() + days);
   return d.toISOString().slice(0, 10);
 }
-
 async function updateStats() {
   const range = getRangeFromPeriod();
   if (!range) {
@@ -1233,6 +1233,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
