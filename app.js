@@ -919,7 +919,8 @@ function buildIssuesForRange(report, range) {
     });
   }
   return { late, sick, exc, unex };
-
+  }
+  
 // 5) dayIssuesBox көрсету (ЕНДІ: кез келген мерзімде, кез келген класс/ALL үшін)
 function renderDayIssuesForRange(report, range) {
   const box = document.getElementById("dayIssuesBox");
@@ -1276,6 +1277,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
