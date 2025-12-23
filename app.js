@@ -633,7 +633,13 @@ function getRangeFromPeriod() {
   const type = document.getElementById("periodType")?.value;
   const toISO = d => d.toISOString().slice(0,10);
   const d0 = s => new Date(s + "T00:00:00");
-
+  
+  if (type === "custom") {
+  const start = document.getElementById("customStart")?.value;
+  const end   = document.getElementById("customEnd")?.value || start;
+  if (!start) return null;
+  return (start <= end) ? { from: start, to: end } : { from: end, to: start };
+}
  // ✅ DAY: customStart арқылы 1 күн
   if (type === "day") {
     const d = document.getElementById("customStart")?.value;
@@ -652,6 +658,7 @@ function getRangeFromPeriod() {
 
 
   // ✅ MONTH
+
   if (type === "month") {
     const v = document.getElementById("monthInput")?.value;
     if (!v) return null;
@@ -1231,6 +1238,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
