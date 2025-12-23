@@ -946,11 +946,7 @@ console.log("API:", { from: apiFrom, to: apiTo, grade, class_letter });
 console.log("DAILY KEYS:", Object.keys(report.daily || {}).slice(0, 20));
 console.log("TOTALS KEYS:", Object.keys(report.totals || {}).length);
 
-
-    // ✅ Күндік блок (кешіккен/ауырған/себепті/себепсіз)
     renderDayIssuesForRange(report, range);
-
-    // ✅ Оқу күндерінің саны
     updateSchoolDaysUI();
 
     // ✅ KPI
@@ -1230,6 +1226,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
