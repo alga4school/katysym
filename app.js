@@ -627,65 +627,54 @@ async function saveAttendance() {
   }
 }
 
-
 /* ================== ПЕРИОД ================== */
+
 function getRangeFromPeriod() {
   const type = document.getElementById("periodType")?.value;
   const toISO = d => d.toISOString().slice(0,10);
-  const d0 = s => new Date(s + "T00:00:00");
-  
-  if (type === "custom") {
-  const start = document.getElementById("customStart")?.value;
-  const end   = document.getElementById("customEnd")?.value || start;
-  if (!start) return null;
-  return (start <= end) ? { from: start, to: end } : { from: end, to: start };
-}
- // ✅ DAY: customStart арқылы 1 күн
+
+  // ✅ DAY
   if (type === "day") {
     const d = document.getElementById("customStart")?.value;
     if (!d) return null;
     return { from: d, to: d };
   }
 
-  // ✅ WEEK: customStart/customEnd арқылы
+  // ✅ WEEK
   if (type === "week") {
     const start = document.getElementById("customStart")?.value;
     const end = document.getElementById("customEnd")?.value || start;
     if (!start) return null;
-    if (!end) return { from: start, to: start };
     return (start <= end) ? { from: start, to: end } : { from: end, to: start };
   }
 
-
   // ✅ MONTH
-
   if (type === "month") {
     const v = document.getElementById("monthInput")?.value;
     if (!v) return null;
     const [y,m] = v.split("-");
-    const last = new Date(Number(y), Number(m), 0); // соңғы күн
+    const last = new Date(Number(y), Number(m), 0);
     return { from:`${y}-${m}-01`, to: toISO(last) };
   }
 
-  // ✅ YEAR (календарь жыл)
+  // ✅ YEAR
   if (type === "year") {
     const y = Number(document.getElementById("yearInput")?.value || new Date().getFullYear());
     return { from:`${y}-01-01`, to:`${y}-12-31` };
   }
 
-  // ✅ QUARTER (2025-2026 оқу жылы)
+  // ✅ QUARTER
   if (type === "quarter") {
     const q = Number(document.getElementById("quarterInput")?.value || 0);
-    // оқу жылы 2025 деп аламыз (2025-09-01 басталады)
     const baseY = Number(document.getElementById("quarterYearInput")?.value || 2025);
 
     const Q = {
       1: { from:`${baseY}-09-01`, to:`${baseY}-10-26` },
-      2: { from:`${baseY}-11-03`, to:`${baseY}-12-28` }, // 27.10-02.11 каникулдан кейін
-      3: { from:`${baseY+1}-01-08`, to:`${baseY+1}-03-18` }, // 29.12-07.01 каникулдан кейін
-      4: { from:`${baseY+1}-03-30`, to:`${baseY+1}-05-25` }, // 19-29.03 каникулдан кейін
+      2: { from:`${baseY}-11-03`, to:`${baseY}-12-28` },
+      3: { from:`${baseY+1}-01-08`, to:`${baseY+1}-03-18` },
+      4: { from:`${baseY+1}-03-30`, to:`${baseY+1}-05-25` },
     };
-
+    
     return Q[q] || null;
   }
 
@@ -695,7 +684,6 @@ function getRangeFromPeriod() {
   return null;
 }
 
-
 function sumTotals(report){
   const totals = { total:0, katysty:0, keshikti:0, sebep:0, sebsez:0, auyrdy:0 };
   Object.values(report.totals || {}).forEach(t => {
@@ -704,6 +692,7 @@ function sumTotals(report){
       totals.total += Number(t[k] || 0);
     });
   });
+  
   return totals;
 }
 
@@ -762,7 +751,7 @@ function fillTable(tableId, rows) {
 
   rows.forEach((r, i) => {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${i + 1}</td><td>${r.name}</td><td>${r.cls}</td><td>${r.count}</td>`;
+ tr.innerHTML = `<td>${i + 1}</td><td>${escapeHtml(r.name)}</td><td>${escapeHtml(r.cls)}</td><td>${r.count}</td>`;
     tbody.appendChild(tr);
   });
 }
@@ -777,7 +766,6 @@ function escapeHtml(s){
   }[c]));
 }
 
-
 // ============================
 // REPORTS
 // ============================
@@ -785,10 +773,15 @@ function escapeHtml(s){
 function fillSimpleTable(tableId, rows) {
   const tbody = document.querySelector(`#${tableId} tbody`);
   if (!tbody) return;
+
   tbody.innerHTML = "";
   rows.forEach((r, i) => {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${i + 1}</td><td>${escapeHtml(r.name)}</td><td>${escapeHtml(r.cls)}</td>`;
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${escapeHtml(r.name)}</td>
+      <td>${escapeHtml(r.cls)}</td>
+    `;
     tbody.appendChild(tr);
   });
 }
@@ -1247,6 +1240,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
