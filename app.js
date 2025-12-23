@@ -1190,18 +1190,10 @@ document.getElementById("saveAttendanceBtn")?.addEventListener("click", saveAtte
 document.getElementById("updateStatsBtn")?.addEventListener("click", updateStats);
 document.getElementById("exportCsvBtn")?.addEventListener("click", exportCsv);
 document.getElementById("searchInput")?.addEventListener("input", renderAttendanceTable);
-document.getElementById("customStart")?.addEventListener("change", () => {
-  const type = document.getElementById("periodType")?.value;
-  if (type !== "day") return;
-  const start = document.getElementById("customStart")?.value;
-  const end = document.getElementById("customEnd");
-  if (start && end) end.value = start;
-});
   
 // ✅ Бет ашылғанда period control-дар бірден дұрыс көрінсін
 document.getElementById("periodType")?.dispatchEvent(new Event("change"));
-document.getElementById("rep_periodType")?.dispatchEvent(new Event("change")); // егер бар болса
-
+  
 // API: сыныптар, оқушылар
 try {
   const cls = await apiGet("classes");
@@ -1227,6 +1219,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
