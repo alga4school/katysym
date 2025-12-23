@@ -836,9 +836,13 @@ function buildIssuesForRange(report, range) {
   const sick = [];
   const exc = [];
   const unex = [];
+  
+const dates = eachDateISO(
+  range.from,
+  addDaysISO(range.to, 1) 
+);
+const dailyKeys = Object.keys(daily); 
 
-  const dates = eachDateISO(range.from, range.to);
-  const dailyKeys = Object.keys(daily);
 
   if (!dailyKeys.length) {
     const totals = report.totals || {};
@@ -1227,6 +1231,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
