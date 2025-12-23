@@ -887,39 +887,40 @@ function buildIssuesForRange(report, range) {
   }
 
   // бір адам мерзім ішінде бірнеше рет кездесуі мүмкін → қайталамас үшін Set
-  const seen = {
-    keshikti: new Set(),
-    auyrdy: new Set(),
-    sebep: new Set(),
-    sebsez: new Set(),
-  };
+const seen = {
+  keshikti: new Set(),
+  auyrdy: new Set(),
+  sebep: new Set(),
+  sebsez: new Set(),
+};
 
-  for (const dateISO of dates) {
-    const dailyMap = daily[dateISO];
-    if (!dailyMap) continue;
+for (const dateISO of dates) {
+  const dailyMap = daily[dateISO];
+  if (!dailyMap) continue;
 
-    Object.entries(dailyMap).forEach(([sid, st]) => {
-      const code = st?.status_code;
-      if (!code || code === "katysty") return;
+  Object.entries(dailyMap).forEach(([sid, st]) => {
+    const code = st?.status_code;
+    if (!code || code === "katysty") return;
 
-      const s = stById.get(String(sid));
-      const name = s ? s.full_name : String(sid);
-      const cls = s ? `${s.grade}${s.class_letter}` : "";
+    const s = stById.get(String(sid));
+    const name = s ? s.full_name : String(sid);
+    const cls = s ? `${s.grade}${s.class_letter}` : "";
 
-      // қайталамау: бір оқушы бір категорияға 1-ақ рет түссін
-      if (seen[code] && seen[code].has(String(sid))) return;
-      if (seen[code]) seen[code].add(String(sid));
+    // қайталамау: бір оқушы бір категорияға 1-ақ рет түссін
+    if (seen[code] && seen[code].has(String(sid))) return;
+    if (seen[code]) seen[code].add(String(sid));
 
-      const row = { name, cls };
+    const row = { name, cls };
 
-      if (code === "keshikti") late.push(row);
-      if (code === "auyrdy") sick.push(row);
-      if (code === "sebep") exc.push(row);
-      if (code === "sebsez") unex.push(row);
-    });
-  return { late, sick, exc, unex };
-  }
-  
+    if (code === "keshikti") late.push(row);
+    if (code === "auyrdy") sick.push(row);
+    if (code === "sebep") exc.push(row);
+    if (code === "sebsez") unex.push(row);
+  });
+} // ✅ for осында бітеді
+
+return { late, sick, exc, unex }; // ✅ return циклдан кейін тұрады
+
 // 5) dayIssuesBox көрсету (ЕНДІ: кез келген мерзімде, кез келген класс/ALL үшін)
 function renderDayIssuesForRange(report, range) {
   const box = document.getElementById("dayIssuesBox");
@@ -1276,6 +1277,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
