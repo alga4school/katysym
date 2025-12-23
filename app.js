@@ -935,12 +935,16 @@ async function updateStats() {
     const apiFrom = range.from;
     const apiTo = addDaysISO(range.to, 1);
 
-    const report = await apiGet("report", {
-      from: apiFrom,
-      to: apiTo,
-      grade,
-      class_letter,
-    });
+   const apiFrom = range.from;
+const apiTo = addDaysISO(range.to, 1); // ✅ әрқашан to+1
+
+const report = await apiGet("report", {
+  from: apiFrom,
+  to: apiTo,
+  grade,
+  class_letter,
+});
+
 
     // ✅ Күндік блок (кешіккен/ауырған/себепті/себепсіз)
     renderDayIssuesForRange(report, range);
@@ -1219,6 +1223,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
