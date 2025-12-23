@@ -932,9 +932,6 @@ async function updateStats() {
   try {
     
     // ✅ API үшін диапазон: to = келесі күн (end-exclusive болса да дұрыс)
-    const apiFrom = range.from;
-    const apiTo = addDaysISO(range.to, 1);
-
    const apiFrom = range.from;
 const apiTo = addDaysISO(range.to, 1); // ✅ әрқашан to+1
 
@@ -1223,6 +1220,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
