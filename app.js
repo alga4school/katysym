@@ -991,9 +991,16 @@ const report = await apiGet("report", {
   }
 }
 
- // ===== DATE HELPERS =====
-function iso(d){ return d.toISOString().slice(0,10); }
-function d0(s){ return new Date(s + "T00:00:00"); }
+// ===== DATE HELPERS (LOCAL) =====
+function iso(d){
+  return fmtISO(d);
+}
+
+function d0(s){
+  const [y,m,d] = s.split("-").map(Number);
+  return new Date(y, m-1, d); // local
+}
+
 
 function betweenInclusive(dateISO, fromISO, toISO){
   const t = d0(dateISO).getTime();
@@ -1240,6 +1247,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
