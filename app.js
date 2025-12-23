@@ -634,31 +634,22 @@ function getRangeFromPeriod() {
   const toISO = d => d.toISOString().slice(0,10);
   const d0 = s => new Date(s + "T00:00:00");
 
-  // ✅ DAY: customStart арқылы 1 күн
+ // ✅ DAY: customStart арқылы 1 күн
   if (type === "day") {
     const d = document.getElementById("customStart")?.value;
     if (!d) return null;
     return { from: d, to: d };
   }
 
-  // ✅ WEEK: таңдалған күннен бастап 7 күн (from..to = 7 күн)
-if (type === "week") {
-  const startISO = document.getElementById("customStart")?.value;
-  if (!startISO) return null;
+  // ✅ WEEK: customStart/customEnd арқылы
+  if (type === "week") {
+    const start = document.getElementById("customStart")?.value;
+    const end = document.getElementById("customEnd")?.value || start;
+    if (!start) return null;
+    if (!end) return { from: start, to: start };
+    return (start <= end) ? { from: start, to: end } : { from: end, to: start };
+  }
 
-  const start = new Date(startISO + "T00:00:00");
-  const end = new Date(start);
-  end.setDate(end.getDate() + 6); // 7 күн = start + 6
-
-  const from = startISO;
-  const to = end.toISOString().slice(0, 10);
-
-  // UI-дағы "Аяқталу күні" де дұрыс тұрсын
-  const endInput = document.getElementById("customEnd");
-  if (endInput) endInput.value = to;
-
-  return { from, to };
-}
 
   // ✅ MONTH
   if (type === "month") {
@@ -847,6 +838,21 @@ function buildIssuesForRange(report, range) {
   const unex = [];
 
   const dates = eachDateISO(range.from, range.to);
+  const dailyKeys = Object.keys(daily);
+
+  if (!dailyKeys.length) {
+    const totals = report.totals || {};
+    (report.students || []).forEach((s) => {
+      const t = totals[String(s.id)] || {};
+      const cls = `${s.grade}${s.class_letter}`;
+      if (Number(t.keshikti || 0) > 0) late.push({ name: s.full_name, cls });
+      if (Number(t.auyrdy || 0) > 0) sick.push({ name: s.full_name, cls });
+      if (Number(t.sebep || 0) > 0) exc.push({ name: s.full_name, cls });
+      if (Number(t.sebsez || 0) > 0) unex.push({ name: s.full_name, cls });
+    });
+    return { late, sick, exc, unex };
+  }
+
 
   // бір адам мерзім ішінде бірнеше рет кездесуі мүмкін → қайталамас үшін Set
   const seen = {
@@ -1191,7 +1197,14 @@ document.getElementById("saveAttendanceBtn")?.addEventListener("click", saveAtte
 document.getElementById("updateStatsBtn")?.addEventListener("click", updateStats);
 document.getElementById("exportCsvBtn")?.addEventListener("click", exportCsv);
 document.getElementById("searchInput")?.addEventListener("input", renderAttendanceTable);
-  
+document.getElementById("customStart")?.addEventListener("change", () => {
+  const type = document.getElementById("periodType")?.value;
+  if (type !== "day") return;
+  const start = document.getElementById("customStart")?.value;
+  const end = document.getElementById("customEnd");
+  if (start && end) end.value = start;
+});
+
 // ✅ Бет ашылғанда period control-дар бірден дұрыс көрінсін
 document.getElementById("periodType")?.dispatchEvent(new Event("change"));
   
@@ -1220,6 +1233,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
