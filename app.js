@@ -828,22 +828,19 @@ function eachDateISO(fromISO, toISO) {
 
 // 4) report.daily ішінен таңдалған мерзім бойынша (1 күн/апта/ай/жыл/барлығы)
 // кешіккен/ауырған/себепті/себепсіз тізімдерді жинау
+
 function buildIssuesForRange(report, range) {
-  const stById = new Map((report.students || []).map((s) => [String(s.id), s]));
+  const stById = new Map((report.students || []).map(s => [String(s.id), s]));
   const daily = report.daily || {};
 
   const late = [];
   const sick = [];
   const exc = [];
   const unex = [];
-  
-const dates = eachDateISO(
-  range.from,
-  addDaysISO(range.to, 1) 
-);
-const dailyKeys = Object.keys(daily); 
 
+  const dailyKeys = Object.keys(daily);
 
+  // daily мүлде жоқ болса — totals арқылы
   if (!dailyKeys.length) {
     const totals = report.totals || {};
     (report.students || []).forEach((s) => {
@@ -856,6 +853,43 @@ const dailyKeys = Object.keys(daily);
     });
     return { late, sick, exc, unex };
   }
+
+  const seen = {
+    keshikti: new Set(),
+    auyrdy: new Set(),
+    sebep: new Set(),
+    sebsez: new Set(),
+  };
+
+  // ✅ ЕҢ НЕГІЗГІ: daily-дің өз күндерін сүземіз (range ішінде ғана)
+  for (const dateISO of dailyKeys) {
+    if (!betweenInclusive(dateISO, range.from, range.to)) continue;
+
+    const dailyMap = daily[dateISO];
+    if (!dailyMap) continue;
+
+    Object.entries(dailyMap).forEach(([sid, st]) => {
+      const code = st?.status_code;
+      if (!code || code === "katysty") return;
+
+      if (seen[code] && seen[code].has(String(sid))) return;
+      if (seen[code]) seen[code].add(String(sid));
+
+      const s = stById.get(String(sid));
+      const name = s ? s.full_name : String(sid);
+      const cls = s ? `${s.grade}${s.class_letter}` : "";
+
+      const row = { name, cls };
+
+      if (code === "keshikti") late.push(row);
+      if (code === "auyrdy") sick.push(row);
+      if (code === "sebep")   exc.push(row);
+      if (code === "sebsez")  unex.push(row);
+    });
+  }
+
+  return { late, sick, exc, unex };
+}
 
 
   // бір адам мерзім ішінде бірнеше рет кездесуі мүмкін → қайталамас үшін Set
@@ -960,6 +994,11 @@ const report = await apiGet("report", {
   grade,
   class_letter,
 });
+    
+console.log("RANGE(UI):", range);
+console.log("API:", { from: apiFrom, to: apiTo, grade, class_letter });
+console.log("DAILY KEYS:", Object.keys(report.daily || {}).slice(0, 20));
+console.log("TOTALS KEYS:", Object.keys(report.totals || {}).length);
 
 
     // ✅ Күндік блок (кешіккен/ауырған/себепті/себепсіз)
@@ -1000,8 +1039,6 @@ function d0(s){
   const [y,m,d] = s.split("-").map(Number);
   return new Date(y, m-1, d); // local
 }
-
-
 function betweenInclusive(dateISO, fromISO, toISO){
   const t = d0(dateISO).getTime();
   return t >= d0(fromISO).getTime() && t <= d0(toISO).getTime();
@@ -1247,6 +1284,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
