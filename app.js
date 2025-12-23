@@ -828,7 +828,7 @@ function eachDateISO(fromISO, toISO) {
   const start = new Date(fromISO + "T00:00:00");
   const end = new Date(toISO + "T00:00:00");
   for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    res.push(d.toISOString().slice(0, 10));
+    res.push(fmtISO(d));
   }
   return res;
 }
@@ -925,11 +925,13 @@ function renderDayIssuesForRange(report, range) {
 
 // ===== DATE HELPERS =====
 
-function addDaysISO(iso, days) {
-  const d = new Date(iso + "T00:00:00");
-  d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
+function addDaysISO(isoStr, days) {
+  const [y,m,d] = isoStr.split("-").map(Number);
+  const dt = new Date(y, m-1, d);   // local date
+  dt.setDate(dt.getDate() + days);
+  return fmtISO(dt);
 }
+
 async function updateStats() {
   const range = getRangeFromPeriod();
   if (!range) {
@@ -1238,6 +1240,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
