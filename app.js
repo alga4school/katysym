@@ -982,63 +982,61 @@ function betweenInclusive(dateISO, fromISO, toISO){
 
 function exportCsv() {
   const range = getRangeFromPeriod();
-  if (!range) { alert(...); return; }
-
+  if (!range) {
+    alert(I18N[currentLang]?.needPeriod || "Кезеңді таңдаңыз");
+    return;
+  }
   const reportClass = document.getElementById("reportClass")?.value || "ALL";
   let grade = "ALL", class_letter = "ALL";
-  if (reportClass !== "ALL") { ... }
 
+  if (reportClass !== "ALL") {
+    const p = parseClass(reportClass);
+    grade = p.grade;
+    class_letter = p.letter;
+  }
   const apiFrom = range.from;
   const apiTo = addDaysISO(range.to, 1);
 
-  apiGet("report", { from: apiFrom, to: apiTo, grade, class_letter })
-    .then(report => { ... });
-}
+ apiGet("report", { from: apiFrom, to: apiTo, grade, class_letter })
+    .then(report => {
 
-      const students = report?.students || [];
+     const students = report?.students || [];
       const daily = report?.daily || {};
       const totals = report?.totals || {};
 
       // helpers
-      const norm = (s) => String(s || "").replace(/\s+/g, "").toUpperCase();
+     const norm = (s) => String(s || "").replace(/\s+/g, "").toUpperCase();
       const wantedClassNorm = (reportClass === "ALL") ? "" : norm(reportClass);
-      const getStudentClass = (s) => `${s.grade}${s.class_letter}`;
+
+     const getStudentClass = (s) => `${s.grade}${s.class_letter}`;
       const getCode = (st) => (st?.status_code || "katysty");
 
       const getKk = (st) => {
         const code = getCode(st);
         return st?.status_kk || STATUS[code]?.kk || STATUS.katysty.kk;
       };
-      const getRu = (st) => {
+      
+     const getRu = (st) => {
         const code = getCode(st);
         return st?.status_ru || STATUS[code]?.ru || STATUS.katysty.ru;
       };
-
+      
       // DAILY rows
       const headerDaily = ["date","student","class","status_code","status_kk","status_ru"];
       const rowsDaily = [];
 
-      Object.entries(daily).forEach(([dateISO, byId]) => {
+       Object.entries(daily).forEach(([dateISO, byId]) => {
         students.forEach(s => {
           const cls = getStudentClass(s);
-
-          // class filter
           if (reportClass !== "ALL" && norm(cls) !== wantedClassNorm) return;
-
+        
           const st = byId?.[String(s.id)];
           const code = getCode(st);
 
-          rowsDaily.push([
-            dateISO,
-            s.full_name,
-            cls,
-            code,
-            getKk(st),
-            getRu(st),
-          ]);
+          rowsDaily.push([dateISO, s.full_name, cls, code, getKk(st), getRu(st)]);
         });
       });
-
+      
       // if daily empty → totals export
       let header = headerDaily;
       let rows = rowsDaily;
@@ -1229,6 +1227,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
