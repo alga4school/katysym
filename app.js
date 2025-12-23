@@ -917,7 +917,6 @@ function buildIssuesForRange(report, range) {
       if (code === "sebep") exc.push(row);
       if (code === "sebsez") unex.push(row);
     });
-  }
   return { late, sick, exc, unex };
   }
   
@@ -1277,6 +1276,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
