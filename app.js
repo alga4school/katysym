@@ -316,7 +316,6 @@ function renderHolidays() {
     };
   });
 }
-
 function initHolidayUI() {
   const addBtn = document.getElementById("addHolidayBtn");
   const clrBtn = document.getElementById("clearHolidaysBtn");
@@ -342,20 +341,13 @@ function initHolidayUI() {
 
   renderHolidays();
 }
-
-// ===== ОҚУ КҮНІ МЕ? =====
-function isSchoolDayISO(dateISO) {
-  const day = d0(dateISO).getDay();
-  if (WEEKEND_DAYS.has(day)) return false;
-  if (isOfficialBreakDay(dateISO)) return false;
-  if (HOLIDAYS.has(dateISO)) return false;
-  return true;
-}
-
-// ✅ ОСЫ ЖЕРГЕ ҚОЯСЫҢ
+// ============================
+// SCHOOL DAYS COUNTER (MISSING FIX)
+// ============================
 function countSchoolDays(fromISO, toISO) {
   if (!fromISO || !toISO) return 0;
 
+  // қауіпсіздік: from <= to
   let start = fromISO;
   let end = toISO;
   if (start > end) [start, end] = [end, start];
@@ -367,15 +359,29 @@ function countSchoolDays(fromISO, toISO) {
   return cnt;
 }
 
-// ===== UI-ды жаңарту =====
+function isSchoolDayISO(dateISO) {
+  const day = d0(dateISO).getDay();
+  if (WEEKEND_DAYS.has(day)) return false;
+  if (isOfficialBreakDay(dateISO)) return false;
+  if (HOLIDAYS.has(dateISO)) return false;
+  return true;
+}
+
+function countSchoolDays(fromISO, toISO) {
+  let c = 0;
+  for (let d = d0(fromISO); d <= d0(toISO); d.setDate(d.getDate() + 1)) {
+    const dayISO = iso(d);
+    if (isSchoolDayISO(dayISO)) c++;
+  }
+  return c;
+}
+
 function updateSchoolDaysUI() {
   const el = document.getElementById("schoolDaysCount");
   if (!el) return;
   const r = getRangeFromPeriod();
   el.textContent = r ? countSchoolDays(r.from, r.to) : 0;
 }
-
-
 // ============================
 // API
 // ============================
@@ -1279,6 +1285,7 @@ document.getElementById("classSelect")?.addEventListener("change", () => {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
