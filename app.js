@@ -930,7 +930,9 @@ const report = await apiGet("report", {
   grade,
   class_letter,
 });
-    
+ console.log("FROM:", apiFrom);
+console.log("TO:", apiTo);
+console.log("DAILY:", report.daily);
 console.log("RANGE(UI):", range);
 console.log("API:", { from: apiFrom, to: apiTo, grade, class_letter });
 console.log("DAILY KEYS:", Object.keys(report.daily || {}).slice(0, 20));
@@ -1261,6 +1263,7 @@ document.getElementById("classSelect")?.addEventListener("change", () => {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
