@@ -1152,7 +1152,7 @@ document.getElementById("searchInput")?.addEventListener("input", renderAttendan
 document.getElementById("reportClass")?.addEventListener("change", () => {
   if (isReportsViewActive()) {
     updateStats();
-  }
+  
 });
   
 // ✅ Бет ашылғанда period control-дар бірден дұрыс көрінсін
@@ -1183,6 +1183,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
