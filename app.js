@@ -350,15 +350,6 @@ function isSchoolDayISO(dateISO) {
   return true;
 }
 
-function countSchoolDays(fromISO, toISO) {
-  let c = 0;
-  for (let d = d0(fromISO); d <= d0(toISO); d.setDate(d.getDate() + 1)) {
-    const dayISO = iso(d);
-    if (isSchoolDayISO(dayISO)) c++;
-  }
-  return c;
-}
-
 function updateSchoolDaysUI() {
   const el = document.getElementById("schoolDaysCount");
   if (!el) return;
@@ -1274,6 +1265,7 @@ document.getElementById("classSelect")?.addEventListener("change", () => {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
