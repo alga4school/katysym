@@ -327,9 +327,8 @@ async function apiPost(body) {
 // ============================
 // STATE
 // ============================
-
 let allStudents = [];
-let statusMap = newMap();
+let statusMap = new Map();
 
 // ============================
 // VIEW SWITCH
@@ -1224,6 +1223,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
