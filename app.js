@@ -1011,7 +1011,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
   
   // Бүгінгі күнді қою
-const today = new Date ();
+ const today = new Date ();
  
   const iso = typeof fmtISO === "function"
     ? fmtISO (сегодня)
@@ -1098,6 +1098,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
