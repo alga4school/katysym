@@ -710,7 +710,6 @@ function sumTotals(report){
 }
 
 /* ================== TOP ================== */
-
 function buildTopFromDaily(report, code, minCount = 3, limit = 10) {
   const students = report?.students || [];
   const daily = report?.daily || {};
@@ -1320,6 +1319,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
