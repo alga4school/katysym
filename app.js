@@ -258,10 +258,23 @@ const OFFICIAL_BREAKS_2025_2026 = [
   // { from:"2026-02-09", to:"2026-02-15" },
 ];
 
-function betweenInclusive(dateISO, fromISO, toISO) {
-  const t = d0(dateISO).getTime();
-  return t >= d0(fromISO).getTime() && t <= d0(toISO).getTime();
+// ============================
+// DATE HELPERS (GLOBAL)
+// ============================
+function d0(iso) {
+  return new Date(iso + "T00:00:00");
 }
+
+function iso(d) {
+  return d.toISOString().slice(0, 10);
+}
+
+function addDaysISO(isoDate, days = 1) {
+  const d = d0(isoDate);
+  d.setDate(d.getDate() + days);
+  return iso(d);
+}
+
 function isOfficialBreakDay(dateISO) {
   return OFFICIAL_BREAKS_2025_2026.some(b => betweenInclusive(dateISO, b.from, b.to));
 }
@@ -1261,6 +1274,7 @@ document.getElementById("classSelect")?.addEventListener("change", () => {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
