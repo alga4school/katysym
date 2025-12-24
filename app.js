@@ -710,7 +710,8 @@ function sumTotals(report){
 }
 
 /* ================== TOP ================== */
-function buildTopFromDaily(report, code, minCount = 3, limit = 10) {␊
+
+function buildTopFromDaily(report, code, minCount = 3, limit = 10) {
   const students = report?.students || [];
   const daily = report?.daily || {};
 
@@ -748,7 +749,6 @@ rows.sort((a, b) => b.count - a.count);
 if (typeof window !== "undefined") {
   window.buildTopFromDaily = buildTopFromDaily;
 }
-
 
 function fillTable(tableId, rows) {
   const tbody = document.querySelector(`#${tableId} tbody`);
@@ -1320,6 +1320,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
