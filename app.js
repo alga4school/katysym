@@ -247,39 +247,96 @@ function setLang(lang) {
 /* ================== SCHOOL CALENDAR / HOLIDAYS (ONE COPY ONLY) ================== */
 
   // Сенбі/жексенбі — демалыс (5 күндік оқу)
-
 const WEEKEND_DAYS = new Set([0, 6]); // Sun=0, Sat=6
 
 // Ресми каникул (2025-2026)
-
 const OFFICIAL_BREAKS_2025_2026 = [
   { from: "2025-10-27", to: "2025-11-02" }, // күзгі
   { from: "2025-12-29", to: "2026-01-07" }, // қысқы
   { from: "2026-03-19", to: "2026-03-29" }, // көктемгі
-
   // 1-сынып қосымша керек болса қос:
-
   // { from:"2026-02-09", to:"2026-02-15" },
-
 ];
 
 function d0(iso) { return new Date(iso + "T00:00:00"); }
-
 function iso(d) { return d.toISOString().slice(0, 10); }
 
 function betweenInclusive(dateISO, fromISO, toISO) {
   const t = d0(dateISO).getTime();
   return t >= d0(fromISO).getTime() && t <= d0(toISO).getTime();
 }
-
 function isOfficialBreakDay(dateISO) {
   return OFFICIAL_BREAKS_2025_2026.some(b => betweenInclusive(dateISO, b.from, b.to));
 }
 
+// ===== manual holidays (қолмен белгілеу) =====
+function loadHolidays() {
+  try { return new Set(JSON.parse(localStorage.getItem(HOLIDAYS_KEY) || "[]")); }
+  catch { return new Set(); }
+}
+function saveHolidays(set) {
+  localStorage.setItem(HOLIDAYS_KEY, JSON.stringify([...set].sort()));
+}
+let HOLIDAYS = loadHolidays();
+
+function renderHolidays() {
+  const el = document.getElementById("holidaysList");
+  if (!el) return;
+
+  if (!HOLIDAYS.size) {
+    // i18n үшін: ішіндегі мәтін data-i18n арқылы ауысуы керек
+    el.innerHTML = `<em data-i18n="noHolidays">${I18N[currentLang]?.noHolidays || ""}</em>`;
+    return;
+  }
+
+  el.innerHTML = [...HOLIDAYS].map(d => `
+    <span class="holidayTag">${d}
+      <button data-date="${d}" class="delHolidayBtn">×</button>
+    </span>
+  `).join(" ");
+
+  el.querySelectorAll(".delHolidayBtn").forEach(btn => {
+    btn.onclick = () => {
+      HOLIDAYS.delete(btn.dataset.date);
+      saveHolidays(HOLIDAYS);
+      renderHolidays();
+      updateSchoolDaysUI();
+      // тіл ауысқанда мәтін де дұрыс болсын:
+      applyI18n();
+    };
+  });
+}
+
+function initHolidayUI() {
+  const addBtn = document.getElementById("addHolidayBtn");
+  const clrBtn = document.getElementById("clearHolidaysBtn");
+  const pick = document.getElementById("holidayPick");
+
+  if (addBtn) addBtn.onclick = () => {
+    const d = pick?.value;
+    if (!d) return;
+    HOLIDAYS.add(d);
+    saveHolidays(HOLIDAYS);
+    renderHolidays();
+    updateSchoolDaysUI();
+    applyI18n();
+  };
+
+  if (clrBtn) clrBtn.onclick = () => {
+    HOLIDAYS.clear();
+    saveHolidays(HOLIDAYS);
+    renderHolidays();
+    updateSchoolDaysUI();
+    applyI18n();
+  };
+
+  renderHolidays();
+}
 function isSchoolDayISO(dateISO) {
   const day = d0(dateISO).getDay();
   if (WEEKEND_DAYS.has(day)) return false;
   if (isOfficialBreakDay(dateISO)) return false;
+  if (HOLIDAYS.has(dateISO)) return false;
   return true;
 }
 
@@ -1222,6 +1279,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
