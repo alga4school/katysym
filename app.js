@@ -1011,7 +1011,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
   
   // Бүгінгі күнді қою
-  const today = new Date();␊
+  const today = new Date();
   const iso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
   document.getElementById("attendanceDate") && (document.getElementById("attendanceDate").value = iso);
@@ -1095,6 +1095,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
