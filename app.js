@@ -252,9 +252,8 @@ const OFFICIAL_BREAKS_2025_2026 = [
   // 1-сынып қосымша керек болса қос:
   // { from:"2026-02-09", to:"2026-02-15" },
 ];
-
-function d0(iso) { return new Date(iso + "T00:00:00"); }
-function iso(d) { return d.toISOString().slice(0, 10); }
+function d0(iso) { return new Date(iso + "T00:00:00"); }␊
+function iso(d) { return d.toISOString().slice(0, 10); }␊
 
 function betweenInclusive(dateISO, fromISO, toISO) {
   const t = d0(dateISO).getTime();
@@ -326,6 +325,9 @@ function showView(id){
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
   document.getElementById(id)?.classList.add("active");
   window.scrollTo({top:0, behavior:"smooth"});
+  if (id === "viewReports" && typeof updateStats === "function") {
+    updateStats();
+  }
 }
 
 // ===== I18N =====
@@ -360,7 +362,7 @@ function applyI18n() {
     renderAttendanceTable();
   }
   
-// applyI18n() соңына қос:
+  // applyI18n() соңына қос:
   updateSchoolDaysUI();
 
 }
@@ -985,8 +987,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     setLang(currentLang === "kk" ? "ru" : "kk");
   });
   
-applyI18n();
-  updateSchoolDaysUI();
+ updateSchoolDaysUI();
+  
     document.getElementById("customStart")?.addEventListener("change", () => {
   const type = document.getElementById("periodType")?.value;
   const startISO = document.getElementById("customStart")?.value;
@@ -1007,8 +1009,9 @@ applyI18n();
   updateSchoolDaysUI();
     updateStats();
 });
+  
   // Бүгінгі күнді қою
-  const today = new Date();
+  const today = new Date();␊
   const iso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
   document.getElementById("attendanceDate") && (document.getElementById("attendanceDate").value = iso);
@@ -1092,6 +1095,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
