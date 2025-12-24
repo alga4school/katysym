@@ -245,18 +245,26 @@ function setLang(lang) {
 }
 
 * ================== SCHOOL CALENDAR / HOLIDAYS (ONE COPY ONLY) ================== */
-// Сенбі/жексенбі — демалыс (5 күндік оқу)
+
+  // Сенбі/жексенбі — демалыс (5 күндік оқу)
+
 const WEEKEND_DAYS = new Set([0, 6]); // Sun=0, Sat=6
+
 // Ресми каникул (2025-2026)
+
 const OFFICIAL_BREAKS_2025_2026 = [
   { from: "2025-10-27", to: "2025-11-02" }, // күзгі
   { from: "2025-12-29", to: "2026-01-07" }, // қысқы
   { from: "2026-03-19", to: "2026-03-29" }, // көктемгі
+
   // 1-сынып қосымша керек болса қос:
+
   // { from:"2026-02-09", to:"2026-02-15" },
+
 ];
 
 function d0(iso) { return new Date(iso + "T00:00:00"); }
+
 function iso(d) { return d.toISOString().slice(0, 10); }
 
 function betweenInclusive(dateISO, fromISO, toISO) {
@@ -1217,6 +1225,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
