@@ -282,6 +282,7 @@ function isSchoolDayISO(dateISO) {
   if (isOfficialBreakDay(dateISO)) return false;
   return true;
 }
+
 function countSchoolDays(fromISO, toISO) {
   let c = 0;
   for (let d = d0(fromISO); d <= d0(toISO); d.setDate(d.getDate() + 1)) {
@@ -575,46 +576,44 @@ async function saveAttendance() {
 
 /* ================== ПЕРИОД ================== */
 function getRangeFromPeriod() {
-  const type = document.getElementById("periodType")?.value;
+  const type = getElementValue("periodType", "");
   const toISO = d => d.toISOString().slice(0,10);
   const d0 = s => new Date(s + "T00:00:00");
-  const todayISO = () => new Date().toISOString().slice(0, 10);
+  const todayISO = () => fmtISO(new Date());
   
 if (type === "custom") {
-  const start = document.getElementById("customStart")?.value;
-  const end   = document.getElementById("customEnd")?.value || start;
+  const start = getElementValue("customStart", "");
+  const end = getElementValue("customEnd", start);
   if (!start) return null;
   return (start <= end) ? { from: start, to: end } : { from: end, to: start };
 }
  // ✅ DAY: customStart арқылы 1 күн
   if (type === "day") {
-    const d = document.getElementById("customStart")?.value || todayISO();
+    const d = getElementValue("customStart", todayISO());
     return { from: d, to: d };
   }
 
   // ✅ WEEK: customStart/customEnd арқылы
   if (type === "week") {
-    const start = document.getElementById("customStart")?.value || todayISO();
-    const end = document.getElementById("customEnd")?.value || start;
+    const start = getElementValue("customStart", todayISO());
+    const end = getElementValue("customEnd", start);
     return (start <= end) ? { from: start, to: end } : { from: end, to: start };
   }
 
-  // ✅ MONTH
-  if (type === "month") {
-    const v = getElementValue ( "monthInput" , "" ) ;
+if (type === "month") {
+    const v = getElementValue("monthInput", "");
     if (!v) return null;
     const [y,m] = v.split("-");
-    const last = new Date ( Number (y), Number (m), 0 ); // last date 
+    const last = new Date(Number(y), Number(m), 0); // соңғы күн␊
     return { from:`${y}-${m}-01`, to: toISO(last) };
   }
-
+  
   // ✅ YEAR
   if (type === "year") {
-    const y = Number(getElementValue("yearInput", newDate().getFullYear()));
- 
+    const y = Number(getElementValue("yearInput", new Date().getFullYear()));
     return { from:`${y}-01-01`, to:`${y}-12-31` };
   }
-
+  
   // ✅ QUARTER
   if (type === "quarter") {
     const q = Number(getElementValue("quarterInput", 0));
@@ -637,6 +636,7 @@ if (type === "custom") {
   return null;
 }
 
+
 function sumTotals(report){
   const totals = { total:0, katysty:0, keshikti:0, sebep:0, sebsez:0, auyrdy:0 };
   Object.values(report.totals || {}).forEach(t => {
@@ -645,7 +645,6 @@ function sumTotals(report){
       totals.total += Number(t[k] || 0);
     });
   });
-  
   return totals;
 }
 
@@ -1223,6 +1222,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
