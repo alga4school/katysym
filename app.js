@@ -1070,12 +1070,12 @@ applyI18n();
 document.getElementById("customStart")?.addEventListener("change", () => {
   const type = document.getElementById("periodType")?.value;
   const startISO = document.getElementById("customStart")?.value;
-  const endInput = document.getElementById("customEnd"); {
-  const type = document.getElementById("periodType")?.value;
-  const startISO = document.getElementById("customStart")?.value;
   const endInput = document.getElementById("customEnd");
 
-  if (!startISO || !endInput) { updateSchoolDaysUI(); return; }
+  if (!startISO || !endInput) { 
+    updateSchoolDaysUI(); 
+    return; 
+  }
 
   if (type === "day") {
     endInput.value = startISO;
@@ -1084,16 +1084,18 @@ document.getElementById("customStart")?.addEventListener("change", () => {
   if (type === "week") {
     const d = new Date(startISO + "T00:00:00");
     d.setDate(d.getDate() + 6);
-    endInput.value = d.toISOString().slice(0,10);
+    endInput.value = d.toISOString().slice(0, 10);
   }
-    
- updateSchoolDaysUI();
-    updateStats();
 
-  document.getElementById("customEnd")?.addEventListener("change", () => {
-    updateSchoolDaysUI();
-    updateStats();
-  });
+  updateSchoolDaysUI();
+  updateStats();
+});
+
+document.getElementById("customEnd")?.addEventListener("change", () => {
+  updateSchoolDaysUI();
+  updateStats();
+});
+
   
   // Бүгінгі күнді қою
   const today = new Date();
@@ -1182,6 +1184,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
