@@ -334,20 +334,19 @@ let statusMap = newMap();
 // ============================
 // VIEW SWITCH
 // ============================
-
-functionshowView(id){
+function showView(id){
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
   const view = document.getElementById(id);
   if (view) view.classList.add("active");
   window.scrollTo({top:0, behavior:"smooth"});
 }
 
-functionisReportsViewActive() {
+function isReportsViewActive() {
   const view = document.getElementById("viewReports");
   return !!(view && view.classList.contains("active"));
 }
 
-functiongetElementValue(id, fallback) {
+function getElementValue(id, fallback) {
   const el = document.getElementById(id);
   return el ? el.value : fallback;
 }
@@ -1225,6 +1224,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
