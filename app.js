@@ -741,10 +741,13 @@ function buildTopFromDaily(report, code, minCount = 3, limit = 10) {
     rows.push({ name, cls, count: cnt });
   });
 
-rows.sort((a, b) => b.count - a.count);
+  rows.sort((a, b) => b.count - a.count);
   return rows.slice(0, limit);
 }
 
+if (typeof globalThis !== "undefined") {
+  globalThis.buildTopFromDaily = buildTopFromDaily;
+}
 if (typeof window !== "undefined") {
   window.buildTopFromDaily = buildTopFromDaily;
 }
@@ -785,6 +788,8 @@ function fillSimpleTable(tableId, rows) {
     tbody.appendChild(tr);
   });
 }
+
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));}
 
 /* =========================================
    Day Issues (Lists) + Update Stats (clean)
@@ -913,70 +918,6 @@ async function updateStats() {
   }
 
   try {
-   const report = await apiGet("report", {
-  from: apiFrom,
-  to: apiTo,
-  grade,
-  class_letter,
-});
-
-
-    // ✅ Күндік блок (кешіккен/ауырған/себепті/себепсіз)
-    renderDayIssuesForRange(report, range);
-
-    // ✅ Оқу күндерінің саны
-    updateSchoolDaysUI();
-
-    // ✅ KPI
-    const t = sumTotals(report);
-    document.getElementById("totalLessons").textContent = t.total;
-    document.getElementById("totalPresent").textContent = t.katysty;
-    document.getElementById("totalLate").textContent = t.keshikti;
-    document.getElementById("totalSick").textContent = t.auyrdy;
-    document.getElementById("totalExcused").textContent = t.sebep;
-    document.getElementById("totalUnexcused").textContent = t.sebsez;
-
-    // ✅ TOP (3+)
-    fillTable("topLateTable", buildTop(report, "keshikti"));
-    fillTable("topUnexcusedTable", buildTop(report, "sebsez"));
-  } catch (e) {
-    alert((currentLang === "ru" ? "Ошибка отчёта: " : "Есеп қатесі: ") + e.message);
-  }
-}
-
-// ===== DATE HELPERS =====
-
-function fmtISO(d) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
-function addDaysISO(isoStr, days) {
-  const [y,m,d] = isoStr.split("-").map(Number);
-  const dt = new Date(y, m-1, d);   // local date
-  dt.setDate(dt.getDate() + days);
-  return fmtISO(dt);
-}
-
-async function updateStats() {
-  const range = getRangeFromPeriod();
-  if (!range) {
-  alert( (I18N[currentLang] && I18N[currentLang].needPeriod) || "Please select a period");
-    return;
-  }
-
-  const reportClass = getElementValue("reportClass", "ALL");
-  let grade = "ALL", class_letter = "ALL";
-
-  if (reportClass !== "ALL") {
-    const p = parseClass(reportClass);
-    grade = p.grade;
-    class_letter = p.letter;
-  }
-
-  try {
     
     // ✅ API үшін диапазон: to = келесі күн (end-exclusive болса да дұрыс)
    const apiFrom = range.from;
@@ -1007,10 +948,11 @@ console.log("TOTALS KEYS:", Object.keys(report.totals || {}).length);
     document.getElementById("totalUnexcused").textContent = t.sebsez;
 
     // ✅ TOP (3+)
-   const buildTopFn =
+  const globalScope = typeof globalThis !== "undefined" ? globalThis : {};
+    const buildTopFn =
       typeof buildTopFromDaily === "function"
         ? buildTopFromDaily
-        : window.buildTopFromDaily;
+        : globalScope.buildTopFromDaily;
 
     const topLate = buildTopFn ? buildTopFn(report, "keshikti", 3, 10) : [];
     const topUnexcused = buildTopFn ? buildTopFn(report, "sebsez", 3, 10) : [];
@@ -1319,3 +1261,4 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
