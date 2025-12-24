@@ -258,35 +258,26 @@ constOFFICIAL_BREAKS_2025_2026 = [
 ];
 
 functiond0(iso) { returnnewDate(iso + "T00:00:00"); }
-   
 functioniso(d) { return d.toISOString().slice(0, 10); }
- 
 
 functionbetweenInclusive(dateISO, fromISO, toISO) {
- 
   const t = d0 (dateISO). getTime ();
   return t >= d0(fromISO).getTime() && t <= d0(toISO).getTime();
 }
 
 functionisOfficialBreakDay(dateISO) {
- 
   returnOFFICIAL_BREAKS_2025_2026.some(b =>betweenInclusive(dateISO, b.from, b.to));
   
 }
 
 function isSchoolDayISO ( dateISO ) {
- 
   const day = d0 (dateISO). getDay ();
   if (WEEKEND_DAYS.has(day)) returnfalse;
- 
   if ( isOfficialBreakDay (dateISO)) return false ;
- 
   returntrue;
- 
 }
 
 functioncountSchoolDays(fromISO, toISO) {
- 
   let c = 0;
   for (let d = d0(fromISO); d <= d0(toISO); d.setDate(d.getDate() + 1)) {
     const dayISO = iso(d);
@@ -339,8 +330,8 @@ let statusMap = newMap();
 // ============================
 // VIEW SWITCH
 // ============================
+
 functionshowView(id){
- 
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
   const view = document.getElementById(id);
   if (view) view.classList.add("active");
@@ -348,18 +339,17 @@ functionshowView(id){
 }
 
 functionisReportsViewActive() {
- 
   const view = document.getElementById("viewReports");
   return !!(view && view.classList.contains("active"));
 }
 
 functiongetElementValue(id, fallback) {
- 
   const el = document.getElementById(id);
   return el ? el.value : fallback;
 }
 
 // ===== I18N =====
+
 function applyI18n() {
   const dict = I18N[currentLang] || I18N.kk;
 
@@ -537,8 +527,8 @@ async function saveAttendance() {
   const classSelect = document.getElementById("classSelect");
   const saveStatus = document.getElementById("saveStatus");
 
-  const date = dateEl?.value;
-  const cls = classSelect?.value;
+ const date = dateEl ? dateEl.value : "";
+  const cls = classSelect ? classSelect.value : "";
 
   if (!date) return alert(I18N[currentLang].needDate);
   if (!cls) return alert(I18N[currentLang].needClass);
@@ -566,8 +556,8 @@ async function saveAttendance() {
     }));
 
     const res = await apiPost({ key: API_KEY, date, grade, class_letter: letter, records });
-    if (!res || res.ok === false) {
-      throw new Error(res?.error || "Save failed");
+   if (!res || res.ok === false) {
+      throw new Error((res && res.error) || "Save failed");
     }
 
     // ✅ енді қайта басса да, фронт бөгейді; ал сервер жағы — overwrite (duplicate болмайды)
@@ -624,18 +614,18 @@ if (type === "custom") {
   }
 
   // ✅ QUARTER
-   (type === "quarter") {
+  if (type === "quarter") {
     const q = Number(getElementValue("quarterInput", 0));
-    // let's say the academic year is 2025 (starts 2025-09-01) 
+    // оқу жылы 2025 деп аламыз (2025-09-01 басталады)
     const baseY = Number(getElementValue("quarterYearInput", 2025));
 
     const Q = {
       1: { from:`${baseY}-09-01`, to:`${baseY}-10-26` },
-      2: { from:`${baseY}-11-03`, to:`${baseY}-12-28` },
-      3: { from:`${baseY+1}-01-08`, to:`${baseY+1}-03-18` },
-      4: { from:`${baseY+1}-03-30`, to:`${baseY+1}-05-25` },
+      2: { from:`${baseY}-11-03`, to:`${baseY}-12-28` }, // 27.10-02.11 каникулдан кейін
+      3: { from:`${baseY+1}-01-08`, to:`${baseY+1}-03-18` }, // 29.12-07.01 каникулдан кейін
+      4: { from:`${baseY+1}-03-30`, to:`${baseY+1}-05-25` }, // 19-29.03 каникулдан кейін
     };
-    
+
     return Q[q] || null;
   }
 
@@ -927,7 +917,7 @@ console.log("TOTALS KEYS:", Object.keys(report.totals || {}).length);
     // 🔍 Диагностика (қаласаңыз уақытша қалдырыңыз)
     // console.log("RANGE(UI)", range);
     // console.log("RANGE(API)", { from: apiFrom, to: apiTo });
-// console.log("DAILY keys sample", report && report.daily ? Object.keys(report.daily).slice(0, 5) : null);
+ // console.log("DAILY keys sample", report && report.daily ? Object.keys(report.daily).slice(0, 5) : null);
 
   } catch (e) {
     alert((currentLang === "ru" ? "Ошибка отчёта: " : "Есеп қатесі: ") + e.message);
@@ -1099,7 +1089,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   
 applyI18n();
 updateSchoolDaysUI();
-
+  
   const customStartInput = document.getElementById("customStart");
   if (customStartInput) {
     customStartInput.addEventListener("change", () => {
@@ -1135,9 +1125,19 @@ updateSchoolDaysUI();
     });
   }
   
-    // If the period changes — show/hide controls
-const periodTypeSelect = document.getElementById("periodType");
-if (periodTypeSelect) periodTypeSelect.addEventListener("change", () => {
+   // Бүгінгі күнді қою
+  const today = new Date();
+  const iso = today.toISOString().slice(0, 10);
+
+  document.getElementById("attendanceDate") && (document.getElementById("attendanceDate").value = iso);
+ document.getElementById("customStart") && (document.getElementById("customStart").value = iso);
+  document.getElementById("customEnd") && (document.getElementById("customEnd").value = iso);
+  document.getElementById("yearInput") && (document.getElementById("yearInput").value = today.getFullYear());
+  document.getElementById("quarterYearInput") && (document.getElementById("quarterYearInput").value = today.getFullYear());
+
+   // Период өзгерсе — контролдарды көрсету/жасыру
+ const periodTypeSelect = document.getElementById("periodType");
+ if (periodTypeSelect) periodTypeSelect.addEventListener("change", () => {
   const type = periodTypeSelect.value;
 
   ["monthControl", "quarterControl", "yearControl", "customControl"].forEach((id) => {
@@ -1152,9 +1152,8 @@ if (periodTypeSelect) periodTypeSelect.addEventListener("change", () => {
   if (type === "day" || type === "week" || type === "custom") {
     const customControl = document.getElementById("customControl");
     if (customControl) customControl.style.display = "flex";
-  }
-  
-const customControl = document.getElementById("customControl");
+  }  
+ const customControl = document.getElementById("customControl");
   const toLabel = customControl ? customControl.querySelector('[data-i18n="toLabel"]') : null;
   const toInput = customControl ? customControl.querySelector("#customEnd") : null;
   if (type === "day") {
@@ -1208,7 +1207,7 @@ try {
 
   allStudents.forEach((s) => statusMap.set(s.id, "katysty"));
 
-  const classSelect = document.getElementById("classSelect");
+ const classSelect = document.getElementById("classSelect");
   if (classSelect) {
     classSelect.addEventListener("change", () => {
       allStudents.forEach((s) => statusMap.set(s.id, "katysty"));
@@ -1216,7 +1215,7 @@ try {
     });
   }
 
-  applyI18n();
+ applyI18n();
   renderAttendanceTable();
 } catch (e) {
   alert("API error: " + e.message);
