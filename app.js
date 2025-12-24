@@ -244,7 +244,7 @@ function setLang(lang) {
   applyI18n();
 }
 
-* ================== SCHOOL CALENDAR / HOLIDAYS (ONE COPY ONLY) ================== */
+/* ================== SCHOOL CALENDAR / HOLIDAYS (ONE COPY ONLY) ================== */
 
   // Сенбі/жексенбі — демалыс (5 күндік оқу)
 
@@ -1225,6 +1225,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
