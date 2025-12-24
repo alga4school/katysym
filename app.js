@@ -1064,38 +1064,45 @@ document.addEventListener("DOMContentLoaded", async () => {
     setLang(currentLang === "kk" ? "ru" : "kk");
   });
   
-applyI18n();
- updateSchoolDaysUI();
+applyI18n ();
+ updateSchoolDaysUI ();
 
-document.getElementById("customStart")?.addEventListener("change", () => {
-  const type = document.getElementById("periodType")?.value;
-  const startISO = document.getElementById("customStart")?.value;
-  const endInput = document.getElementById("customEnd");
+  const customStartInput = document.getElementById ( " customStart" ) ;
+  if (customStartInput) {
+    customStartInput.addEventListener ( "change" , () = > {
+      const type = document.getElementById ( "periodType " ) ?. value ;
+      const startISO =
+ customStartInput.value ;
+      const endInput = document.getElementById ( "customEnd" ) ;
 
-  if (!startISO || !endInput) { 
-    updateSchoolDaysUI(); 
-    return; 
+      if (!startISO || !endInput) {
+        updateSchoolDaysUI ();
+        возвращаться ;
+      }
+
+      if (type === "day" ) {
+        endInput.value = startISO ;
+      }
+
+      if (type === "week" ) {
+        const d = new Date (startISO + "T00:00:00" );
+ 
+        d.setDate (d.getDate ( ) + 6 ) ;
+        endInput.value = d.toISOString ( ). slice ( 0 , 10 );
+      }
+
+      updateSchoolDaysUI ();
+      updateStats ();
+    });
   }
 
-  if (type === "day") {
-    endInput.value = startISO;
+  const customEndInput = document.getElementById ( "customEnd" ) ;
+  if (customEndInput) {
+    customEndInput.addEventListener ( "change" , () = > {
+      updateSchoolDaysUI ();
+      updateStats ();
+    });
   }
-
-  if (type === "week") {
-    const d = new Date(startISO + "T00:00:00");
-    d.setDate(d.getDate() + 6);
-    endInput.value = d.toISOString().slice(0, 10);
-  }
-
-  updateSchoolDaysUI();
-  updateStats();
-});
-
-document.getElementById("customEnd")?.addEventListener("change", () => {
-  updateSchoolDaysUI();
-  updateStats();
-});
-
   
   // Бүгінгі күнді қою
   const today = new Date();
@@ -1184,6 +1191,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
