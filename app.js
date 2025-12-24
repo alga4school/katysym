@@ -971,9 +971,6 @@ console.log("TOTALS KEYS:", Object.keys(report.totals || {}).length);
 }
 
  // ===== DATE HELPERS =====
-function iso(d){ return d.toISOString().slice(0,10); }
-function d0(s){ return new Date(s + "T00:00:00"); }
-
 function betweenInclusive(dateISO, fromISO, toISO){
   const t = d0(dateISO).getTime();
   return t >= d0(fromISO).getTime() && t <= d0(toISO).getTime();
@@ -984,6 +981,7 @@ function exportCsv() {
   if (!range) {
     alert(I18N[currentLang]?.needPeriod || "Кезеңді таңдаңыз");
     return;
+  }
   const reportClass = getElementValue("reportClass", "ALL");
   let grade = "ALL", class_letter = "ALL";
 
@@ -1231,7 +1229,11 @@ if (reportClassSelect) {
 }
 
 // ✅ Make period controls appear correctly immediately when the page opens
-if (periodTypeSelect) periodTypeSelect.dispatchEvent(new Event("change"));
+if (periodTypeSelect) {
+  periodTypeSelect.dispatchEvent(new Event("change"));
+}
+
+
   
 // API: classes, students
 try {
@@ -1257,3 +1259,4 @@ document.getElementById("classSelect")?.addEventListener("change", () => {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
