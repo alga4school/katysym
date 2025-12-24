@@ -327,15 +327,27 @@ let statusMap = new Map();
 // ============================
 // VIEW SWITCH
 // ============================
-function showView(id){
-  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
-  document.getElementById(id)?.classList.add("active");
-  window.scrollTo({top:0, behavior:"smooth"});
+function showView ( id ){
+ 
+  document.querySelectorAll ( ".view" ) . forEach ( v = > v.classList.remove ( " active " ))
+ ;
+  const view = document.getElementById ( id );
+  if (view) view.classList.add ( " active " )
+ ;
+  window.scrollTo ({ top : 0 , behavior : " smooth" })
+ ;
 }
 
-function isReportsViewActive() {
-  const view = document.getElementById("viewReports");
-  return !!(view && view.classList.contains("active"));
+функция isReportsViewActive ( ) {
+ 
+  const view = document.getElementById ( "viewReports " ) ;
+  return !! ( view && view.classList.contains ( " active" ));
+}
+
+function getElementValue ( id, fallback ) {
+ 
+  const el = document.getElementById ( id );
+  return el ? el. value : fallback;
 }
 
 // ===== I18N =====
@@ -588,23 +600,25 @@ if (type === "custom") {
 
   // ✅ MONTH
   if (type === "month") {
-    const v = document.getElementById("monthInput")?.value;
+    const v = getElementValue ( "monthInput" , "" ) ;
     if (!v) return null;
     const [y,m] = v.split("-");
-    const last = new Date(Number(y), Number(m), 0);
+    const last = new Date ( Number (y), Number (m), 0 ); // last date 
     return { from:`${y}-${m}-01`, to: toISO(last) };
   }
 
   // ✅ YEAR
   if (type === "year") {
-    const y = Number(document.getElementById("yearInput")?.value || new Date().getFullYear());
+    const y = Number(getElementValue("yearInput", newDate().getFullYear()));
+ 
     return { from:`${y}-01-01`, to:`${y}-12-31` };
   }
 
   // ✅ QUARTER
-  if (type === "quarter") {
-    const q = Number(document.getElementById("quarterInput")?.value || 0);
-    const baseY = Number(document.getElementById("quarterYearInput")?.value || 2025);
+   (type === "quarter") {
+    const q = Number(getElementValue("quarterInput", 0));
+    // let's say the academic year is 2025 (starts 2025-09-01) 
+    const baseY = Number(getElementValue("quarterYearInput", 2025));
 
     const Q = {
       1: { from:`${baseY}-09-01`, to:`${baseY}-10-26` },
@@ -636,9 +650,9 @@ function sumTotals(report){
 
 /* ================== TOP ================== */
 // ✅ daily арқылы нақты санау (тоқсан/ай/жыл бәріне дұрыс)
-function buildTopFromDaily(report, code, minCount = 3, limit = 10) {
-  const students = report?.students || [];
-  const daily = report?.daily || {};
+function buildTopFromDaily ( report, code, minCount = 3 , limit = 10 ) { 
+  const students = (report && report.students) || [];
+  const daily = (report && report.daily) || {};
 
   // id -> student
   const stById = new Map(students.map(s => [String(s.id), s]));
@@ -649,7 +663,7 @@ function buildTopFromDaily(report, code, minCount = 3, limit = 10) {
   Object.entries(daily).forEach(([dateISO, byId]) => {
     if (!byId) return;
     Object.entries(byId).forEach(([sid, st]) => {
-      const c = st?.status_code || "katysty";
+     const c = (st && st.status_code) || "katysty";
       if (c !== code) return;
       counts.set(String(sid), (counts.get(String(sid)) || 0) + 1);
     });
@@ -694,8 +708,9 @@ function fillTable(tableId, rows) {
   });
 }
 
-function escapeHtml(s){
-  return String(s ?? '').replace(/[&<>"']/g, c => ({
+functionescapeHtml(s){
+  const safe = (s === null || s === undefined) ? "" : s;
+  returnString(safe).replace(/[&<>"']/g, c => ({
     "&":"&amp;",
     "<":"&lt;",
     ">":"&gt;",
@@ -790,7 +805,7 @@ function buildIssuesForRange(report, range) {
     if (!dailyMap) continue;
 
     Object.entries(dailyMap).forEach(([sid, st]) => {
-      const code = st?.status_code;
+       const code = st ? st.status_code : "";
       if (!code || code === "katysty") return;
 
       if (seen[code] && seen[code].has(String(sid))) return;
@@ -853,11 +868,11 @@ function addDaysISO(isoStr, days) {
 async function updateStats() {
   const range = getRangeFromPeriod();
   if (!range) {
-    alert(I18N[currentLang]?.needPeriod || "Периодты таңдаңыз");
+  alert( (I18N[currentLang] && I18N[currentLang].needPeriod) || "Please select a period");
     return;
   }
 
-  const reportClass = document.getElementById("reportClass")?.value || "ALL";
+  const reportClass = getElementValue("reportClass", "ALL");
   let grade = "ALL", class_letter = "ALL";
 
   if (reportClass !== "ALL") {
@@ -903,7 +918,7 @@ console.log("TOTALS KEYS:", Object.keys(report.totals || {}).length);
     // 🔍 Диагностика (қаласаңыз уақытша қалдырыңыз)
     // console.log("RANGE(UI)", range);
     // console.log("RANGE(API)", { from: apiFrom, to: apiTo });
-    // console.log("DAILY keys sample", report?.daily ? Object.keys(report.daily).slice(0, 5) : null);
+// console.log("DAILY keys sample", report && report.daily ? Object.keys(report.daily).slice(0, 5) : null);
 
   } catch (e) {
     alert((currentLang === "ru" ? "Ошибка отчёта: " : "Есеп қатесі: ") + e.message);
@@ -927,10 +942,10 @@ function betweenInclusive(dateISO, fromISO, toISO){
 function exportCsv() {
   const range = getRangeFromPeriod();
   if (!range) {
-    alert(I18N[currentLang]?.needPeriod || "Кезеңді таңдаңыз");
+   alert( (I18N[currentLang] && I18N[currentLang].needPeriod) || "Select a period");
     return;
   }
-  const reportClass = document.getElementById("reportClass")?.value || "ALL";
+  const reportClass = getElementValue("reportClass", "ALL");
   let grade = "ALL", class_letter = "ALL";
 
   if (reportClass !== "ALL") {
@@ -944,25 +959,25 @@ function exportCsv() {
  apiGet("report", { from: apiFrom, to: apiTo, grade, class_letter })
     .then(report => {
 
-     const students = report?.students || [];
-      const daily = report?.daily || {};
-      const totals = report?.totals || {};
+     const students = (report && report.students) || [];
+      const daily = (report && report.daily) || {};
+      const totals = (report && report.totals) || {};
 
       // helpers
      const norm = (s) => String(s || "").replace(/\s+/g, "").toUpperCase();
       const wantedClassNorm = (reportClass === "ALL") ? "" : norm(reportClass);
 
-     const getStudentClass = (s) => `${s.grade}${s.class_letter}`;
-      const getCode = (st) => (st?.status_code || "katysty");
+const getStudentClass = (s) => `${s.grade}${s.class_letter}`;
+      const getCode = (st) => ((st && st.status_code) || "katysty");
 
       const getKk = (st) => {
         const code = getCode(st);
-        return st?.status_kk || STATUS[code]?.kk || STATUS.katysty.kk;
+       return (st && st.status_kk) || (STATUS[code] && STATUS[code].kk) || STATUS.katysty.kk;
       };
       
      const getRu = (st) => {
         const code = getCode(st);
-        return st?.status_ru || STATUS[code]?.ru || STATUS.katysty.ru;
+        return (st && st.status_ru) || (STATUS[code] && STATUS[code].ru) || STATUS.katysty.ru;
       };
       
       // DAILY rows
@@ -974,7 +989,7 @@ function exportCsv() {
           const cls = getStudentClass(s);
           if (reportClass !== "ALL" && norm(cls) !== wantedClassNorm) return;
         
-          const st = byId?.[String(s.id)];
+        const st = byId ? byId[String(s.id)] : undefined;
           const code = getCode(st);
 
           rowsDaily.push([dateISO, s.full_name, cls, code, getKk(st), getRu(st)]);
@@ -993,7 +1008,7 @@ function exportCsv() {
           const cls = getStudentClass(s);
           if (reportClass !== "ALL" && norm(cls) !== wantedClassNorm) return;
 
-          const t = totals?.[String(s.id)] || {};
+           const t = (totals && totals[String(s.id)]) || {};
           const katysty  = Number(t.katysty || 0);
           const keshikti = Number(t.keshikti || 0);
           const auyrdy   = Number(t.auyrdy || 0);
@@ -1021,7 +1036,7 @@ function exportCsv() {
       const sep = ";";
       const csv = "\ufeff" + [header, ...rows]
         .map(r => r.map(x => {
-          const v = String(x ?? "");
+          const v = String((x === null || x === undefined) ? "" : x);
           return (v.includes(sep) || v.includes('"') || v.includes("\n"))
             ? `"${v.replace(/"/g, '""')}"`
             : v;
@@ -1051,59 +1066,70 @@ function exportCsv() {
 document.addEventListener("DOMContentLoaded", async () => {
 
   // Навигация
-  document.getElementById("goAttendance")?.addEventListener("click", () => showView("viewAttendance"));
- document.getElementById("goReports")?.addEventListener("click", () => {
-    showView("viewReports");
-    updateStats();
-  });
-  document.getElementById("backHome1")?.addEventListener("click", () => showView("viewHome"));
-  document.getElementById("backHome2")?.addEventListener("click", () => showView("viewHome"));
+ const goAttendance = document.getElementById("goAttendance");
+  if (goAttendance) goAttendance.addEventListener("click", () => showView("viewAttendance"));
+  const goReports = document.getElementById("goReports");
+  if (goReports) {
+    goReports.addEventListener("click", () => {
+      showView("viewReports");
+      updateStats();
+    });
+  }
+  const backHome1 = document.getElementById("backHome1");
+  if (backHome1) backHome1.addEventListener("click", () => showView("viewHome"));
+  const backHome2 = document.getElementById("backHome2");
+  if (backHome2) backHome2.addEventListener("click", () => showView("viewHome"));
 
   // Тілді ауыстыру
-  document.getElementById("langToggle")?.addEventListener("click", () => {
-    setLang(currentLang === "kk" ? "ru" : "kk");
-  });
+  const langToggle = document.getElementById("langToggle");
+  if (langToggle) {
+    langToggle.addEventListener("click", () => {
+      setLang(currentLang === "kk" ? "ru" : "kk");
+    });
+  }
   
 applyI18n();
 updateSchoolDaysUI();
 
-const customStartInput = document.getElementById("customStart");
-if (customStartInput) {
-  customStartInput.addEventListener("change", () => {
-    const type = document.getElementById("periodType")?.value;
-    const startISO = customStartInput.value;
-    const endInput = document.getElementById("customEnd");
+  const customStartInput = document.getElementById("customStart");
+  if (customStartInput) {
+    customStartInput.addEventListener("change", () => {
+      const type = getElementValue("periodType", "");
+      const startISO = customStartInput.value;
+      const endInput = document.getElementById("customEnd");
 
-    if (!startISO || !endInput) {
+      if (!startISO || !endInput) {
+        updateSchoolDaysUI();
+        return;
+      }
+
+      if (type === "day") {
+        endInput.value = startISO;
+      }
+
+      if (type === "week") {
+        const d = new Date(startISO + "T00:00:00");
+        d.setDate(d.getDate() + 6);
+        endInput.value = d.toISOString().slice(0, 10);
+      }
+
       updateSchoolDaysUI();
-      return;
-    }
+      updateStats();
+    });
+  }
 
-    if (type === "day") {
-      endInput.value = startISO;
-    }
-
-    if (type === "week") {
-      const d = new Date(startISO + "T00:00:00");
-      d.setDate(d.getDate() + 6);
-      endInput.value = d.toISOString().slice(0, 10);
-    }
-
-    updateSchoolDaysUI();
-    updateStats();
-  });
-}
-
-const customEndInput = document.getElementById("customEnd");
-if (customEndInput) {
-  customEndInput.addEventListener("change", () => {
-    updateSchoolDaysUI();
-    updateStats();
-  });
-}
-
-document.getElementById("periodType")?.addEventListener("change", () => {
-  const type = document.getElementById("periodType")?.value;
+  const customEndInput = document.getElementById("customEnd");
+  if (customEndInput) {
+    customEndInput.addEventListener("change", () => {
+      updateSchoolDaysUI();
+      updateStats();
+    });
+  }
+  
+    // If the period changes — show/hide controls
+const periodTypeSelect = document.getElementById("periodType");
+if (periodTypeSelect) periodTypeSelect.addEventListener("change", () => {
+  const type = periodTypeSelect.value;
 
   ["monthControl", "quarterControl", "yearControl", "customControl"].forEach((id) => {
     const el = document.getElementById(id);
@@ -1120,43 +1146,47 @@ document.getElementById("periodType")?.addEventListener("change", () => {
   }
 
   const customControl = document.getElementById("customControl");
-  const toLabel = customControl?.querySelector('[data-i18n="toLabel"]');
-  const toInput = customControl?.querySelector("#customEnd");
-
+  const toLabel = customControl ? customControl.querySelector('[data-i18n="toLabel"]') : null;
+  const toInput = customControl ? customControl.querySelector("#customEnd") : null;
   if (type === "day") {
     if (toLabel) toLabel.style.display = "none";
     if (toInput) {
       toInput.style.display = "none";
-      toInput.value = document.getElementById("customStart")?.value || toInput.value;
+      toInput.value = getElementValue("customStart", toInput.value);
     }
   } else {
     if (toLabel) toLabel.style.display = "";
     if (toInput) toInput.style.display = "";
   }
-
-  updateSchoolDaysUI();
-  if (isReportsViewActive()) updateStats();
+   updateSchoolDaysUI();
+   if (isReportsViewActive()) {
+     updateStats();
+   }
 });
 
-document.getElementById("reportClass")?.addEventListener("change", () => {
-  if (isReportsViewActive()) updateStats();
-});
 
-// Батырмалар
-document.getElementById("saveAttendanceBtn")?.addEventListener("click", saveAttendance);
-document.getElementById("updateStatsBtn")?.addEventListener("click", updateStats);
-document.getElementById("exportCsvBtn")?.addEventListener("click", exportCsv);
-document.getElementById("searchInput")?.addEventListener("input", renderAttendanceTable);
-document.getElementById("reportClass")?.addEventListener("change", () => {
-  if (isReportsViewActive()) {
-    updateStats();
+// Buttons
+ const saveAttendanceBtn = document.getElementById("saveAttendanceBtn");
+if (saveAttendanceBtn) saveAttendanceBtn.addEventListener("click", saveAttendance);
+const updateStatsBtn = document.getElementById("updateStatsBtn");
+if (updateStatsBtn) updateStatsBtn.addEventListener("click", updateStats);
+const exportCsvBtn = document.getElementById("exportCsvBtn");
+if (exportCsvBtn) exportCsvBtn.addEventListener("click", exportCsv);
+const searchInput = document.getElementById("searchInput");
+if (searchInput) searchInput.addEventListener("input", renderAttendanceTable);
+const reportClassSelect = document.getElementById("reportClass");
+if (reportClassSelect) {
+  reportClassSelect.addEventListener("change", () => {
+    if (isReportsViewActive()) {
+      updateStats();
+    }
+  });
+}
+
+// ✅ Make period controls appear correctly immediately when the page opens
+if (periodTypeSelect) periodTypeSelect.dispatchEvent(new Event("change"));
   
-});
-  
-// ✅ Бет ашылғанда period control-дар бірден дұрыс көрінсін
-document.getElementById("periodType")?.dispatchEvent(new Event("change"));
-  
-// API: сыныптар, оқушылар
+// API: classes, students
 try {
   const cls = await apiGet("classes");
   window.__classesLoaded = true;
@@ -1170,10 +1200,13 @@ try {
 
   allStudents.forEach((s) => statusMap.set(s.id, "katysty"));
 
-  document.getElementById("classSelect")?.addEventListener("change", () => {
-    allStudents.forEach((s) => statusMap.set(s.id, "katysty"));
-    renderAttendanceTable();
-  });
+  const classSelect = document.getElementById("classSelect");
+  if (classSelect) {
+    classSelect.addEventListener("change", () => {
+      allStudents.forEach((s) => statusMap.set(s.id, "katysty"));
+      renderAttendanceTable();
+    });
+  }
 
   applyI18n();
   renderAttendanceTable();
@@ -1181,6 +1214,9 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
+
+
 
 
 
