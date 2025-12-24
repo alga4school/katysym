@@ -1064,60 +1064,47 @@ document.addEventListener("DOMContentLoaded", async () => {
     setLang(currentLang === "kk" ? "ru" : "kk");
   });
   
-applyI18n ();
-updateSchoolDaysUI ();
+applyI18n();
+updateSchoolDaysUI();
 
-  const customStartInput = document.getElementById ( " customStart" ) ;
-  if (customStartInput) {
-    customStartInput.addEventListener ( "change" , () = > {
-      const type = document.getElementById ( "periodType " ) ?. value ;
-      const startISO =
- customStartInput.value ;
-      const endInput = document.getElementById ( "customEnd" ) ;
+const customStartInput = document.getElementById("customStart");
+if (customStartInput) {
+  customStartInput.addEventListener("change", () => {
+    const type = document.getElementById("periodType")?.value;
+    const startISO = customStartInput.value;
+    const endInput = document.getElementById("customEnd");
 
-      if (!startISO || !endInput) {
-        updateSchoolDaysUI ();
-        возвращаться ;
-      }
+    if (!startISO || !endInput) {
+      updateSchoolDaysUI();
+      return;
+    }
 
-      if (type === "day" ) {
-        endInput.value = startISO ;
-      }
+    if (type === "day") {
+      endInput.value = startISO;
+    }
 
-      if (type === "week" ) {
-        const d = new Date (startISO + "T00:00:00" );
- 
-        d.setDate (d.getDate ( ) + 6 ) ;
-        endInput.value = d.toISOString ( ). slice ( 0 , 10 );
-      }
+    if (type === "week") {
+      const d = new Date(startISO + "T00:00:00");
+      d.setDate(d.getDate() + 6);
+      endInput.value = d.toISOString().slice(0, 10);
+    }
 
-      updateSchoolDaysUI ();
-      updateStats ();
-    });
-  }
+    updateSchoolDaysUI();
+    updateStats();
+  });
+}
 
-  const customEndInput = document.getElementById ( "customEnd" ) ;
-  if (customEndInput) {
-    customEndInput.addEventListener ( "change" , () = > {
-      updateSchoolDaysUI ();
-      updateStats ();
-    });
-  }
+const customEndInput = document.getElementById("customEnd");
+if (customEndInput) {
+  customEndInput.addEventListener("change", () => {
+    updateSchoolDaysUI();
+    updateStats();
+  });
+}
 
-  // Бүгінгі күнді қою
-  const today = new Date();
-  const iso = today.toISOString().slice(0, 10);
+document.getElementById("periodType")?.addEventListener("change", () => {
+  const type = document.getElementById("periodType")?.value;
 
-  document.getElementById("attendanceDate") && (document.getElementById("attendanceDate").value = iso);
- document.getElementById("customStart") && (document.getElementById("customStart").value = iso);
-  document.getElementById("customEnd") && (document.getElementById("customEnd").value = iso);
-  document.getElementById("yearInput") && (document.getElementById("yearInput").value = today.getFullYear());
-  document.getElementById("quarterYearInput") && (document.getElementById("quarterYearInput").value = today.getFullYear());
-
-  // Период өзгерсе — контролдарды көрсету/жасыру
- document.getElementById ( "periodType" ). addEventListener ( " change" , () = > {
-  const type = document.getElementById ( "periodType " ) . value ;
-   
   ["monthControl", "quarterControl", "yearControl", "customControl"].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.style.display = "none";
@@ -1135,7 +1122,7 @@ updateSchoolDaysUI ();
   const customControl = document.getElementById("customControl");
   const toLabel = customControl?.querySelector('[data-i18n="toLabel"]');
   const toInput = customControl?.querySelector("#customEnd");
-                                                                          
+
   if (type === "day") {
     if (toLabel) toLabel.style.display = "none";
     if (toInput) {
@@ -1146,10 +1133,13 @@ updateSchoolDaysUI ();
     if (toLabel) toLabel.style.display = "";
     if (toInput) toInput.style.display = "";
   }
-   updateSchoolDaysUI();
-   if (isReportsViewActive()) {
-     updateStats();
-   }
+
+  updateSchoolDaysUI();
+  if (isReportsViewActive()) updateStats();
+});
+
+document.getElementById("reportClass")?.addEventListener("change", () => {
+  if (isReportsViewActive()) updateStats();
 });
 
 // Батырмалар
@@ -1191,6 +1181,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
