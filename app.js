@@ -245,38 +245,48 @@ function setLang(lang) {
 }
 
 /* ================== SCHOOL CALENDAR / HOLIDAYS (ONE COPY ONLY) ================== */
-// Сенбі/жексенбі — демалыс (5 күндік оқу)
-const WEEKEND_DAYS = new Set([0, 6]); // Sun=0, Sat=6
+// Saturday/Sunday — rest (5-day study)
+constWEEKEND_DAYS = newSet([0, 6]); // Sun=0, Sat=6
 
-// Ресми каникул (2025-2026)
-const OFFICIAL_BREAKS_2025_2026 = [
-  { from: "2025-10-27", to: "2025-11-02" }, // күзгі
-  { from: "2025-12-29", to: "2026-01-07" }, // қысқы
-  { from: "2026-03-19", to: "2026-03-29" }, // көктемгі
-  // 1-сынып қосымша керек болса қос:
+// Resmi holidays (2025-2026)
+constOFFICIAL_BREAKS_2025_2026 = [
+  { from : "2025-10-27" , to : "2025-11-02" }, // autumn
+  { from : "2025-12-29" , to : "2026-01-07" }, // winter
+  { from : "2026-03-19" , to : "2026-03-29" }, // spring
+  // Add if you need a 1st class extension:
   // { from:"2026-02-09", to:"2026-02-15" },
 ];
 
-function d0(iso) { return new Date(iso + "T00:00:00"); }
-function iso(d) { return d.toISOString().slice(0, 10); }
+functiond0(iso) { returnnewDate(iso + "T00:00:00"); }
+   
+functioniso(d) { return d.toISOString().slice(0, 10); }
+ 
 
-function betweenInclusive(dateISO, fromISO, toISO) {
-  const t = d0(dateISO).getTime();
+functionbetweenInclusive(dateISO, fromISO, toISO) {
+ 
+  const t = d0 (dateISO). getTime ();
   return t >= d0(fromISO).getTime() && t <= d0(toISO).getTime();
 }
 
-function isOfficialBreakDay(dateISO) {
-  return OFFICIAL_BREAKS_2025_2026.some(b => betweenInclusive(dateISO, b.from, b.to));
+functionisOfficialBreakDay(dateISO) {
+ 
+  returnOFFICIAL_BREAKS_2025_2026.some(b =>betweenInclusive(dateISO, b.from, b.to));
+  
 }
 
-function isSchoolDayISO(dateISO) {
-  const day = d0(dateISO).getDay();
-  if (WEEKEND_DAYS.has(day)) return false;
-  if (isOfficialBreakDay(dateISO)) return false;
-  return true;
+function isSchoolDayISO ( dateISO ) {
+ 
+  const day = d0 (dateISO). getDay ();
+  if (WEEKEND_DAYS.has(day)) returnfalse;
+ 
+  if ( isOfficialBreakDay (dateISO)) return false ;
+ 
+  returntrue;
+ 
 }
 
-function countSchoolDays(fromISO, toISO) {
+functioncountSchoolDays(fromISO, toISO) {
+ 
   let c = 0;
   for (let d = d0(fromISO); d <= d0(toISO); d.setDate(d.getDate() + 1)) {
     const dayISO = iso(d);
@@ -285,10 +295,11 @@ function countSchoolDays(fromISO, toISO) {
   return c;
 }
 
-function updateSchoolDaysUI() {
+functionupdateSchoolDaysUI() {
+ 
   const el = document.getElementById("schoolDaysCount");
   if (!el) return;
-  const r = getRangeFromPeriod();
+  const r = getRangeFromPeriod ();
   el.textContent = r ? countSchoolDays(r.from, r.to) : 0;
 }
 
@@ -1211,6 +1222,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
