@@ -1144,8 +1144,8 @@ if (periodTypeSelect) periodTypeSelect.addEventListener("change", () => {
     const customControl = document.getElementById("customControl");
     if (customControl) customControl.style.display = "flex";
   }
-
-  const customControl = document.getElementById("customControl");
+  
+const customControl = document.getElementById("customControl");
   const toLabel = customControl ? customControl.querySelector('[data-i18n="toLabel"]') : null;
   const toInput = customControl ? customControl.querySelector("#customEnd") : null;
   if (type === "day") {
@@ -1163,7 +1163,6 @@ if (periodTypeSelect) periodTypeSelect.addEventListener("change", () => {
      updateStats();
    }
 });
-
 
 // Buttons
  const saveAttendanceBtn = document.getElementById("saveAttendanceBtn");
@@ -1214,6 +1213,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
