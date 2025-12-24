@@ -1065,7 +1065,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   
 applyI18n ();
- updateSchoolDaysUI ();
+updateSchoolDaysUI ();
 
   const customStartInput = document.getElementById ( " customStart" ) ;
   if (customStartInput) {
@@ -1103,7 +1103,7 @@ applyI18n ();
       updateStats ();
     });
   }
-  
+
   // Бүгінгі күнді қою
   const today = new Date();
   const iso = today.toISOString().slice(0, 10);
@@ -1115,9 +1115,9 @@ applyI18n ();
   document.getElementById("quarterYearInput") && (document.getElementById("quarterYearInput").value = today.getFullYear());
 
   // Период өзгерсе — контролдарды көрсету/жасыру
- document.getElementById("periodType")?.addEventListener("change", () => {
-  const type = document.getElementById("periodType")?.value;
-    
+ document.getElementById ( "periodType" ). addEventListener ( " change" , () = > {
+  const type = document.getElementById ( "periodType " ) . value ;
+   
   ["monthControl", "quarterControl", "yearControl", "customControl"].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.style.display = "none";
@@ -1191,6 +1191,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
