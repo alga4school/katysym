@@ -1089,7 +1089,6 @@ document.getElementById("customStart")?.addEventListener("change", () => {
     
  updateSchoolDaysUI();
     updateStats();
-});
 
   document.getElementById("customEnd")?.addEventListener("change", () => {
     updateSchoolDaysUI();
@@ -1183,6 +1182,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
