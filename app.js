@@ -1062,10 +1062,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 applyI18n();
  updateSchoolDaysUI();
 
-document.getElementById("customStart")?.addEventListener("change", () => {␊
-  const type = document.getElementById("periodType")?.value;␊
-  const startISO = document.getElementById("customStart")?.value;␊
-  const endInput = document.getElementById("customEnd");␊ {
+document.getElementById("customStart")?.addEventListener("change", () => {
+  const type = document.getElementById("periodType")?.value;
+  const startISO = document.getElementById("customStart")?.value;
+  const endInput = document.getElementById("customEnd"); {
   const type = document.getElementById("periodType")?.value;
   const startISO = document.getElementById("customStart")?.value;
   const endInput = document.getElementById("customEnd");
@@ -1102,8 +1102,8 @@ document.getElementById("customStart")?.addEventListener("change", () => {␊
   document.getElementById("quarterYearInput") && (document.getElementById("quarterYearInput").value = today.getFullYear());
 
   // Период өзгерсе — контролдарды көрсету/жасыру
- document.getElementById("periodType")?.addEventListener("change", () => {␊
-  const type = document.getElementById("periodType")?.value;␊
+ document.getElementById("periodType")?.addEventListener("change", () => {
+  const type = document.getElementById("periodType")?.value;
     
   ["monthControl", "quarterControl", "yearControl", "customControl"].forEach((id) => {
     const el = document.getElementById(id);
@@ -1179,6 +1179,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
