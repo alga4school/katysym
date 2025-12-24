@@ -342,6 +342,8 @@ function initHolidayUI() {
 
   renderHolidays();
 }
+
+// ===== ОҚУ КҮНІ МЕ? =====
 function isSchoolDayISO(dateISO) {
   const day = d0(dateISO).getDay();
   if (WEEKEND_DAYS.has(day)) return false;
@@ -350,12 +352,29 @@ function isSchoolDayISO(dateISO) {
   return true;
 }
 
+// ✅ ОСЫ ЖЕРГЕ ҚОЯСЫҢ
+function countSchoolDays(fromISO, toISO) {
+  if (!fromISO || !toISO) return 0;
+
+  let start = fromISO;
+  let end = toISO;
+  if (start > end) [start, end] = [end, start];
+
+  let cnt = 0;
+  for (let d = start; d <= end; d = addDaysISO(d, 1)) {
+    if (isSchoolDayISO(d)) cnt++;
+  }
+  return cnt;
+}
+
+// ===== UI-ды жаңарту =====
 function updateSchoolDaysUI() {
   const el = document.getElementById("schoolDaysCount");
   if (!el) return;
   const r = getRangeFromPeriod();
   el.textContent = r ? countSchoolDays(r.from, r.to) : 0;
 }
+
 
 // ============================
 // API
@@ -1260,6 +1279,7 @@ document.getElementById("classSelect")?.addEventListener("change", () => {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
