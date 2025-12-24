@@ -633,49 +633,53 @@ async function saveAttendance() {
 
 /* ================== ПЕРИОД ================== */
 function getRangeFromPeriod() {
-  const type = getElementValue("periodType", "");
+  const type = document.getElementById("periodType")?.value;
   const toISO = d => d.toISOString().slice(0,10);
   const d0 = s => new Date(s + "T00:00:00");
-  const todayISO = () => fmtISO(new Date());
-  
-if (type === "custom") {
-  const start = getElementValue("customStart", "");
-  const end = getElementValue("customEnd", start);
-  if (!start) return null;
-  return (start <= end) ? { from: start, to: end } : { from: end, to: start };
-}
- // ✅ DAY: customStart арқылы 1 күн
+
+  // ✅ DAY: customStart арқылы 1 күн
   if (type === "day") {
-    const d = getElementValue("customStart", todayISO());
+    const d = document.getElementById("customStart")?.value;
+    if (!d) return null;
     return { from: d, to: d };
   }
 
-  // ✅ WEEK: customStart/customEnd арқылы
+  // ✅ WEEK: соңғы 5 оқу күні (дүйсенбі–жұма), 7 күн емес
   if (type === "week") {
-    const start = getElementValue("customStart", todayISO());
-    const end = getElementValue("customEnd", start);
-    return (start <= end) ? { from: start, to: end } : { from: end, to: start };
+    const end = new Date();
+    // бүгіннен артқа 7 күн қарап, тек оқу күндерін жинаймыз
+    const days = [];
+    for (let i = 0; i < 14 && days.length < 5; i++) {
+      const t = new Date();
+      t.setDate(t.getDate() - i);
+      const dow = t.getDay(); // 0 Sun .. 6 Sat
+      if (dow !== 0 && dow !== 6) days.push(toISO(t));
+    }
+    const from = days[days.length - 1];
+    const to = days[0];
+    return { from, to };
   }
 
-if (type === "month") {
-    const v = getElementValue("monthInput", "");
+  // ✅ MONTH
+  if (type === "month") {
+    const v = document.getElementById("monthInput")?.value;
     if (!v) return null;
     const [y,m] = v.split("-");
-    const last = new Date(Number(y), Number(m), 0); // соңғы күн␊
+    const last = new Date(Number(y), Number(m), 0); // соңғы күн
     return { from:`${y}-${m}-01`, to: toISO(last) };
   }
-  
-  // ✅ YEAR
+
+  // ✅ YEAR (календарь жыл)
   if (type === "year") {
-    const y = Number(getElementValue("yearInput", new Date().getFullYear()));
+    const y = Number(document.getElementById("yearInput")?.value || new Date().getFullYear());
     return { from:`${y}-01-01`, to:`${y}-12-31` };
   }
-  
-  // ✅ QUARTER
+
+  // ✅ QUARTER (2025-2026 оқу жылы)
   if (type === "quarter") {
-    const q = Number(getElementValue("quarterInput", 0));
+    const q = Number(document.getElementById("quarterInput")?.value || 0);
     // оқу жылы 2025 деп аламыз (2025-09-01 басталады)
-    const baseY = Number(getElementValue("quarterYearInput", 2025));
+    const baseY = Number(document.getElementById("quarterYearInput")?.value || 2025);
 
     const Q = {
       1: { from:`${baseY}-09-01`, to:`${baseY}-10-26` },
@@ -706,75 +710,30 @@ function sumTotals(report){
 }
 
 /* ================== TOP ================== */
-// ✅ daily арқылы нақты санау (тоқсан/ай/жыл бәріне дұрыс)
-function buildTopFromDaily ( report, code, minCount = 3 , limit = 10 ) { 
-  const students = (report && report.students) || [];
-  const daily = (report && report.daily) || {};
-
-  // id -> student
-  const stById = new Map(students.map(s => [String(s.id), s]));
-
-  // id -> count
-  const counts = new Map();
-
-  Object.entries(daily).forEach(([dateISO, byId]) => {
-    if (!byId) return;
-    Object.entries(byId).forEach(([sid, st]) => {
-     const c = (st && st.status_code) || "katysty";
-      if (c !== code) return;
-      counts.set(String(sid), (counts.get(String(sid)) || 0) + 1);
-    });
-  });
-
-  // build rows
-  const rows = [];
-  counts.forEach((cnt, sid) => {
-    if (cnt < minCount) return;
-
-    const s = stById.get(String(sid));
-    const name = s ? s.full_name : sid;
-    const cls = s ? `${s.grade}${s.class_letter}` : "";
-
-    rows.push({ name, cls, count: cnt });
-  });
-
-  rows.sort((a, b) => b.count - a.count);
-  return rows.slice(0, limit);
+function buildTop(report, code, limit=10) {
+  return (report.students||[])
+    .map(s=>({
+      name:s.full_name,
+      cls:`${s.grade}${s.class_letter}`,
+      count:Number(report.totals?.[String(s.id)]?.[code]||0)
+    }))
+    .filter(x=>x.count>3) // 4+ рет (3тен жогары)
+    .sort((a,b)=>b.count-a.count)
+    .slice(0,limit);
 }
 
-
-function fillTable(tableId, rows) {
+function fillTable(tableId, rows){
   const tbody = document.querySelector(`#${tableId} tbody`);
   if (!tbody) return;
-
   tbody.innerHTML = "";
-
-  if (!rows || rows.length === 0) {
+  rows.forEach((r,i)=>{
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td colspan="4" style="text-align:center; color:#888; padding:12px;">
-      ${currentLang === "ru" ? "Нет данных (нужно ≥ 3 раз)" : "Дерек жоқ (≥ 3 рет болуы керек)"}
-    </td>`;
-    tbody.appendChild(tr);
-    return;
-  }
-
-  rows.forEach((r, i) => {
-    const tr = document.createElement("tr");
- tr.innerHTML = `<td>${i + 1}</td><td>${escapeHtml(r.name)}</td><td>${escapeHtml(r.cls)}</td><td>${r.count}</td>`;
+    tr.innerHTML = `<td>${i+1}</td><td>${r.name}</td><td>${r.cls}</td><td>${r.count}</td>`;
     tbody.appendChild(tr);
   });
 }
 
-function escapeHtml(s){
-  const safe = (s === null || s === undefined) ? "" : s;
-  return String(safe).replace(/[&<>"']/g, c => ({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    "\"":"&quot;",
-    "'":"&#39;"
-  }[c]));
-}
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));}
 
 // ============================
 // REPORTS
@@ -783,20 +742,15 @@ function escapeHtml(s){
 function fillSimpleTable(tableId, rows) {
   const tbody = document.querySelector(`#${tableId} tbody`);
   if (!tbody) return;
-
   tbody.innerHTML = "";
   rows.forEach((r, i) => {
     const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${i + 1}</td>
-      <td>${escapeHtml(r.name)}</td>
-      <td>${escapeHtml(r.cls)}</td>
-    `;
+    tr.innerHTML = `<td>${i + 1}</td><td>${escapeHtml(r.name)}</td><td>${escapeHtml(r.cls)}</td>`;
     tbody.appendChild(tr);
   });
 }
 
-  /* =========================================
+/* =========================================
    Day Issues (Lists) + Update Stats (clean)
    ========================================= */
   
@@ -831,23 +785,25 @@ function eachDateISO(fromISO, toISO) {
   const start = new Date(fromISO + "T00:00:00");
   const end = new Date(toISO + "T00:00:00");
   for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    res.push(fmtISO(d));
+    res.push(d.toISOString().slice(0, 10));
   }
   return res;
 }
 
 // 4) report.daily ішінен таңдалған мерзім бойынша (1 күн/апта/ай/жыл/барлығы)
 // кешіккен/ауырған/себепті/себепсіз тізімдерді жинау
-
 function buildIssuesForRange(report, range) {
-  const stById = new Map((report.students || []).map(s => [String(s.id), s]));
+  const stById = new Map((report.students || []).map((s) => [String(s.id), s]));
   const daily = report.daily || {};
 
   const late = [];
   const sick = [];
-  const exc  = [];
+  const exc = [];
   const unex = [];
 
+  const dates = eachDateISO(range.from, range.to);
+
+  // бір адам мерзім ішінде бірнеше рет кездесуі мүмкін → қайталамас үшін Set
   const seen = {
     keshikti: new Set(),
     auyrdy: new Set(),
@@ -855,29 +811,28 @@ function buildIssuesForRange(report, range) {
     sebsez: new Set(),
   };
 
-  for (const dateISO of Object.keys(daily)) {
-    if (!betweenInclusive(dateISO, range.from, range.to)) continue;
-
+  for (const dateISO of dates) {
     const dailyMap = daily[dateISO];
     if (!dailyMap) continue;
 
     Object.entries(dailyMap).forEach(([sid, st]) => {
-       const code = st ? st.status_code : "";
+      const code = st?.status_code;
       if (!code || code === "katysty") return;
 
+      const s = stById.get(String(sid));
+      const name = s ? s.full_name : String(sid);
+      const cls = s ? `${s.grade}${s.class_letter}` : "";
+
+      // қайталамау: бір оқушы бір категорияға 1-ақ рет түссін
       if (seen[code] && seen[code].has(String(sid))) return;
       if (seen[code]) seen[code].add(String(sid));
 
-      const s = stById.get(String(sid));
-      const row = {
-        name: s ? s.full_name : String(sid),
-        cls:  s ? `${s.grade}${s.class_letter}` : ""
-      };
+      const row = { name, cls };
 
       if (code === "keshikti") late.push(row);
-      if (code === "auyrdy")   sick.push(row);
-      if (code === "sebep")    exc.push(row);
-      if (code === "sebsez")   unex.push(row);
+      if (code === "auyrdy") sick.push(row);
+      if (code === "sebep") exc.push(row);
+      if (code === "sebsez") unex.push(row);
     });
   }
 
@@ -891,19 +846,60 @@ function renderDayIssuesForRange(report, range) {
 
   const issues = buildIssuesForRange(report, range);
 
-  // бәрі бос болса — жасырамыз
+  // егер бәрі бос болса — жасырамыз
   if (!(issues.late.length || issues.sick.length || issues.exc.length || issues.unex.length)) {
     hideDayIssues();
     return;
   }
 
-  // ✅ КҮНДІКТЕ ДЕ 4 КАТЕГОРИЯ
   fill3("tblLate", issues.late);
   fill3("tblSick", issues.sick);
   fill3("tblExcused", issues.exc);
   fill3("tblUnexcused", issues.unex);
-
   box.style.display = "block";
+}
+
+// 6) Update Stats (CLEAN)
+async function updateStats() {
+  const range = getRangeFromPeriod();
+  if (!range) {
+    alert(I18N[currentLang]?.needPeriod || "Периодты таңдаңыз");
+    return;
+  }
+
+  const reportClass = document.getElementById("reportClass")?.value || "ALL";
+  let grade = "ALL", class_letter = "ALL";
+
+  if (reportClass !== "ALL") {
+    const p = parseClass(reportClass);
+    grade = p.grade;
+    class_letter = p.letter;
+  }
+
+  try {
+    const report = await apiGet("report", {
+      from: range.from,
+      to: range.to,
+      grade,
+      class_letter,
+    });
+
+    // ✅ МЫНА БӨЛІК ОСЫ ЖЕРДЕ БОЛУЫ КЕРЕК
+    renderDayIssuesForRange(report, range);
+
+    const t = sumTotals(report);
+    document.getElementById("totalLessons").textContent = t.total;
+    document.getElementById("totalPresent").textContent = t.katysty;
+    document.getElementById("totalLate").textContent = t.keshikti;
+    document.getElementById("totalSick").textContent = t.auyrdy;
+    document.getElementById("totalExcused").textContent = t.sebep;
+    document.getElementById("totalUnexcused").textContent = t.sebsez;
+
+    fillTable("topLateTable", buildTop(report, "keshikti"));
+    fillTable("topUnexcusedTable", buildTop(report, "sebsez"));
+  } catch (e) {
+    alert((currentLang === "ru" ? "Ошибка отчёта: " : "Есеп қатесі: ") + e.message);
+  }
 }
 
 // ===== DATE HELPERS =====
@@ -983,9 +979,8 @@ console.log("TOTALS KEYS:", Object.keys(report.totals || {}).length);
 }
 
 // ===== DATE HELPERS (LOCAL) =====
-function iso(d){
-  return fmtISO(d);
-}
+function iso(d){ return d.toISOString().slice(0,10); }
+function d0(s){ return new Date(s + "T00:00:00"); }
 
 function d0(s){
   const [y,m,d] = s.split("-").map(Number);
@@ -1279,6 +1274,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
