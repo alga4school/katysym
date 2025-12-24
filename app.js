@@ -333,6 +333,11 @@ function showView(id){
   window.scrollTo({top:0, behavior:"smooth"});
 }
 
+function isReportsViewActive() {
+  const view = document.getElementById("viewReports");
+  return !!(view && view.classList.contains("active"));
+}
+
 // ===== I18N =====
 function applyI18n() {
   const dict = I18N[currentLang] || I18N.kk;
@@ -355,6 +360,7 @@ function applyI18n() {
     });
   }
 
+   // ✅ ОСЫ ЖЕРДЕ БОЛУЫ КЕРЕК
   if (window.__classesLoaded) {
     renderClassesTo(document.getElementById("classSelect"), window.__classList, false);
     renderClassesTo(document.getElementById("reportClass"), window.__classList, true);
@@ -363,9 +369,8 @@ function applyI18n() {
   if (typeof renderAttendanceTable === "function") {
     renderAttendanceTable();
   }
-    
   updateSchoolDaysUI();
-}
+  }
 
 function statusLabel(code){
   const item = STATUS[code] || STATUS.katysty;
@@ -561,7 +566,7 @@ function getRangeFromPeriod() {
   const toISO = d => d.toISOString().slice(0,10);
   const d0 = s => new Date(s + "T00:00:00");
   const todayISO = () => new Date().toISOString().slice(0, 10);
-
+  
 if (type === "custom") {
   const start = document.getElementById("customStart")?.value;
   const end   = document.getElementById("customEnd")?.value || start;
@@ -1047,7 +1052,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Навигация
   document.getElementById("goAttendance")?.addEventListener("click", () => showView("viewAttendance"));
-  document.getElementById("goReports")?.addEventListener("click", () => {
+ document.getElementById("goReports")?.addEventListener("click", () => {
     showView("viewReports");
     updateStats();
   });
@@ -1082,11 +1087,15 @@ document.getElementById("customStart")?.addEventListener("change", () => {
     endInput.value = d.toISOString().slice(0,10);
   }
     
+ updateSchoolDaysUI();
+    updateStats();
+});
+
   document.getElementById("customEnd")?.addEventListener("change", () => {
     updateSchoolDaysUI();
     updateStats();
   });
-
+  
   // Бүгінгі күнді қою
   const today = new Date();
   const iso = today.toISOString().slice(0, 10);
@@ -1130,11 +1139,10 @@ document.getElementById("customStart")?.addEventListener("change", () => {
     if (toInput) toInput.style.display = "";
   }
    updateSchoolDaysUI();
-   if (document.getElementById("viewReports")?.classList.contains("active")) {
+   if (isReportsViewActive()) {
      updateStats();
    }
 });
-
 
 // Батырмалар
 document.getElementById("saveAttendanceBtn")?.addEventListener("click", saveAttendance);
@@ -1142,7 +1150,7 @@ document.getElementById("updateStatsBtn")?.addEventListener("click", updateStats
 document.getElementById("exportCsvBtn")?.addEventListener("click", exportCsv);
 document.getElementById("searchInput")?.addEventListener("input", renderAttendanceTable);
 document.getElementById("reportClass")?.addEventListener("change", () => {
-  if (document.getElementById("viewReports")?.classList.contains("active")) {
+  if (isReportsViewActive()) {
     updateStats();
   }
 });
@@ -1175,6 +1183,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
