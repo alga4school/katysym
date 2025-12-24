@@ -329,6 +329,7 @@ let statusMap = newMap();
 // VIEW SWITCH
 // ============================
 functionshowView(id){
+ 
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
   const view = document.getElementById(id);
   if (view) view.classList.add("active");
@@ -1210,6 +1211,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
