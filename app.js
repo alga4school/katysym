@@ -710,9 +710,9 @@ function fillTable(tableId, rows) {
   });
 }
 
-functionescapeHtml(s){
+function escapeHtml(s){
   const safe = (s === null || s === undefined) ? "" : s;
-  returnString(safe).replace(/[&<>"']/g, c => ({
+  return String(safe).replace(/[&<>"']/g, c => ({
     "&":"&amp;",
     "<":"&lt;",
     ">":"&gt;",
@@ -1224,6 +1224,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
