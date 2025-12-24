@@ -327,27 +327,24 @@ let statusMap = new Map();
 // ============================
 // VIEW SWITCH
 // ============================
-function showView ( id ){
+functionshowView(id){
  
-  document.querySelectorAll ( ".view" ) . forEach ( v = > v.classList.remove ( " active " ))
- ;
-  const view = document.getElementById ( id );
-  if (view) view.classList.add ( " active " )
- ;
-  window.scrollTo ({ top : 0 , behavior : " smooth" })
- ;
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  const view = document.getElementById(id);
+  if (view) view.classList.add("active");
+  window.scrollTo({top:0, behavior:"smooth"});
 }
 
-функция isReportsViewActive ( ) {
+functionisReportsViewActive() {
  
-  const view = document.getElementById ( "viewReports " ) ;
-  return !! ( view && view.classList.contains ( " active" ));
+  const view = document.getElementById("viewReports");
+  return !!(view && view.classList.contains("active"));
 }
 
-function getElementValue ( id, fallback ) {
+functiongetElementValue(id, fallback) {
  
-  const el = document.getElementById ( id );
-  return el ? el. value : fallback;
+  const el = document.getElementById(id);
+  return el ? el.value : fallback;
 }
 
 // ===== I18N =====
@@ -1213,6 +1210,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
