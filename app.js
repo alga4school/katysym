@@ -355,7 +355,6 @@ function applyI18n() {
     });
   }
 
-  // ✅ ОСЫ ЖЕРДЕ БОЛУЫ КЕРЕК
   if (window.__classesLoaded) {
     renderClassesTo(document.getElementById("classSelect"), window.__classList, false);
     renderClassesTo(document.getElementById("reportClass"), window.__classList, true);
@@ -557,23 +556,28 @@ async function saveAttendance() {
 }
 
 /* ================== ПЕРИОД ================== */
-
 function getRangeFromPeriod() {
   const type = document.getElementById("periodType")?.value;
   const toISO = d => d.toISOString().slice(0,10);
+  const d0 = s => new Date(s + "T00:00:00");
+  const todayISO = () => new Date().toISOString().slice(0, 10);
 
-  // ✅ DAY
+if (type === "custom") {
+  const start = document.getElementById("customStart")?.value;
+  const end   = document.getElementById("customEnd")?.value || start;
+  if (!start) return null;
+  return (start <= end) ? { from: start, to: end } : { from: end, to: start };
+}
+ // ✅ DAY: customStart арқылы 1 күн
   if (type === "day") {
-    const d = document.getElementById("customStart")?.value;
-    if (!d) return null;
+    const d = document.getElementById("customStart")?.value || todayISO();
     return { from: d, to: d };
   }
 
-  // ✅ WEEK
+  // ✅ WEEK: customStart/customEnd арқылы
   if (type === "week") {
-    const start = document.getElementById("customStart")?.value;
+    const start = document.getElementById("customStart")?.value || todayISO();
     const end = document.getElementById("customEnd")?.value || start;
-    if (!start) return null;
     return (start <= end) ? { from: start, to: end } : { from: end, to: start };
   }
 
@@ -1058,7 +1062,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 applyI18n();
  updateSchoolDaysUI();
 
-  document.getElementById("customStart")?.addEventListener("change", () => {
+document.getElementById("customStart")?.addEventListener("change", () => {␊
+  const type = document.getElementById("periodType")?.value;␊
+  const startISO = document.getElementById("customStart")?.value;␊
+  const endInput = document.getElementById("customEnd");␊ {
   const type = document.getElementById("periodType")?.value;
   const startISO = document.getElementById("customStart")?.value;
   const endInput = document.getElementById("customEnd");
@@ -1075,9 +1082,14 @@ applyI18n();
     endInput.value = d.toISOString().slice(0,10);
   }
 
-  updateSchoolDaysUI();
+   updateSchoolDaysUI();
     updateStats();
 });
+
+  document.getElementById("customEnd")?.addEventListener("change", () => {
+    updateSchoolDaysUI();
+    updateStats();
+  });
 
   // Бүгінгі күнді қою
   const today = new Date();
@@ -1090,9 +1102,9 @@ applyI18n();
   document.getElementById("quarterYearInput") && (document.getElementById("quarterYearInput").value = today.getFullYear());
 
   // Период өзгерсе — контролдарды көрсету/жасыру
- document.getElementById("periodType")?.addEventListener("change", () => {
-  const type = document.getElementById("periodType")?.value;
-
+ document.getElementById("periodType")?.addEventListener("change", () => {␊
+  const type = document.getElementById("periodType")?.value;␊
+    
   ["monthControl", "quarterControl", "yearControl", "customControl"].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.style.display = "none";
@@ -1110,6 +1122,7 @@ applyI18n();
   const customControl = document.getElementById("customControl");
   const toLabel = customControl?.querySelector('[data-i18n="toLabel"]');
   const toInput = customControl?.querySelector("#customEnd");
+                                                                          
   if (type === "day") {
     if (toLabel) toLabel.style.display = "none";
     if (toInput) {
@@ -1121,14 +1134,23 @@ applyI18n();
     if (toInput) toInput.style.display = "";
   }
    updateSchoolDaysUI();
+   if (document.getElementById("viewReports")?.classList.contains("active")) {
+     updateStats();
+   }
 });
+
 
 // Батырмалар
 document.getElementById("saveAttendanceBtn")?.addEventListener("click", saveAttendance);
 document.getElementById("updateStatsBtn")?.addEventListener("click", updateStats);
 document.getElementById("exportCsvBtn")?.addEventListener("click", exportCsv);
 document.getElementById("searchInput")?.addEventListener("input", renderAttendanceTable);
-
+document.getElementById("reportClass")?.addEventListener("change", () => {
+  if (document.getElementById("viewReports")?.classList.contains("active")) {
+    updateStats();
+  }
+});
+  
 // ✅ Бет ашылғанда period control-дар бірден дұрыс көрінсін
 document.getElementById("periodType")?.dispatchEvent(new Event("change"));
   
@@ -1157,6 +1179,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
