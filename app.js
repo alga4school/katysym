@@ -1247,18 +1247,13 @@ try {
 
   allStudents.forEach((s) => statusMap.set(s.id, "katysty"));
 
- const classSelect = document.getElementById("classSelect");
-  if (classSelect) {
-    classSelect.addEventListener("change", () => {
-      allStudents.forEach((s) => statusMap.set(s.id, "katysty"));
-      renderAttendanceTable();
-    });
-  }
-
+document.getElementById("classSelect")?.addEventListener("change", () => {
+    allStudents.forEach((s) => statusMap.set(s.id, "katysty"));
+    renderAttendanceTable();
+  });
  applyI18n();
   renderAttendanceTable();
 } catch (e) {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
-
