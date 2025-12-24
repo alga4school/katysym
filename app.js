@@ -558,7 +558,7 @@ async function saveAttendance() {
 /* ================== ПЕРИОД ================== */
 function getRangeFromPeriod() {
   const type = document.getElementById("periodType")?.value;
-  const toISO = d => d.toISOString().slice(0,10);
+ const toISO = d => fmtISO(d);
   const d0 = s => new Date(s + "T00:00:00");
 
   // ✅ DAY: customStart арқылы 1 күн
@@ -1011,8 +1011,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
   
   // Бүгінгі күнді қою
-  const today = new Date();
-  const iso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+const today = new Date();
+  const iso = fmtISO(today);
 
   document.getElementById("attendanceDate") && (document.getElementById("attendanceDate").value = iso);
  document.getElementById("customStart") && (document.getElementById("customStart").value = iso);
@@ -1095,6 +1095,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
