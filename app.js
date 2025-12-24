@@ -77,7 +77,6 @@ saveBtn: "💾 Сақтау",
     attendanceHint:
       "Ескерту: барлығы әдепкіде «Қатысты». Тек қажет болса ғана «Ауырды / Себепті / Себепсіз / Кешікті» таңдаңыз.",
     dayIssuesNote: "Ескерту: “Қатысты” оқушылар көрсетілмейді.",
-    noHolidays: "Таңдалмаған",
 
     // ===== KPI =====
    kpiTotal: "📊 Барлық белгі",
@@ -97,9 +96,8 @@ unexcused: "❌ Себепсіз",
     // ===== TOP TABLES =====
    topLate: "🔥 Көп кешігу (TOP)",
 topUnexcused: "🚫 Көп себепсіз (TOP)",
-
-    // ===== HOLIDAYS =====
-    holidaysLabel: "Оқымайтын күндер (мереке/каникул):",
+    
+     // ===== HOLIDAYS =====
     schoolDaysLabel: "Оқу күндерінің саны:",
 
     // ===== MESSAGES =====
@@ -180,7 +178,6 @@ saveBtn: "💾 Сохранить",
     attendanceHint:
       "Подсказка: по умолчанию все «Присутствовал(а)». Выбирайте «Болел(а) / По уважительной / Без уважительной / Опоздал(а)» только при необходимости.",
     dayIssuesNote: "Примечание: “Присутствовал(а)” не показывается.",
-    noHolidays: "Не выбрано",
 
     // ===== KPI =====
    kpiTotal: "📊 Всего отметок",
@@ -202,8 +199,8 @@ unexcused: "❌ Без уважительной",
 topUnexcused: "🚫 Много без причины (TOP)",
 
     // ===== HOLIDAYS =====
- holidaysLabel: "Нерабочие дни (праздники / каникулы):",
-  schoolDaysLabel: "Количество учебных дней:",
+     schoolDaysLabel: "Количество учебных дней:",
+    
     // ===== MESSAGES =====
     saveOk: "✅ Сохранено:",
     saveErr: "❌ Ошибка:",
@@ -251,8 +248,6 @@ function setLang(lang) {
 // Сенбі/жексенбі — демалыс (5 күндік оқу)
 const WEEKEND_DAYS = new Set([0, 6]); // Sun=0, Sat=6
 
-const HOLIDAYS_KEY = "katysym_holidays_v1";
-
 // Ресми каникул (2025-2026)
 const OFFICIAL_BREAKS_2025_2026 = [
   { from: "2025-10-27", to: "2025-11-02" }, // күзгі
@@ -269,79 +264,15 @@ function betweenInclusive(dateISO, fromISO, toISO) {
   const t = d0(dateISO).getTime();
   return t >= d0(fromISO).getTime() && t <= d0(toISO).getTime();
 }
+
 function isOfficialBreakDay(dateISO) {
   return OFFICIAL_BREAKS_2025_2026.some(b => betweenInclusive(dateISO, b.from, b.to));
-}
-
-// ===== manual holidays (қолмен белгілеу) =====
-function loadHolidays() {
-  try { return new Set(JSON.parse(localStorage.getItem(HOLIDAYS_KEY) || "[]")); }
-  catch { return new Set(); }
-}
-function saveHolidays(set) {
-  localStorage.setItem(HOLIDAYS_KEY, JSON.stringify([...set].sort()));
-}
-let HOLIDAYS = loadHolidays();
-
-function renderHolidays() {
-  const el = document.getElementById("holidaysList");
-  if (!el) return;
-
-  if (!HOLIDAYS.size) {
-    // i18n үшін: ішіндегі мәтін data-i18n арқылы ауысуы керек
-    el.innerHTML = `<em data-i18n="noHolidays">${I18N[currentLang]?.noHolidays || ""}</em>`;
-    return;
-  }
-
-  el.innerHTML = [...HOLIDAYS].map(d => `
-    <span class="holidayTag">${d}
-      <button data-date="${d}" class="delHolidayBtn">×</button>
-    </span>
-  `).join(" ");
-
-  el.querySelectorAll(".delHolidayBtn").forEach(btn => {
-    btn.onclick = () => {
-      HOLIDAYS.delete(btn.dataset.date);
-      saveHolidays(HOLIDAYS);
-      renderHolidays();
-      updateSchoolDaysUI();
-      // тіл ауысқанда мәтін де дұрыс болсын:
-      applyI18n();
-    };
-  });
-}
-
-function initHolidayUI() {
-  const addBtn = document.getElementById("addHolidayBtn");
-  const clrBtn = document.getElementById("clearHolidaysBtn");
-  const pick = document.getElementById("holidayPick");
-
-  if (addBtn) addBtn.onclick = () => {
-    const d = pick?.value;
-    if (!d) return;
-    HOLIDAYS.add(d);
-    saveHolidays(HOLIDAYS);
-    renderHolidays();
-    updateSchoolDaysUI();
-    applyI18n();
-  };
-
-  if (clrBtn) clrBtn.onclick = () => {
-    HOLIDAYS.clear();
-    saveHolidays(HOLIDAYS);
-    renderHolidays();
-    updateSchoolDaysUI();
-    applyI18n();
-  };
-
-  renderHolidays();
 }
 
 function isSchoolDayISO(dateISO) {
   const day = d0(dateISO).getDay();
   if (WEEKEND_DAYS.has(day)) return false;
   if (isOfficialBreakDay(dateISO)) return false;
-  if (HOLIDAYS.has(dateISO)) return false;
   return true;
 }
 
@@ -433,10 +364,8 @@ function applyI18n() {
   if (typeof renderAttendanceTable === "function") {
     renderAttendanceTable();
   }
-      // applyI18n() соңына қос:
-renderHolidays();
-updateSchoolDaysUI();
-
+    
+  updateSchoolDaysUI();
 }
 
 function statusLabel(code){
@@ -1114,7 +1043,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Навигация
   document.getElementById("goAttendance")?.addEventListener("click", () => showView("viewAttendance"));
-  document.getElementById("goReports")?.addEventListener("click", () => showView("viewReports"));
+  document.getElementById("goReports")?.addEventListener("click", () => {
+    showView("viewReports");
+    updateStats();
+  });
   document.getElementById("backHome1")?.addEventListener("click", () => showView("viewHome"));
   document.getElementById("backHome2")?.addEventListener("click", () => showView("viewHome"));
 
@@ -1124,8 +1056,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   
 applyI18n();
-  initHolidayUI();
-  updateSchoolDaysUI();
+ updateSchoolDaysUI();
 
   document.getElementById("customStart")?.addEventListener("change", () => {
   const type = document.getElementById("periodType")?.value;
@@ -1226,6 +1157,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
