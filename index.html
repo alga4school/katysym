@@ -4,16 +4,12 @@
  <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Сабаққа қатысу журналы</title>
-   <link rel="icon" href="/katysym/favicon_io/favicon.ico">
- <link rel="stylesheet" href="/katysym/style.css?v=2025-03-08">
+  <link rel="icon" href="/katysym/favicon.ico">
+  <link rel="stylesheet" href="/katysym/style.css">
   <link rel="icon" href="/katysym/img/logo.png">
-  <link rel="manifest" href="/katysym/manifest.json">
-  <link rel="apple-touch-icon" href="/katysym/img/logo.png">
- 
 </head>
 
 <body data-lang="kk">
- 
   <!-- ✅ HEADER (БІР РЕТ ҚАНА) -->
   <header class="topbar">
     <div class="brand">
@@ -171,9 +167,20 @@
   </button>
 </div>
 
-<!-- ===== SCHOOL DAYS ===== -->
+<!-- ===== HOLIDAYS ===== -->
 <div class="holidayBox-top">
   <div class="holidayRow">
+    <div class="holidayList">
+      <span data-i18n="holidaysLabel">Оқымайтын күндер (мереке/каникул):</span>
+      <span id="holidaysList"><em data-i18n="noHolidays">Таңдалмаған</em></span>
+    </div>
+
+    <div class="holidayBtns">
+      <input type="date" id="holidayPick" />
+      <button id="addHolidayBtn" class="btn" data-i18n="btnAdd">Қосу</button>
+      <button id="clearHolidaysBtn" class="btn" data-i18n="btnClear">Тазалау</button>
+    </div>
+
     <div class="holidayDays">
       <span data-i18n="schoolDaysLabel">Оқу күндерінің саны:</span>
       <span id="schoolDaysCount">0</span>
@@ -270,6 +277,6 @@
   </div> <!-- ✅ main container end -->
 
   <!-- ✅ Тек осы script ғана, ең соңында -->
-  <script src="/katysym/app.js?v=2025-03-08"></script>
+  <script src="/katysym/app.js"></script>
 </body>
 </html>
