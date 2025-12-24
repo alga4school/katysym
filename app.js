@@ -1081,11 +1081,7 @@ document.getElementById("customStart")?.addEventListener("change", () => {
     d.setDate(d.getDate() + 6);
     endInput.value = d.toISOString().slice(0,10);
   }
-
-   updateSchoolDaysUI();
-    updateStats();
-});
-
+    
   document.getElementById("customEnd")?.addEventListener("change", () => {
     updateSchoolDaysUI();
     updateStats();
@@ -1179,6 +1175,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
