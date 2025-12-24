@@ -258,9 +258,6 @@ const OFFICIAL_BREAKS_2025_2026 = [
   // { from:"2026-02-09", to:"2026-02-15" },
 ];
 
-function d0(iso) { return new Date(iso + "T00:00:00"); }
-function iso(d) { return d.toISOString().slice(0, 10); }
-
 function betweenInclusive(dateISO, fromISO, toISO) {
   const t = d0(dateISO).getTime();
   return t >= d0(fromISO).getTime() && t <= d0(toISO).getTime();
@@ -971,6 +968,8 @@ console.log("TOTALS KEYS:", Object.keys(report.totals || {}).length);
 }
 
  // ===== DATE HELPERS =====
+function d0(iso) { return new Date(iso + "T00:00:00"); }
+function iso(d) { return d.toISOString().slice(0, 10); }
 function betweenInclusive(dateISO, fromISO, toISO){
   const t = d0(dateISO).getTime();
   return t >= d0(fromISO).getTime() && t <= d0(toISO).getTime();
@@ -1259,4 +1258,5 @@ document.getElementById("classSelect")?.addEventListener("change", () => {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
