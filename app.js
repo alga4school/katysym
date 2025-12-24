@@ -984,10 +984,32 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("langToggle")?.addEventListener("click", () => {
     setLang(currentLang === "kk" ? "ru" : "kk");
   });
+  
+applyI18n();
+  updateSchoolDaysUI();
+    document.getElementById("customStart")?.addEventListener("change", () => {
+  const type = document.getElementById("periodType")?.value;
+  const startISO = document.getElementById("customStart")?.value;
+  const endInput = document.getElementById("customEnd");
 
+  if (!startISO || !endInput) { updateSchoolDaysUI(); return; }
+
+  if (type === "day") {
+    endInput.value = startISO;
+  }
+
+  if (type === "week") {
+    const d = new Date(startISO + "T00:00:00");
+    d.setDate(d.getDate() + 6);
+    endInput.value = d.toISOString().slice(0,10);
+  }
+
+  updateSchoolDaysUI();
+    updateStats();
+});
   // Бүгінгі күнді қою
   const today = new Date();
-  const iso = today.toISOString().slice(0, 10);
+  const iso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
   document.getElementById("attendanceDate") && (document.getElementById("attendanceDate").value = iso);
  document.getElementById("customStart") && (document.getElementById("customStart").value = iso);
@@ -1070,5 +1092,6 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
