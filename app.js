@@ -934,9 +934,6 @@ const report = await apiGet("report", {
 console.log("TO:", apiTo);
 console.log("DAILY:", report.daily);
 console.log("RANGE(UI):", range);
-console.log("API:", { from: apiFrom, to: apiTo, grade, class_letter });
-console.log("DAILY KEYS:", Object.keys(report.daily || {}).slice(0, 20));
-console.log("TOTALS KEYS:", Object.keys(report.totals || {}).length);
 
     renderDayIssuesForRange(report, range);
     updateSchoolDaysUI();
@@ -1263,6 +1260,7 @@ document.getElementById("classSelect")?.addEventListener("change", () => {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
