@@ -972,11 +972,7 @@ console.log("TOTALS KEYS:", Object.keys(report.totals || {}).length);
 }
 
  // ===== DATE HELPERS =====
-function addDaysISO(isoDate, days = 1) {
-  const d = new Date(isoDate + "T00:00:00");
-  d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
-}
+
 function betweenInclusive(dateISO, fromISO, toISO){
   const t = d0(dateISO).getTime();
   return t >= d0(fromISO).getTime() && t <= d0(toISO).getTime();
@@ -1265,6 +1261,7 @@ document.getElementById("classSelect")?.addEventListener("change", () => {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
