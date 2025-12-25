@@ -552,6 +552,26 @@ async function saveAttendance() {
     localStorage.setItem(guardKey, "1");
     const extra = res.replaced ? (I18N[currentLang].replaced || "(қайта жазылды)") : "";
     saveStatus.textContent = `${I18N[currentLang].saveOk} ${res.saved} ${extra}`;
+    // ===== 🔥 САҚТАЛҒАН КҮНГЕ ЕСЕПТІ БІРДЕН ДАЙЫНДАУ =====
+const pt = document.getElementById("periodType");
+const cs = document.getElementById("customStart");
+const ce = document.getElementById("customEnd");
+
+// Есепті "КҮН" режиміне ауыстыру
+if (pt) pt.value = "day";
+if (cs) cs.value = date;
+if (ce) ce.value = date;
+
+// UI дұрыс жаңарсын
+pt?.dispatchEvent(new Event("change"));
+
+// Есеп пен оқу күнін бірден есептеу
+updateSchoolDaysUI();
+updateStats();
+
+// ҚАЛАСАҢ — бірден есеп бетіне өткізу
+// showView("viewReports");
+
   } catch (e) {
     saveStatus.textContent = `${I18N[currentLang].saveErr} ${e.message}`;
   } finally {
@@ -559,38 +579,27 @@ async function saveAttendance() {
   }
 }
 
-
 /* ================== ПЕРИОД ================== */
 
 function getRangeFromPeriod() {
   const type = document.getElementById("periodType")?.value;
-  const toISO = d => iso(d);
-  const d0 = s => new Date(s + "T00:00:00");
+  const last = new Date(Number(y), Number(m), 0);
+ return { from:`${y}-${m}-01`, to: iso(last) };
 
-
-  // ✅ DAY: customStart арқылы 1 күн
+// ✅ DAY: customStart арқылы 1 күн
   if (type === "day") {
     const d = document.getElementById("customStart")?.value;
     if (!d) return null;
     return { from: d, to: d };
   }
 
-  // ✅ WEEK: соңғы 5 оқу күні (дүйсенбі–жұма), 7 күн емес
-  if (type === "week") {
-    const end = new Date();
-    
-    // бүгіннен артқа 7 күн қарап, тек оқу күндерін жинаймыз
-    const days = [];
-    for (let i = 0; i < 14 && days.length < 5; i++) {
-      const t = new Date();
-      t.setDate(t.getDate() - i);
-      const dow = t.getDay(); // 0 Sun .. 6 Sat
-      if (dow !== 0 && dow !== 6) days.push(toISO(t));
-    }
-    const from = days[days.length - 1];
-    const to = days[0];
-    return { from, to };
-  }
+  // ✅ WEEK: берём выбранный диапазон (customStart → customEnd)
+if (type === "week") {
+  const from = document.getElementById("customStart")?.value;
+  const to = document.getElementById("customEnd")?.value;
+  if (!from || !to) return null;
+  return { from, to };
+}
 
   // ✅ MONTH
   if (type === "month") {
@@ -1140,6 +1149,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
