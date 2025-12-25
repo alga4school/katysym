@@ -253,7 +253,12 @@ const OFFICIAL_BREAKS_2025_2026 = [
   // { from:"2026-02-09", to:"2026-02-15" },
 ];
 function d0(iso) { return new Date(iso + "T00:00:00"); }
-function iso(d) { return d.toISOString().slice(0, 10); }
+function iso(d) {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
 
 function betweenInclusive(dateISO, fromISO, toISO) {
   const t = d0(dateISO).getTime();
@@ -561,6 +566,7 @@ function getRangeFromPeriod() {
   const toISO = d => iso(d);
   const d0 = s => new Date(s + "T00:00:00");
 
+
   // ✅ DAY: customStart арқылы 1 күн
   if (type === "day") {
     const d = document.getElementById("customStart")?.value;
@@ -589,7 +595,7 @@ function getRangeFromPeriod() {
     const v = document.getElementById("monthInput")?.value;
     if (!v) return null;
     const [y,m] = v.split("-");
-    const last = new Date(Number(y), Number(m), 0); // соңғы күн
+  const last = new Date(Number(y), Number(m), 0); // соңғы күн
     return { from:`${y}-${m}-01`, to: toISO(last) };
   }
 
@@ -709,10 +715,11 @@ function eachDateISO(fromISO, toISO) {
   const start = new Date(fromISO + "T00:00:00");
   const end = new Date(toISO + "T00:00:00");
   for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    res.push(d.toISOString().slice(0, 10));
+    res.push(iso(d));
   }
   return res;
 }
+
 
 // 4) report.daily ішінен таңдалған мерзім бойынша (1 күн/апта/ай/жыл/барлығы)
 // кешіккен/ауырған/себепті/себепсіз тізімдерді жинау
@@ -825,18 +832,6 @@ async function updateStats() {
     alert((currentLang === "ru" ? "Ошибка отчёта: " : "Есеп қатесі: ") + e.message);
   }
 }
-
-
- // ===== DATE HELPERS =====
-function iso(d){ return d.toISOString().slice(0,10); }
-function d0(s){ return new Date(s + "T00:00:00"); }
-
-function betweenInclusive(dateISO, fromISO, toISO){
-  const t = d0(dateISO).getTime();
-  return t >= d0(fromISO).getTime() && t <= d0(toISO).getTime();
-}
-
-
 
 function exportCsv() {
   const range = getRangeFromPeriod();
@@ -1000,10 +995,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     endInput.value = startISO;
   }
 
-  if (type === "week") {
+ if (type === "week") {
     const d = new Date(startISO + "T00:00:00");
     d.setDate(d.getDate() + 6);
-    endInput.value = d.toISOString().slice(0,10);
+    endInput.value = iso(d);
   }
 
   updateSchoolDaysUI();
@@ -1011,15 +1006,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
   
   // Бүгінгі күнді қою
-  const today = new Date();
-
-  const todayIso = today.toISOString().slice(0, 10);
+const today = new Date();
+  const todayIso = iso(today);
 
   document.getElementById("attendanceDate") && (document.getElementById("attendanceDate").value = todayIso);
   document.getElementById("customStart") && (document.getElementById("customStart").value = todayIso);
   document.getElementById("customEnd") && (document.getElementById("customEnd").value = todayIso);
   document.getElementById("yearInput") && (document.getElementById("yearInput").value = today.getFullYear());
   document.getElementById("quarterYearInput") && (document.getElementById("quarterYearInput").value = today.getFullYear());
+
 
   // Период өзгерсе — контролдарды көрсету/жасыру
  document.getElementById("periodType")?.addEventListener("change", () => {
@@ -1096,6 +1091,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
