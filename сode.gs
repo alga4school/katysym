@@ -175,7 +175,8 @@ const spreadsheetTz = SpreadsheetApp.openById(SPREADSHEET_ID).getSpreadsheetTime
     totals[sid][code] = (totals[sid][code] || 0) + 1;
   }
 
-  // Дополнительные расчеты для top и lists
+// Дополнительные расчеты для top и lists
+const rowsFiltered = data.slice(1).filter(r => {
  let d = normalizeDate(r[idx.date]);
     if (!d) return false;
     if (from && d < from) return false;
