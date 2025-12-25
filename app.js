@@ -608,7 +608,20 @@ async function saveAttendance() {
 }
 
 
-/* ================== ПЕРИОД ================== */
+/* ================== ПЕРИОД (2025–2026 оқу жылы) ================== */
+
+// ✅ 2025–2026 оқу жылы тоқсандары (каникулсыз оқу аралығы)
+function getQuarterRange_2025_2026(q) {
+  const Q = {
+    1: { from: "2025-09-01", to: "2025-10-26" },
+    2: { from: "2025-11-03", to: "2025-12-28" },
+    3: { from: "2026-01-08", to: "2026-03-18" },
+    4: { from: "2026-03-30", to: "2026-05-25" },
+  };
+  return Q[q] || Q[1];
+}
+
+// ✅ Диапазонды periodType бойынша есептеу
 function getRangeFromPeriod() {
   const type = document.getElementById("periodType")?.value;
   if (!type) return null;
@@ -623,7 +636,6 @@ function getRangeFromPeriod() {
   }
 
   // ✅ WEEK: user таңдаған диапазон (customStart → customEnd)
-  // (сенде customControl бар, сондықтан ең дұрыс логика осы)
   if (type === "week") {
     const s = document.getElementById("customStart")?.value;
     const e = document.getElementById("customEnd")?.value;
@@ -631,9 +643,9 @@ function getRangeFromPeriod() {
     return { from: s, to: e };
   }
 
-  // ✅ MONTH
+  // ✅ MONTH: monthInput = "YYYY-MM"
   if (type === "month") {
-    const v = document.getElementById("monthInput")?.value; // "YYYY-MM"
+    const v = document.getElementById("monthInput")?.value;
     if (!v) return null;
 
     const [y, m] = v.split("-");
@@ -641,25 +653,18 @@ function getRangeFromPeriod() {
     return { from: `${y}-${m}-01`, to: toISO(last) };
   }
 
-  // ✅ YEAR (календарь жыл)
+  // ✅ YEAR: календарь жыл
   if (type === "year") {
-    const y = Number(document.getElementById("yearInput")?.value || new Date().getFullYear());
+    const y = Number(
+      document.getElementById("yearInput")?.value || new Date().getFullYear()
+    );
     return { from: `${y}-01-01`, to: `${y}-12-31` };
   }
 
-  // ✅ QUARTER (оқу жылы логикасы)
+  // ✅ QUARTER: 2025–2026 оқу жылы тоқсандары
   if (type === "quarter") {
-    const q = Number(document.getElementById("quarterInput")?.value || 0);
-    const baseY = Number(document.getElementById("quarterYearInput")?.value || new Date().getFullYear());
-
-    const Q = {
-      1: { from: `${baseY}-09-01`, to: `${baseY}-10-26` },
-      2: { from: `${baseY}-11-03`, to: `${baseY}-12-28` },
-      3: { from: `${baseY + 1}-01-08`, to: `${baseY + 1}-03-18` },
-      4: { from: `${baseY + 1}-03-30`, to: `${baseY + 1}-05-25` },
-    };
-
-    return Q[q] || null;
+    const q = Number(document.getElementById("quarterInput")?.value || 1);
+    return getQuarterRange_2025_2026(q);
   }
 
   // ✅ ALL: user таңдаған диапазон (customStart → customEnd)
@@ -673,8 +678,49 @@ function getRangeFromPeriod() {
   return null;
 }
 
+/* ================== ПЕРИОД UI (авто толтыру) ================== */
+
+// ✅ Тоқсан таңдағанда customStart/customEnd автомат толтыру
+function updatePeriodControls() {
+  const type = document.getElementById("periodType")?.value;
+
+  const customCtrl = document.getElementById("customCtrl");
+  const customStart = document.getElementById("customStart");
+  const customEnd = document.getElementById("customEnd");
+
+  // customCtrl бар болса ғана көрсет/жасыр (сенде бар деп есептеймін)
+  if (customCtrl) {
+    // day/week/all/quarter кезінде custom диапазон көрінсін
+    const showCustom = type === "day" || type === "week" || type === "all" || type === "quarter";
+    customCtrl.style.display = showCustom ? "block" : "none";
+  }
+
+  // ✅ QUARTER таңдағанда автомат күндер қойылады
+  if (type === "quarter" && customStart && customEnd) {
+    const q = Number(document.getElementById("quarterInput")?.value || 1);
+    const r = getQuarterRange_2025_2026(q);
+    customStart.value = r.from;
+    customEnd.value = r.to;
+  }
+}
+
+// ✅ Listener-лер: periodType/quarter өзгерсе — күндер автомат жаңарсын
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("periodType")?.addEventListener("change", updatePeriodControls);
+  document.getElementById("quarterInput")?.addEventListener("change", updatePeriodControls);
+
+  // Бет ашылғанда да бір рет толтырып қоямыз
+  updatePeriodControls();
+});
 function sumTotals(report) {
-  const totals = { total: 0, katysty: 0, keshikti: 0, sebep: 0, sebsez: 0, auyrdy: 0 };
+  const totals = {
+    total: 0,
+    katysty: 0,
+    keshikti: 0,
+    sebep: 0,
+    sebsez: 0,
+    auyrdy: 0,
+  };
 
   Object.values(report?.totals || {}).forEach((t) => {
     ["katysty", "keshikti", "sebep", "sebsez", "auyrdy"].forEach((k) => {
@@ -1203,6 +1249,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
