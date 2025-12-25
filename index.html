@@ -3,10 +3,11 @@
 <head>
  <meta charset="UTF-8">
   <title>Сабаққа қатысу журналы</title>
-  <link rel="icon" href="/katysym/favicon.ico">
-  <link rel="stylesheet" href="/katysym/style.css">
-  <link rel="icon" href="/katysym/img/logo.png">
-
+ <link rel="icon" href="/katysym/favicon.ico">
+<link rel="stylesheet" href="/katysym/style.css">
+<link rel="icon" href="/katysym/img/logo.png">
+ <link rel="manifest" href="/katysym/manifest.json">
+  <meta name="theme-color" content="#0b1220">
 </head>
 
 <body data-lang="kk">
@@ -279,7 +280,17 @@
 
   </div> <!-- ✅ main container end -->
 
-  <!-- ✅ Тек осы script ғана, ең соңында -->
-  <script src="/katysym/app.js"></script>
-</body>
+     <!-- барлық HTML осында бітеді -->
+    <script src="/katysym/app.js"></script>
+
+    <!-- 🔽 ОСЫ ЖЕРГЕ ҚОС -->
+  <script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/katysym/sw.js");
+  }
+</script>
+    <!-- 🔼 ОСЫ ЖЕРГЕ ДЕЙІН -->
+
+  </body>
 </html>
+
