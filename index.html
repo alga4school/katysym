@@ -1,330 +1,183 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="kk">
 <head>
- <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Сабаққа қатысу журналы</title>
-<link rel="icon" href="/katysym/favicon_io/favicon.ico">  
-  <link rel="stylesheet" href="/katysym/style.css">
-  <link rel="icon" href="/katysym/img/logo.png">
- <link rel="manifest" href="/katysym/manifest.json">
+  <meta charset="UTF-8">
+  <title>Қатысу журналы</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- favicon -->
+  <link rel="icon" href="favicon.ico">
+
+  <!-- styles -->
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body data-lang="kk">
- 
-  <!-- ✅ HEADER (БІР РЕТ ҚАНА) -->
-  <header class="topbar">
-    <div class="brand">
-      <img src="/katysym/img/logo.png" alt="logo" class="brand-logo">
-      <div class="brand-text">
-    <div class="brand-title" data-i18n="schoolName"></div>
-        </div>
-      </div>
-    <button id="langToggle" class="lang-btn">🌏KK / RU</button>
-  </header>
 
-  <!-- ✅ APP CONTENT -->
-  <div id="app">
+<header>
+  <h1 data-i18n="schoolName">№4 Алға орта мектебі</h1>
 
-      <!-- Views -->
-      <div id="viewHome" class="view active">
-        <div class="app">
-          <div class="home-card">
-            <div class="banner">
-              <div class="banner-overlay">
-                <h1 class="banner-title"></h1>
-                <p class="banner-text" id="homeBannerText">
-                  <span data-i18n="attendance"></span><br>
-                  <span data-i18n="attendanceDesc">Оқушылардың сабаққа қатысуын есепке алудың автоматтандырылған жүйесі</span>
-                </p>
-              </div>
-            </div>
-            <div class="home-actions">
-              <button id="goAttendance" class="btn primary" data-i18n="markAttendance">📚 Сабаққа қатысуды белгілеу</button>
-              <button id="goReports" class="btn" data-i18n="reports">📊 Есептер мен статистика</button>
-            </div>
-          </div>
-          
-          <!-- PWA Install Instructions -->
-          <div class="home-card install-card">
-            <h3 style="margin: 0 0 16px 0; font-size: 18px;" data-i18n="installPWA">📱 Приложение ретінде орнату</h3>
-            <div class="install-instructions">
-              <div class="install-item">
-                <h4 data-i18n="installAndroid">📱 Android (Samsung және т.б.)</h4>
-                <p class="install-steps" data-i18n="installAndroidSteps">1. Төмен оң жағындағы үш нүкте (⋮) басыңыз<br>2. 'Қосымшаға орнату' немесе 'Экранға орнату' таңдаңыз</p>
-              </div>
-              <div class="install-item">
-                <h4 data-i18n="installIOS">🍎 iPhone (iOS)</h4>
-                <p class="install-steps" data-i18n="installIOSSteps">1. Төмен оң жағындағы 'Ортасындағы' батырма басыңыз<br>2. 'Негіздің экранына қосу' таңдаңыз<br>3. 'Қосу' басыңыз</p>
-              </div>
-              <div class="install-item">
-                <h4 data-i18n="installPC">💻 Компьютер</h4>
-                <p class="install-steps" data-i18n="installPCSteps">1. Адресі барлау ішіндегі орнату батырмасын басыңыз<br>2. Немесе параметрлер > Қосымшалар > Орнату</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+  <nav>
+    <button id="goAttendance">📚 Қатысу</button>
+    <button id="goReports">📊 Есептер</button>
+    <button id="langToggle">🌐 KK / RU</button>
+  </nav>
+</header>
 
-      <div id="viewAttendance" class="view">
-        <div class="reports-bg">
-          <div class="reports-head">
-            <h2 class="view-title light" id="attendanceTitle" data-i18n="dailyControlTitle">📚 Күнделікті бақылау</h2>
-            <button id="backHome1" class="btn link light" data-i18n="homeBtn">← 🏠Басты бет</button>
-          </div>
-          <div class="reports-shell">
-            <div class="reports-card">
-              <div class="controls">
-                <div class="field">
-                  <label class="label" data-i18n="date">Күні</label>
-                  <input type="date" id="attendanceDate" />
-                </div>
-                <div class="field">
-                  <label class="label" data-i18n="class">Сынып</label>
-                  <select id="classSelect">
-                    <option value="" data-i18n="chooseClass">Сыныпты таңдаңыз</option>
-                  </select>
-                </div>
-                <div class="field grow">
-                  <label class="label" data-i18n="search">Іздеу</label>
-               <input type="text" id="searchInput" data-i18n-placeholder="studentNamePlaceholder" placeholder="Оқушы аты" />
-                </div>
-               <button id="saveAttendanceBtn" class="btn primary">
-   <span data-i18n="saveBtn">Сақтау</span>
-</button>
+<!-- ================== HOME ================== -->
+<section id="viewHome" class="view active">
+  <h2 data-i18n="attendanceDesc">
+    Сабаққа қатысуды белгілеу және есеп беру жүйесі
+  </h2>
+</section>
 
-              </div>
-              <div class="save-status" id="saveStatus"></div>
-              <div class="table-wrap">
-                <table class="table" id="attendanceTable">
-                  <thead>
-                   <tr><th>#</th><th data-i18n="student">Оқушы</th><th data-i18n="class">Сынып</th><th data-i18n="mark">Белгі</th></tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
-              </div>
-           <p class="hint" data-i18n="attendanceHint">
-  Ескерту: барлығы әдепкіде «Қатысты». 
-  Тек қажет болса ғана «Ауырды / Себепті / Себепсіз / Кешікті» таңдаңыз.
-</p>
-            </div>
-          </div>
-        </div>
-      </div>
+<!-- ================== ATTENDANCE ================== -->
+<section id="viewAttendance" class="view">
 
-      <div id="viewReports" class="view">
-        <div class="panel">
-          <div class="view-head">
-          <h2 class="view-title">📊 <span data-i18n="reportsTitle">Есептер мен статистика</span></h2>
-<button id="backHome2" class="btn link" data-i18n="homeBtn">← 🏠Басты бет</button>
-          </div>
-          <div class="controls">
-            <div class="field">
-              <label class="label" data-i18n="periodLabel">Кезең</label>
-              <select id="periodType">
-  <option value="day" data-i18n="pDay">Күні</option>
-  <option value="week" data-i18n="pWeek">Апта</option>
-  <option value="month" data-i18n="pMonth">Ай</option>
-  <option value="quarter" data-i18n="pQuarter">Тоқсан</option>
-  <option value="year" data-i18n="pYear">Жыл</option>
-  <option value="all" data-i18n="pAll">Барлығы</option>
-</select>
+  <h2 data-i18n="markAttendance">📚 Сабаққа қатысуды белгілеу</h2>
 
-            </div>
-            <div class="field" id="monthControl" style="display:none;">
-              <label class="label">Ай</label>
-              <input type="month" id="monthInput" />
-            </div>
-            <div class="field" id="quarterControl" style="display:none;">
-              <label class="label">Тоқсан</label>
-              <select id="quarterInput">
-                <option value="1">1-ші тоқсан</option>
-                <option value="2">2-ші тоқсан</option>
-                <option value="3">3-ші тоқсан</option>
-                <option value="4">4-ші тоқсан</option>
-              </select>
-              <input type="number" id="quarterYearInput" placeholder="Жыл" />
-            </div>
-            <div class="field" id="yearControl" style="display:none;">
-              <label class="label">Жыл</label>
-              <input type="number" id="yearInput" />
-            </div>
-   <div class="field" id="customControl" style="display:none;">
-  <label class="label" data-i18n="fromLabel">Басталу күні</label>
-  <input type="date" id="customStart" />
+  <div class="controls">
+    <label>
+      <span data-i18n="date">Күні</span>
+      <input type="date" id="attendanceDate">
+    </label>
 
-  <label class="label" data-i18n="toLabel">Аяқталу күні</label>
-  <input type="date" id="customEnd" />
-</div>
-            <div class="field">
-   <label class="label" data-i18n="class">Сынып</label>
-  <select id="reportClass">
-    <option value="ALL" data-i18n="allClasses">Барлық сынып</option>
-  </select>
-</div>
+    <label>
+      <span data-i18n="class">Сынып</span>
+      <select id="classSelect"></select>
+    </label>
 
-<div class="report-actions">
-  <button id="updateStatsBtn" class="btn primary" type="button">
-     <span data-i18n="btnUpdate">Көрсету</span>
-  </button>
-  <button id="exportCsvBtn" class="btn ghost" type="button">
-     <span data-i18n="btnExport">CSV жүктеу</span>
-  </button>
-</div>
-
-<!-- ===== SCHOOL DAYS ===== -->
-<div class="holidayBox-top">
-  <div class="holidayRow">
-    <div class="holidayDays">
-      <span data-i18n="schoolDaysLabel">Оқу күндерінің саны:</span>
-      <span id="schoolDaysCount">0</span>
-    </div>
+    <input
+      type="text"
+      id="searchInput"
+      data-i18n-placeholder="studentNamePlaceholder"
+      placeholder="Оқушы аты"
+    >
   </div>
-</div>
 
-<!-- ===== KPI ===== -->
-<div class="kpis">
+  <p class="hint" data-i18n="attendanceHint"></p>
+
+  <table id="attendanceTable" class="table">
+    <thead>
+      <tr>
+        <th>№</th>
+        <th data-i18n="student">Оқушы</th>
+        <th data-i18n="class">Сынып</th>
+        <th data-i18n="mark">Белгі</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div class="actions">
+    <button id="saveAttendanceBtn" data-i18n="saveBtn">💾 Сақтау</button>
+    <span id="saveStatus"></span>
+  </div>
+
+</section>
+
+<!-- ================== REPORTS ================== -->
+<section id="viewReports" class="view">
+
+  <h2 data-i18n="reportsTitle">Есептер мен статистика</h2>
+
+  <!-- PERIOD -->
+  <div class="controls">
+    <label>
+      <span data-i18n="periodLabel">Кезең</span>
+      <select id="periodType">
+        <option value="day" data-i18n="pDay">Күні</option>
+        <option value="week" data-i18n="pWeek">Апта</option>
+        <option value="month" data-i18n="pMonth">Ай</option>
+        <option value="quarter" data-i18n="pQuarter">Тоқсан</option>
+        <option value="year" data-i18n="pYear">Жыл</option>
+        <option value="all" data-i18n="pAll">Барлығы</option>
+      </select>
+    </label>
+
+    <label>
+      <span data-i18n="class">Сынып</span>
+      <select id="reportClass"></select>
+    </label>
+  </div>
+
+  <!-- CUSTOM RANGE -->
+  <div class="controls" id="customControl">
+    <label>
+      <span data-i18n="fromLabel">Басталу күні</span>
+      <input type="date" id="customStart">
+    </label>
+
+    <label>
+      <span data-i18n="toLabel">Аяқталу күні</span>
+      <input type="date" id="customEnd">
+    </label>
+  </div>
+
+  <!-- MONTH -->
+  <div class="controls" id="monthControl">
+    <input type="month" id="monthInput">
+  </div>
+
+  <!-- QUARTER -->
+  <div class="controls" id="quarterControl">
+    <select id="quarterInput">
+      <option value="1">I</option>
+      <option value="2">II</option>
+      <option value="3">III</option>
+      <option value="4">IV</option>
+    </select>
+    <input type="number" id="quarterYearInput">
+  </div>
+
+  <!-- YEAR -->
+  <div class="controls" id="yearControl">
+    <input type="number" id="yearInput">
+  </div>
+
+  <div class="actions">
+    <button id="updateStatsBtn" data-i18n="btnUpdate">📈 Көрсету</button>
+    <button id="exportCsvBtn" data-i18n="btnExport">⬇ CSV</button>
+  </div>
+
+  <p>
+    <span data-i18n="schoolDaysLabel">Оқу күндері:</span>
+    <b id="schoolDaysCount">0</b>
+  </p>
+
+  <!-- KPI -->
   <div class="kpi">
-    <div class="kpi-label" data-i18n="kpiTotal">📊 Барлық белгі</div>
-    <div class="kpi-val" id="totalLessons">0</div>
-  </div>
-  <div class="kpi">
-    <div class="kpi-label" data-i18n="kpiPresent">✅ Қатысты</div>
-    <div class="kpi-val" id="totalPresent">0</div>
-  </div>
-  <div class="kpi">
-    <div class="kpi-label" data-i18n="kpiLate">⏰ Кешікті</div>
-    <div class="kpi-val" id="totalLate">0</div>
-  </div>
-  <div class="kpi">
-    <div class="kpi-label" data-i18n="kpiSick">🤒 Ауырды</div>
-    <div class="kpi-val" id="totalSick">0</div>
-  </div>
-  <div class="kpi">
-    <div class="kpi-label" data-i18n="kpiExcused">📄 Себепті</div>
-    <div class="kpi-val" id="totalExcused">0</div>
-  </div>
-  <div class="kpi">
-    <div class="kpi-label" data-i18n="kpiUnexcused">❌ Себепсіз</div>
-    <div class="kpi-val" id="totalUnexcused">0</div>
-  </div>
-</div>
-
-<!-- ===== DAY ISSUES ===== -->
-<div class="dayIssuesBox" id="dayIssuesBox" style="display:none;">
-  <h3 data-i18n="dayIssuesTitle">📌 Сабақтан қалғандар (күндік)</h3>
-  <div class="dayGrid">
-    <div class="mini-card">
-      <h4 class="mini-title" data-i18n="late">⏰ Кешіккендер</h4>
-    <table class="table mini" id="tblLate">
-  <thead>
-    <tr>
-      <th>#</th>
-      <th data-i18n="student">Оқушы</th>
-      <th data-i18n="class">Сынып</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
-​​
-   <div class="dayIssuesBox" id="dayIssuesBox" style="display:none;">
-  <h3 data-i18n="dayIssuesTitle">📌 Сабақтан қалғандар</h3>
-
-  <div class="dayGrid">
-
-    <div class="mini-card">
-      <h4 class="mini-title" data-i18n="late">⏰ Кешіккендер</h4>
-      <table class="table mini" id="tblLate">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th data-i18n="student">Оқушы</th>
-            <th data-i18n="class">Сынып</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <div class="mini-card">
-      <h4 class="mini-title" data-i18n="sick">🤒 Ауырғандар</h4>
-      <table class="table mini" id="tblSick">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th data-i18n="student">Оқушы</th>
-            <th data-i18n="class">Сынып</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <div class="mini-card">
-      <h4 class="mini-title" data-i18n="excused">📄 Себепті</h4>
-      <table class="table mini" id="tblExcused">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th data-i18n="student">Оқушы</th>
-            <th data-i18n="class">Сынып</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <div class="mini-card">
-      <h4 class="mini-title" data-i18n="unexcused">❌ Себепсіз</h4>
-      <table class="table mini" id="tblUnexcused">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th data-i18n="student">Оқушы</th>
-            <th data-i18n="class">Сынып</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-<!-- ===== TOP TABLES ===== -->
-<div class="tables-grid">
-  <div class="mini-card">
-    <h4 class="mini-title" data-i18n="topLate">🔥 Көп кешігу (TOP)</h4>
-    <table class="table mini" id="topLateTable">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th data-i18n="student">Оқушы</th>
-          <th data-i18n="class">Сынып</th>
-          <th data-i18n="colCount">Саны</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <div>📊 <span id="totalLessons">0</span></div>
+    <div>✅ <span id="totalPresent">0</span></div>
+    <div>⏰ <span id="totalLate">0</span></div>
+    <div>🤒 <span id="totalSick">0</span></div>
+    <div>📄 <span id="totalExcused">0</span></div>
+    <div>❌ <span id="totalUnexcused">0</span></div>
   </div>
 
-  <div class="mini-card">
-    <h4 class="mini-title" data-i18n="topUnexcused">🚫 Көп себепсіз (TOP)</h4>
-    <table class="table mini" id="topUnexcusedTable">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th data-i18n="student">Оқушы</th>
-          <th data-i18n="class">Сынып</th>
-          <th data-i18n="colCount">Саны</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+  <!-- DAY ISSUES -->
+  <div id="dayIssuesBox" style="display:none;">
+    <h3 data-i18n="dayIssuesTitle"></h3>
+
+    <table id="tblLate" class="table mini"><tbody></tbody></table>
+    <table id="tblSick" class="table mini"><tbody></tbody></table>
+    <table id="tblExcused" class="table mini"><tbody></tbody></table>
+    <table id="tblUnexcused" class="table mini"><tbody></tbody></table>
+
+    <p class="hint" data-i18n="dayIssuesNote"></p>
   </div>
-</div>
 
+  <!-- TOP -->
+  <h3 data-i18n="topLate"></h3>
+  <table id="topLateTable" class="table mini"><tbody></tbody></table>
 
-  </div> <!-- ✅ main container end -->
+  <h3 data-i18n="topUnexcused"></h3>
+  <table id="topUnexcusedTable" class="table mini"><tbody></tbody></table>
 
-  <!-- ✅ Тек осы script ғана, ең соңында -->
-  <script src="/katysym/app.js"></script>
+</section>
+
+<!-- ================== JS ================== -->
+<script src="app.js"></script>
+
 </body>
 </html>
