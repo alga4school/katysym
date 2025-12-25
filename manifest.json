@@ -1,20 +1,22 @@
 {
-  "name": "Сабаққа қатысу журналы",
-  "short_name": "Қатысу",
-  "start_url": "/katysym/",
+  "name": "Katysym",
+  "short_name": "Katysym",
+  "start_url": "/katysym/index.html",
   "display": "standalone",
-  "background_color": "#0b1220",
-  "theme_color": "#0b1220",
+  "background_color": "#ffffff",
+  "theme_color": "#2e7d32",
   "icons": [
     {
       "src": "/katysym/favicon_io/android-chrome-192x192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/katysym/favicon_io/android-chrome-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
