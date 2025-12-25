@@ -1020,46 +1020,54 @@ function exportCsv() {
       const totals = report?.totals || {};
 
       // ---------- helpers ----------
-      const norm = (s) => String(s || "").replace(/\s+/g, "").toUpperCase();
-      const wantedClassNorm = (reportClass === "ALL") ? "" : norm(reportClass);
+      // ---------- helpers ----------
+const norm = (s) => String(s || "").replace(/\s+/g, "").toUpperCase();
+const wantedClassNorm = (reportClass === "ALL") ? "" : norm(reportClass);
 
-      const getStudentClass = (s) => `${s.grade}${s.class_letter}`;
-      const getCode = (st) => (st?.status_code || "katysty");
+// ✅ class дұрыс құралуы үшін (әріп жоқ болса да қате шықпайды)
+const getStudentClass = (s, st) => {
+  const g = (s?.grade ?? st?.grade ?? "");
+  const l = (s?.class_letter || st?.class_letter || "");
+  return `${g}${l}`.trim();
+};
 
-      const getKk = (st) => {
-        const code = getCode(st);
-        return st?.status_kk || STATUS?.[code]?.kk || STATUS.katysty.kk;
-      };
+const getCode = (st) => (st?.status_code || "katysty");
 
-      const getRu = (st) => {
-        const code = getCode(st);
-        return st?.status_ru || STATUS?.[code]?.ru || STATUS.katysty.ru;
-      };
+const getKk = (st) => {
+  const code = getCode(st);
+  return st?.status_kk || STATUS?.[code]?.kk || STATUS.katysty.kk;
+};
 
-      // ---------- build DAILY rows ----------
-      const headerDaily = ["date", "student", "class", "status_code", "status_kk", "status_ru"];
-      const rowsDaily = [];
+const getRu = (st) => {
+  const code = getCode(st);
+  return st?.status_ru || STATUS?.[code]?.ru || STATUS.katysty.ru;
+};
 
-      Object.entries(daily).forEach(([dateISO, byId]) => {
-        students.forEach((s) => {
-          const cls = getStudentClass(s);
+// ---------- build DAILY rows ----------
+const headerDaily = ["date", "student", "class", "status_code", "status_kk", "status_ru"];
+const rowsDaily = [];
 
-          // Фильтр класс если выбран
-          if (reportClass !== "ALL" && norm(cls) !== wantedClassNorm) return;
+Object.entries(daily).forEach(([dateISO, byId]) => {
+  students.forEach((s) => {
+    const st = byId?.[String(s.id)];
+    const cls = getStudentClass(s, st);
 
-          const st = byId?.[String(s.id)];
-          const code = getCode(st);
+    // Фильтр класс если выбран
+    if (reportClass !== "ALL" && norm(cls) !== wantedClassNorm) return;
 
-          rowsDaily.push([
-            dateISO,
-            s.full_name,
-            cls,
-            code,
-            getKk(st),
-            getRu(st),
-          ]);
-        });
-      });
+    const code = getCode(st);
+
+    rowsDaily.push([
+      dateISO,
+      s.full_name,
+      cls,
+      code,
+      getKk(st),
+      getRu(st),
+    ]);
+  });
+});
+
 
       // Егер daily жоқ/бос болса — totals шығарамыз
       let header = headerDaily;
@@ -1249,6 +1257,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
