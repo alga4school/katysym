@@ -127,7 +127,10 @@ function getReport_(p){
   const from = String(p.from || "");
   const to   = String(p.to || "");
 
-const spreadsheetTz = SpreadsheetApp.openById(SPREADSHEET_ID).getSpreadsheetTimeZone();
+ const spreadsheetTz = String(
+    SpreadsheetApp.openById(SPREADSHEET_ID).getSpreadsheetTimeZone() ||
+    Session.getScriptTimeZone()
+  );
   const normalizeDate = (value) => {
     if (value instanceof Date) {
       return Utilities.formatDate(value, spreadsheetTz, "yyyy-MM-dd");
