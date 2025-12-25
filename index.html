@@ -2,24 +2,25 @@
 <html lang="kk">
 <head>
  <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Сабаққа қатысу журналы</title>
-<link rel="icon" href="/katysym/favicon_io/favicon.ico">  
+  <link rel="icon" href="/katysym/favicon.ico">
   <link rel="stylesheet" href="/katysym/style.css">
   <link rel="icon" href="/katysym/img/logo.png">
- <link rel="manifest" href="/katysym/manifest.json">
+
 </head>
 
 <body data-lang="kk">
- 
+
   <!-- ✅ HEADER (БІР РЕТ ҚАНА) -->
   <header class="topbar">
     <div class="brand">
       <img src="/katysym/img/logo.png" alt="logo" class="brand-logo">
       <div class="brand-text">
     <div class="brand-title" data-i18n="schoolName"></div>
+        
         </div>
       </div>
+    </div>
     <button id="langToggle" class="lang-btn">🌏KK / RU</button>
   </header>
 
@@ -98,15 +99,12 @@
               <div class="table-wrap">
                 <table class="table" id="attendanceTable">
                   <thead>
-                   <tr><th>#</th><th data-i18n="student">Оқушы</th><th data-i18n="class">Сынып</th><th data-i18n="mark">Белгі</th></tr>
+                    <tr><th>#</th><th data-i18n="student">Оқушы</th><th data-i18n="class">Сынып</th><th data-i18n="mark">Белгі</th>
                   </thead>
                   <tbody></tbody>
                 </table>
               </div>
-           <p class="hint" data-i18n="attendanceHint">
-  Ескерту: барлығы әдепкіде «Қатысты». 
-  Тек қажет болса ғана «Ауырды / Себепті / Себепсіз / Кешікті» таңдаңыз.
-</p>
+              <p class="hint" data-i18n="note">Ескерту: барлығы әдепкіде «Қатысты». Тек қажет болса ғана «Ауырды / Себепті / Себепсіз / Кешікті» таңдаңыз.</p>
             </div>
           </div>
         </div>
@@ -157,7 +155,7 @@
   <input type="date" id="customEnd" />
 </div>
             <div class="field">
-   <label class="label" data-i18n="class">Сынып</label>
+  <label class="label" data-i18n="classLabel">Сынып</label>
   <select id="reportClass">
     <option value="ALL" data-i18n="allClasses">Барлық сынып</option>
   </select>
@@ -172,9 +170,20 @@
   </button>
 </div>
 
-<!-- ===== SCHOOL DAYS ===== -->
+<!-- ===== HOLIDAYS ===== -->
 <div class="holidayBox-top">
   <div class="holidayRow">
+    <div class="holidayList">
+      <span data-i18n="holidaysLabel">Оқымайтын күндер (мереке/каникул):</span>
+      <span id="holidaysList"><em data-i18n="noHolidays">Таңдалмаған</em></span>
+    </div>
+
+    <div class="holidayBtns">
+      <input type="date" id="holidayPick" />
+      <button id="addHolidayBtn" class="btn" data-i18n="btnAdd">Қосу</button>
+      <button id="clearHolidaysBtn" class="btn" data-i18n="btnClear">Тазалау</button>
+    </div>
+
     <div class="holidayDays">
       <span data-i18n="schoolDaysLabel">Оқу күндерінің саны:</span>
       <span id="schoolDaysCount">0</span>
@@ -216,77 +225,23 @@
   <div class="dayGrid">
     <div class="mini-card">
       <h4 class="mini-title" data-i18n="late">⏰ Кешіккендер</h4>
-    <table class="table mini" id="tblLate">
-  <thead>
-    <tr>
-      <th>#</th>
-      <th data-i18n="student">Оқушы</th>
-      <th data-i18n="class">Сынып</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
-​​
-   <div class="dayIssuesBox" id="dayIssuesBox" style="display:none;">
-  <h3 data-i18n="dayIssuesTitle">📌 Сабақтан қалғандар</h3>
-
-  <div class="dayGrid">
-
-    <div class="mini-card">
-      <h4 class="mini-title" data-i18n="late">⏰ Кешіккендер</h4>
-      <table class="table mini" id="tblLate">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th data-i18n="student">Оқушы</th>
-            <th data-i18n="class">Сынып</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+      <table class="table mini" id="tblLate"><tbody></tbody></table>
     </div>
-
     <div class="mini-card">
       <h4 class="mini-title" data-i18n="sick">🤒 Ауырғандар</h4>
-      <table class="table mini" id="tblSick">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th data-i18n="student">Оқушы</th>
-            <th data-i18n="class">Сынып</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+      <table class="table mini" id="tblSick"><tbody></tbody></table>
     </div>
-
     <div class="mini-card">
       <h4 class="mini-title" data-i18n="excused">📄 Себепті</h4>
-      <table class="table mini" id="tblExcused">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th data-i18n="student">Оқушы</th>
-            <th data-i18n="class">Сынып</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+      <table class="table mini" id="tblExcused"><tbody></tbody></table>
     </div>
-
     <div class="mini-card">
       <h4 class="mini-title" data-i18n="unexcused">❌ Себепсіз</h4>
-      <table class="table mini" id="tblUnexcused">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th data-i18n="student">Оқушы</th>
-            <th data-i18n="class">Сынып</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+      <table class="table mini" id="tblUnexcused"><tbody></tbody></table>
     </div>
+  </div>
+  <p class="hint" data-i18n="dayIssuesNote">Ескерту: “Қатысты” оқушылар көрсетілмейді.</p>
+</div>
 
 <!-- ===== TOP TABLES ===== -->
 <div class="tables-grid">
