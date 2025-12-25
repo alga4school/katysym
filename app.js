@@ -85,7 +85,7 @@ kpiExcused: "📄 Себепті",
 kpiUnexcused: "❌ Себепсіз",
 
     // ===== DAY ISSUES =====
- dayIssuesTitle : " 📌 Отсутствующие по менструации ",
+dayIssuesTitle: "📌 Сабақтан қалғандар",
  late: "⏰ Кешіккендер",
 sick: "🤒 Ауырғандар",
 excused: "📄 Себепті",
@@ -184,7 +184,7 @@ kpiExcused: "📄 По уважительной",
 kpiUnexcused: "❌ Без уважительной",
 
     // ===== DAY ISSUES =====
-dayIssuesTitle : "📌 Проблемы, связанные с менструальным циклом " ,
+dayIssuesTitle: "📌 Отсутствующие за период",
 late: "⏰ Опоздавшие",
 sick: "🤒 Болели",
 excused: "📄 По уважительной",
@@ -1064,24 +1064,42 @@ const today = new Date();
     if (toLabel) toLabel.style.display = "";
     if (toInput) toInput.style.display = "";
   }
+
+  updateSchoolDaysUI();
+  updateStats();
 });
 
 // Батырмалар
 document.getElementById("saveAttendanceBtn")?.addEventListener("click", saveAttendance);
 document.getElementById("updateStatsBtn")?.addEventListener("click", updateStats);
 document.getElementById("exportCsvBtn")?.addEventListener("click", exportCsv);
-document.getElementById("searchInput")?.addEventListener("input", renderAttendanceTable);
-document.getElementById("customStart")?.addEventListener("change", () => {
-  const type = document.getElementById("periodType")?.value;
-  if (type !== "day") return;
-  const start = document.getElementById("customStart")?.value;
-  const end = document.getElementById("customEnd");
-  if (start && end) end.value = start;
+  document.getElementById("monthInput")?.addEventListener("change", () => {
+  updateSchoolDaysUI();
+  updateStats();
 });
+
+document.getElementById("quarterInput")?.addEventListener("change", () => {
+  updateSchoolDaysUI();
+  updateStats();
+});
+
+document.getElementById("quarterYearInput")?.addEventListener("input", () => {
+  updateSchoolDaysUI();
+  updateStats();
+});
+
+document.getElementById("yearInput")?.addEventListener("input", () => {
+  updateSchoolDaysUI();
+  updateStats();
+});
+
+document.getElementById("reportClass")?.addEventListener("change", () => {
+  updateStats();
+});
+document.getElementById("searchInput")?.addEventListener("input", renderAttendanceTable);
   
 // ✅ Бет ашылғанда period control-дар бірден дұрыс көрінсін
 document.getElementById("periodType")?.dispatchEvent(new Event("change"));
-document.getElementById("rep_periodType")?.dispatchEvent(new Event("change")); // егер бар болса
 
 // API: сыныптар, оқушылар
 try {
@@ -1108,6 +1126,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
