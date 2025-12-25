@@ -558,7 +558,7 @@ async function saveAttendance() {
 /* ================== ПЕРИОД ================== */
 function getRangeFromPeriod() {
   const type = document.getElementById("periodType")?.value;
-   const toISO = d => fmtISO (d );
+  const toISO = d => iso(d);
   const d0 = s => new Date(s + "T00:00:00");
 
   // ✅ DAY: customStart арқылы 1 күн
@@ -1011,15 +1011,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
   
   // Бүгінгі күнді қою
- const today = new Date ();
- 
-  const iso = typeof fmtISO === "function"
-    ? fmtISO (сегодня)
-    : сегодня. toISOString (). slice ( 0 , 10 );
+  const today = new Date();
 
-  document.getElementById("attendanceDate") && (document.getElementById("attendanceDate").value = iso);
- document.getElementById("customStart") && (document.getElementById("customStart").value = iso);
-  document.getElementById("customEnd") && (document.getElementById("customEnd").value = iso);
+  const todayIso = today.toISOString().slice(0, 10);
+
+  document.getElementById("attendanceDate") && (document.getElementById("attendanceDate").value = todayIso);
+  document.getElementById("customStart") && (document.getElementById("customStart").value = todayIso);
+  document.getElementById("customEnd") && (document.getElementById("customEnd").value = todayIso);
   document.getElementById("yearInput") && (document.getElementById("yearInput").value = today.getFullYear());
   document.getElementById("quarterYearInput") && (document.getElementById("quarterYearInput").value = today.getFullYear());
 
@@ -1098,6 +1096,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
