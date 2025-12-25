@@ -57,10 +57,10 @@ async function apiGet(mode, params = {}) {
   const url = new URL(WEBAPP_URL);
   url.searchParams.set("mode", mode);
   url.searchParams.set("key", API_KEY);
-
-  Object.entries(params).forEach(([k, v]) => {
-    if (v !== undefined && v !== null && v !== "") url.searchParams.set(k, String(v));
-  });
+  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+  const r = await fetch(url);
+  return await r.json();
+}
 
   const resp = await fetch(url.toString(), { method: "GET" });
   const text = await resp.text();
@@ -1244,6 +1244,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
