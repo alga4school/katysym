@@ -561,6 +561,7 @@ async function saveAttendance() {
 
 
 /* ================== ПЕРИОД ================== */
+
 function getRangeFromPeriod() {
   const type = document.getElementById("periodType")?.value;
   const toISO = d => iso(d);
@@ -577,6 +578,7 @@ function getRangeFromPeriod() {
   // ✅ WEEK: соңғы 5 оқу күні (дүйсенбі–жұма), 7 күн емес
   if (type === "week") {
     const end = new Date();
+    
     // бүгіннен артқа 7 күн қарап, тек оқу күндерін жинаймыз
     const days = [];
     for (let i = 0; i < 14 && days.length < 5; i++) {
@@ -595,7 +597,7 @@ function getRangeFromPeriod() {
     const v = document.getElementById("monthInput")?.value;
     if (!v) return null;
     const [y,m] = v.split("-");
-  const last = new Date(Number(y), Number(m), 0); // соңғы күн
+ const last = new Date(Number(y), Number(m), 0); // соңғы күн
     return { from:`${y}-${m}-01`, to: toISO(last) };
   }
 
@@ -630,10 +632,24 @@ function getRangeFromPeriod() {
 
 function sumTotals(report){
   const totals = { total:0, katysty:0, keshikti:0, sebep:0, sebsez:0, auyrdy:0 };
-  Object.values(report.totals || {}).forEach(t => {
-    ["katysty","keshikti","sebep","sebsez","auyrdy"].forEach(k => {
-      totals[k] += Number(t[k] || 0);
-      totals.total += Number(t[k] || 0);
+  const totalsByStudent = report.totals || {};
+  if (Object.keys(totalsByStudent).length) {
+    Object.values(totalsByStudent).forEach(t => {
+      ["katysty","keshikti","sebep","sebsez","auyrdy"].forEach(k => {
+        totals[k] += Number(t[k] || 0);
+        totals.total += Number(t[k] || 0);
+      });
+    });
+    return totals;
+  }
+
+  const daily = report.daily || {};
+  Object.values(daily).forEach(byStudent => {
+    Object.values(byStudent || {}).forEach(st => {
+      const code = st?.status_code || "katysty";
+      if (totals[code] == null) return;
+      totals[code] += 1;
+      totals.total += 1;
     });
   });
   return totals;
@@ -719,6 +735,7 @@ function eachDateISO(fromISO, toISO) {
   }
   return res;
 }
+
 
 
 // 4) report.daily ішінен таңдалған мерзім бойынша (1 күн/апта/ай/жыл/барлығы)
@@ -995,7 +1012,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     endInput.value = startISO;
   }
 
- if (type === "week") {
+  if (type === "week") {
     const d = new Date(startISO + "T00:00:00");
     d.setDate(d.getDate() + 6);
     endInput.value = iso(d);
@@ -1091,6 +1108,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
