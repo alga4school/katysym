@@ -1,4 +1,44 @@
 // ============================
+// API HELPERS (MISSING FIX)
+// ============================
+
+async function apiGet(action, params = {}) {
+  const url = new URL(WEBAPP_URL + action);
+  Object.entries(params).forEach(([k, v]) =>
+    url.searchParams.append(k, v)
+  );
+
+  const res = await fetch(url.toString(), {
+    headers: {
+      "X-API-KEY": API_KEY,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("API GET error");
+  }
+
+  return await res.json();
+}
+
+async function apiPost(body) {
+  const res = await fetch(WEBAPP_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-API-KEY": API_KEY,
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    throw new Error("API POST error");
+  }
+
+  return await res.json();
+}
+
+// ============================
 // LANG (global)
 // ============================
 let currentLang =
@@ -1164,3 +1204,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
