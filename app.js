@@ -583,8 +583,9 @@ updateStats();
 
 function getRangeFromPeriod() {
   const type = document.getElementById("periodType")?.value;
-  const last = new Date(Number(y), Number(m), 0);
- return { from:`${y}-${m}-01`, to: iso(last) };
+ const last = new Date(Number(y), Number(m), 0); // соңғы күн
+    return { from:`${y}-${m}-01`, to: toISO(last) };
+  }
 
 // ✅ DAY: customStart арқылы 1 күн
   if (type === "day") {
@@ -606,9 +607,6 @@ if (type === "week") {
     const v = document.getElementById("monthInput")?.value;
     if (!v) return null;
     const [y,m] = v.split("-");
- const last = new Date(Number(y), Number(m), 0); // соңғы күн
-    return { from:`${y}-${m}-01`, to: toISO(last) };
-  }
 
   // ✅ YEAR (календарь жыл)
   if (type === "year") {
@@ -1149,6 +1147,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
