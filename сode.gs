@@ -127,16 +127,20 @@ function getReport_(p){
   const from = String(p.from || "");
   const to   = String(p.to || "");
 
- const spreadsheetTz = String(
-    SpreadsheetApp.openById(SPREADSHEET_ID).getSpreadsheetTimeZone() ||
-    Session.getScriptTimeZone()
-  );
+ const spreadsheetTz = [
+    SpreadsheetApp.openById(SPREADSHEET_ID).getSpreadsheetTimeZone(),
+    Session.getScriptTimeZone(),
+    "ВРЕМЯ ПО ГРИНВИЧУ" ,
+  ]
+    .map((tz) => String(tz || "").trim())
+    .find((tz) => tz.length > 0) ;
   const normalizeDate = (value) => {
     if (value instanceof Date) {
-      return Utilities.formatDate(value, spreadsheetTz, "yyyy-MM-dd");
+      return Utilities.formatDate(value, spreadsheetTz, "yyyy-MM-dd") ;
     }
-    return String(value || "").slice(0, 10);
-  };
+    return String(value || "").slice(0, 10) ;
+  } ;
+
 
   const students = getStudents_({ grade, class_letter: letter });
   const mapStudents = new Map(students.map(s=>[String(s.id),s]));
@@ -152,7 +156,7 @@ function getReport_(p){
     const r = data[i];
 
     // ✅ date-ті міндетті түрде YYYY-MM-DD қыламыз
-   let d = normalizeDate(r[idx.date]);
+   let d = normalizeDate(r[idx.date]) ;
 
     if (!d) continue;
     if (from && d < from) continue;
@@ -180,7 +184,7 @@ function getReport_(p){
 
 // Дополнительные расчеты для top и lists
 const rowsFiltered = data.slice(1).filter(r => {
- let d = normalizeDate(r[idx.date]);
+let d = normalizeDate(r[idx.date]) ;
     if (!d) return false;
     if (from && d < from) return false;
     if (to && d > to) return false;
