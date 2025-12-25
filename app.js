@@ -248,147 +248,18 @@ function setLang(lang) {
   document.body.dataset.lang = currentLang;
   localStorage.setItem("lang", currentLang);
 
-/* ================== SCHOOL CALENDAR / HOLIDAYS (ONE COPY ONLY) ================== */
-
-// Сенбі/жексенбі — демалыс (5 күндік оқу)
-const WEEKEND_DAYS = new Set([0, 6]); // Sun=0, Sat=6
-
-const HOLIDAYS_KEY = "katysym_holidays_v1";
-
-// Ресми каникул (2025-2026)
-const OFFICIAL_BREAKS_2025_2026 = [
-  { from: "2025-10-27", to: "2025-11-02" }, // күзгі
-  { from: "2025-12-29", to: "2026-01-07" }, // қысқы
-  { from: "2026-03-19", to: "2026-03-29" }, // көктемгі
-  // 1-сынып қосымша керек болса қос:
-  // { from:"2026-02-09", to:"2026-02-15" },
-];
-
-function d0(iso) { return new Date(iso + "T00:00:00"); }
-function iso(d) { return d.toISOString().slice(0, 10); }
-
-function betweenInclusive(dateISO, fromISO, toISO) {
-  const t = d0(dateISO).getTime();
-  return t >= d0(fromISO).getTime() && t <= d0(toISO).getTime();
+  // тіл ауысқанда интерфейс мәтіндерін жаңарту
+  applyI18n();
 }
-function isOfficialBreakDay(dateISO) {
-  return OFFICIAL_BREAKS_2025_2026.some(b => betweenInclusive(dateISO, b.from, b.to));
+/* ================== DATE HELPERS ================== */
+/* Күнмен жұмыс істейтін функциялар (отчёт/сүзгі үшін керек болуы мүмкін) */
+
+function d0(iso) { 
+  return new Date(iso + "T00:00:00"); 
 }
-
-// ===== manual holidays (қолмен белгілеу) =====
-function loadHolidays() {
-  try { return new Set(JSON.parse(localStorage.getItem(HOLIDAYS_KEY) || "[]")); }
-  catch { return new Set(); }
+function iso(d) { 
+  return d.toISOString().slice(0, 10); 
 }
-function saveHolidays(set) {
-  localStorage.setItem(HOLIDAYS_KEY, JSON.stringify([...set].sort()));
-}
-let HOLIDAYS = loadHolidays();
-
-function renderHolidays() {
-  const el = document.getElementById("holidaysList");
-  if (!el) return;
-
-  if (!HOLIDAYS.size) {
-    // i18n үшін: ішіндегі мәтін data-i18n арқылы ауысуы керек
-    el.innerHTML = `<em data-i18n="noHolidays">${I18N[currentLang]?.noHolidays || ""}</em>`;
-    return;
-  }
-
-  el.innerHTML = [...HOLIDAYS].map(d => `
-    <span class="holidayTag">${d}
-      <button data-date="${d}" class="delHolidayBtn">×</button>
-    </span>
-  `).join(" ");
-
-  el.querySelectorAll(".delHolidayBtn").forEach(btn => {
-    btn.onclick = () => {
-      HOLIDAYS.delete(btn.dataset.date);
-      saveHolidays(HOLIDAYS);
-      renderHolidays();
-      updateSchoolDaysUI();
-      // тіл ауысқанда мәтін де дұрыс болсын:
-      applyI18n();
-    };
-  });
-}
-
-function initHolidayUI() {
-  const addBtn = document.getElementById("addHolidayBtn");
-  const clrBtn = document.getElementById("clearHolidaysBtn");
-  const pick = document.getElementById("holidayPick");
-
-  if (addBtn) addBtn.onclick = () => {
-    const d = pick?.value;
-    if (!d) return;
-    HOLIDAYS.add(d);
-    saveHolidays(HOLIDAYS);
-    renderHolidays();
-    updateSchoolDaysUI();
-    applyI18n();
-  };
-
-  if (clrBtn) clrBtn.onclick = () => {
-    HOLIDAYS.clear();
-    saveHolidays(HOLIDAYS);
-    renderHolidays();
-    updateSchoolDaysUI();
-    applyI18n();
-  };
-
-  renderHolidays();
-}
-
-function isSchoolDayISO(dateISO) {
-  const day = d0(dateISO).getDay();
-  if (WEEKEND_DAYS.has(day)) return false;
-  if (isOfficialBreakDay(dateISO)) return false;
-  if (HOLIDAYS.has(dateISO)) return false;
-  return true;
-}
-
-function countSchoolDays(fromISO, toISO) {
-  let c = 0;
-  for (let d = d0(fromISO); d <= d0(toISO); d.setDate(d.getDate() + 1)) {
-    const dayISO = iso(d);
-    if (isSchoolDayISO(dayISO)) c++;
-  }
-  return c;
-}
-
-function updateSchoolDaysUI() {
-  const el = document.getElementById("schoolDaysCount");
-  if (!el) return;
-  const r = getRangeFromPeriod();
-  el.textContent = r ? countSchoolDays(r.from, r.to) : 0;
-}
-
-// ============================
-// API
-// ============================
-async function apiGet(mode, params = {}) {
-  const url = new URL(WEBAPP_URL);
-  url.searchParams.set("mode", mode);
-  url.searchParams.set("key", API_KEY);
-  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-
-  const r = await fetch(url.toString(), { method: "GET" });
-  const data = await r.json();
-  if (!data.ok) throw new Error(data.error || "API error");
-  return data;
-}
-
-async function apiPost(body) {
-  const r = await fetch(WEBAPP_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  const data = await r.json();
-  if (!data.ok) throw new Error(data.error || "API error");
-  return data;
-}
-
 // ============================
 // STATE
 // ============================
@@ -398,26 +269,31 @@ let statusMap = new Map();
 // ============================
 // VIEW SWITCH
 // ============================
-function showView(id){
+function showView(id) {
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
   document.getElementById(id)?.classList.add("active");
-  window.scrollTo({top:0, behavior:"smooth"});
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-// ===== I18N =====
+// ============================
+// I18N
+// ============================
 function applyI18n() {
   const dict = I18N[currentLang] || I18N.kk;
 
+  // мәтіндер
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.dataset.i18n;
     if (dict[key] != null) el.textContent = dict[key];
   });
 
+  // placeholder-лар
   document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
     const key = el.dataset.i18nPlaceholder;
     if (dict[key] != null) el.placeholder = dict[key];
   });
 
+  // период option-дары
   const period = document.getElementById("periodType");
   if (period) {
     [...period.options].forEach(opt => {
@@ -426,27 +302,31 @@ function applyI18n() {
     });
   }
 
-  // ✅ ОСЫ ЖЕРДЕ БОЛУЫ КЕРЕК
+  // ✅ Сынып select-тері (тіл ауысқанда "Барлық сынып/Все классы" дұрыс ауысуы үшін)
   if (window.__classesLoaded) {
     renderClassesTo(document.getElementById("classSelect"), window.__classList, false);
     renderClassesTo(document.getElementById("reportClass"), window.__classList, true);
   }
 
+  // attendance кестесін қайта салу
   if (typeof renderAttendanceTable === "function") {
     renderAttendanceTable();
   }
-      // applyI18n() соңына қос:
-renderHolidays();
-updateSchoolDaysUI();
 
+  // ❌ HOLIDAYS өшірсең — мыналарды МҮЛДЕ ҚОСУҒА БОЛМАЙДЫ:
+  // renderHolidays();
+  // updateSchoolDaysUI();
 }
 
-function statusLabel(code){
+// ============================
+// STATUS HELPERS
+// ============================
+function statusLabel(code) {
   const item = STATUS[code] || STATUS.katysty;
   return currentLang === "ru" ? item.ru : item.kk;
 }
 
-function rowClassColor(code){
+function rowClassColor(code) {
   if (code === "katysty") return "present";
   if (code === "auyrdy") return "sick";
   if (code === "keshikti") return "late";
@@ -455,7 +335,10 @@ function rowClassColor(code){
   return "";
 }
 
-function renderClassesTo(selectEl, classList, includeAll=false){
+// ============================
+// CLASSES
+// ============================
+function renderClassesTo(selectEl, classList, includeAll = false) {
   if (!selectEl) return;
   selectEl.innerHTML = "";
 
@@ -479,20 +362,23 @@ function renderClassesTo(selectEl, classList, includeAll=false){
   });
 }
 
-function normalizeClassValue(v){
+function normalizeClassValue(v) {
   return String(v || "")
-    .replace(/\s+/g, "")   // убираем пробелы: "0 Ә" -> "0Ә"
+    .replace(/\s+/g, "")   // "0 Ә" -> "0Ә"
     .toUpperCase();
 }
 
-function parseClass(cls){
+function parseClass(cls) {
   const c = normalizeClassValue(cls);
-  const m = c.match(/^(\d+)(.*)$/); // число + буква(ы)
-  if (!m) return { grade:"", letter:"" };
+  const m = c.match(/^(\d+)(.*)$/); // сан + әріп(тер)
+  if (!m) return { grade: "", letter: "" };
   return { grade: m[1], letter: m[2] || "" };
 }
 
-function buildStatusCell(studentId){
+// ============================
+// ATTENDANCE TABLE
+// ============================
+function buildStatusCell(studentId) {
   const wrap = document.createElement("div");
   wrap.className = "status-cell";
 
@@ -518,19 +404,21 @@ function buildStatusCell(studentId){
   sel.addEventListener("change", () => {
     const pick = sel.value;
     if (!pick) return;
+
     statusMap.set(studentId, pick);
     text.textContent = statusLabel(pick);
     sel.value = "";
+
     const tr = wrap.closest("tr");
     if (tr) tr.className = rowClassColor(pick);
   });
 
- wrap.appendChild(text);
-wrap.appendChild(sel);
-return wrap;
+  wrap.appendChild(text);
+  wrap.appendChild(sel);
+  return wrap;
 }
 
-function renderAttendanceTable(){
+function renderAttendanceTable() {
   const tbody = document.querySelector("#attendanceTable tbody");
   if (!tbody) return;
 
@@ -544,22 +432,28 @@ function renderAttendanceTable(){
 
   if (selectedClass) {
     const { grade, letter } = parseClass(selectedClass);
-    filtered = filtered.filter(s => String(s.grade) === grade && String(s.class_letter) === letter);
+    filtered = filtered.filter(s =>
+      String(s.grade) === grade && String(s.class_letter) === letter
+    );
   } else {
     filtered = [];
   }
 
-  if (q) filtered = filtered.filter(s => String(s.full_name).toLowerCase().includes(q));
+  if (q) {
+    filtered = filtered.filter(s =>
+      String(s.full_name).toLowerCase().includes(q)
+    );
+  }
 
   tbody.innerHTML = "";
-  
+
   if (filtered.length === 0 && selectedClass) {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td colspan="4" style="text-align:center; color: #999; padding: 20px;">Оқушылар табылмады</td>`;
+    tr.innerHTML = `<td colspan="4" style="text-align:center; color:#999; padding:20px;">Оқушылар табылмады</td>`;
     tbody.appendChild(tr);
     return;
   }
-  
+
   filtered.forEach((s, i) => {
     const tr = document.createElement("tr");
     const code = statusMap.get(s.id) || "katysty";
@@ -583,7 +477,7 @@ async function saveAttendance() {
   const btn = document.getElementById("saveAttendanceBtn");
   const dateEl = document.getElementById("attendanceDate");
   const classSelect = document.getElementById("classSelect");
-  const saveStatus = document.getElementById("saveStatus");
+  const saveStatus = document.getElementById("saveStatus"); // ⚠️ болуы да мүмкін, болмауы да мүмкін
 
   const date = dateEl?.value;
   const cls = classSelect?.value;
@@ -594,36 +488,81 @@ async function saveAttendance() {
   // ҚАЙТАЛАНҒАН басуды тоқтатамыз (localStorage guard)
   const { grade, letter } = parseClass(cls);
   const guardKey = `att_saved:${date}:${grade}:${letter}`;
+
   if (localStorage.getItem(guardKey) === "1") {
-    saveStatus.textContent = I18N[currentLang].alreadySaved || "✅ Бұл сынып бұл күні already сақталған";
+    if (saveStatus) {
+      saveStatus.textContent =
+        I18N[currentLang].alreadySaved || "✅ Бұл сынып бұл күні сақталған";
+    }
     return;
   }
 
   if (btn) btn.disabled = true;
-  saveStatus.textContent = "⏳ ...";
+  if (saveStatus) saveStatus.textContent = "⏳ ...";
 
   try {
-    const students = allStudents.filter(s => String(s.grade) === grade && String(s.class_letter) === letter);
+    const students = allStudents.filter(
+      (s) => String(s.grade) === grade && String(s.class_letter) === letter
+    );
+
     if (!students.length) {
-      throw new Error(I18N[currentLang].noStudents || "Оқушылар тізімі бос. Google Sheet students толтырылғанын тексеріңіз.");
+      throw new Error(
+        I18N[currentLang].noStudents ||
+          "Оқушылар тізімі бос. Google Sheet students толтырылғанын тексеріңіз."
+      );
     }
 
-    const records = students.map(s => ({
+    const records = students.map((s) => ({
       student_id: s.id,
       status_code: statusMap.get(s.id) || "katysty",
     }));
 
-    const res = await apiPost({ key: API_KEY, date, grade, class_letter: letter, records });
+    const res = await apiPost({
+      key: API_KEY,
+      date,
+      grade,
+      class_letter: letter,
+      records,
+    });
+
     if (!res || res.ok === false) {
       throw new Error(res?.error || "Save failed");
     }
 
-    // ✅ енді қайта басса да, фронт бөгейді; ал сервер жағы — overwrite (duplicate болмайды)
+    // ✅ қайта басса да, фронт бөгейді; сервер жағы overwrite (duplicate болмайды)
     localStorage.setItem(guardKey, "1");
-    const extra = res.replaced ? (I18N[currentLang].replaced || "(қайта жазылды)") : "";
-    saveStatus.textContent = `${I18N[currentLang].saveOk} ${res.saved} ${extra}`;
+
+    const extra = res.replaced
+      ? (I18N[currentLang].replaced || "(қайта жазылды)")
+      : "";
+
+    if (saveStatus) {
+      saveStatus.textContent = `${I18N[currentLang].saveOk} ${res.saved} ${extra}`;
+    }
+
+    // ✅ ЕҢ МАҢЫЗДЫ: сақтағаннан кейін БҮГІНГІ ОТЧЁТ бірден шықсын
+    // Reports-та "Күні" ашып қойсаң, дәл сол күнге есеп көрсетіледі
+    const periodType = document.getElementById("periodType");
+    const customStart = document.getElementById("customStart");
+    const customEnd = document.getElementById("customEnd");
+
+    if (periodType) periodType.value = "day";
+    if (customStart) customStart.value = date;
+    if (customEnd) customEnd.value = date;
+
+    // контролдарды бірден дұрыстау
+    if (typeof updatePeriodControls === "function") updatePeriodControls();
+
+    // отчётты жаңарту
+    if (typeof updateStats === "function") {
+      await updateStats();
+    }
   } catch (e) {
-    saveStatus.textContent = `${I18N[currentLang].saveErr} ${e.message}`;
+    if (saveStatus) {
+      saveStatus.textContent = `${I18N[currentLang].saveErr} ${e.message}`;
+    } else {
+      alert(`${I18N[currentLang].saveErr} ${e.message}`);
+    }
   } finally {
     if (btn) btn.disabled = false;
   }
@@ -633,8 +572,9 @@ async function saveAttendance() {
 /* ================== ПЕРИОД ================== */
 function getRangeFromPeriod() {
   const type = document.getElementById("periodType")?.value;
-  const toISO = d => d.toISOString().slice(0,10);
-  const d0 = s => new Date(s + "T00:00:00");
+  if (!type) return null;
+
+  const toISO = (d) => d.toISOString().slice(0, 10);
 
   // ✅ DAY: customStart арқылы 1 күн
   if (type === "day") {
@@ -643,117 +583,156 @@ function getRangeFromPeriod() {
     return { from: d, to: d };
   }
 
-  // ✅ WEEK: соңғы 5 оқу күні (дүйсенбі–жұма), 7 күн емес
+  // ✅ WEEK: user таңдаған диапазон (customStart → customEnd)
+  // (сенде customControl бар, сондықтан ең дұрыс логика осы)
   if (type === "week") {
-    const end = new Date();
-    // бүгіннен артқа 7 күн қарап, тек оқу күндерін жинаймыз
-    const days = [];
-    for (let i = 0; i < 14 && days.length < 5; i++) {
-      const t = new Date();
-      t.setDate(t.getDate() - i);
-      const dow = t.getDay(); // 0 Sun .. 6 Sat
-      if (dow !== 0 && dow !== 6) days.push(toISO(t));
-    }
-    const from = days[days.length - 1];
-    const to = days[0];
-    return { from, to };
+    const s = document.getElementById("customStart")?.value;
+    const e = document.getElementById("customEnd")?.value;
+    if (!s || !e) return null;
+    return { from: s, to: e };
   }
 
   // ✅ MONTH
   if (type === "month") {
-    const v = document.getElementById("monthInput")?.value;
+    const v = document.getElementById("monthInput")?.value; // "YYYY-MM"
     if (!v) return null;
-    const [y,m] = v.split("-");
+
+    const [y, m] = v.split("-");
     const last = new Date(Number(y), Number(m), 0); // соңғы күн
-    return { from:`${y}-${m}-01`, to: toISO(last) };
+    return { from: `${y}-${m}-01`, to: toISO(last) };
   }
 
   // ✅ YEAR (календарь жыл)
   if (type === "year") {
     const y = Number(document.getElementById("yearInput")?.value || new Date().getFullYear());
-    return { from:`${y}-01-01`, to:`${y}-12-31` };
+    return { from: `${y}-01-01`, to: `${y}-12-31` };
   }
 
-  // ✅ QUARTER (2025-2026 оқу жылы)
+  // ✅ QUARTER (оқу жылы логикасы)
   if (type === "quarter") {
     const q = Number(document.getElementById("quarterInput")?.value || 0);
-    // оқу жылы 2025 деп аламыз (2025-09-01 басталады)
-    const baseY = Number(document.getElementById("quarterYearInput")?.value || 2025);
+    const baseY = Number(document.getElementById("quarterYearInput")?.value || new Date().getFullYear());
 
     const Q = {
-      1: { from:`${baseY}-09-01`, to:`${baseY}-10-26` },
-      2: { from:`${baseY}-11-03`, to:`${baseY}-12-28` }, // 27.10-02.11 каникулдан кейін
-      3: { from:`${baseY+1}-01-08`, to:`${baseY+1}-03-18` }, // 29.12-07.01 каникулдан кейін
-      4: { from:`${baseY+1}-03-30`, to:`${baseY+1}-05-25` }, // 19-29.03 каникулдан кейін
+      1: { from: `${baseY}-09-01`, to: `${baseY}-10-26` },
+      2: { from: `${baseY}-11-03`, to: `${baseY}-12-28` },
+      3: { from: `${baseY + 1}-01-08`, to: `${baseY + 1}-03-18` },
+      4: { from: `${baseY + 1}-03-30`, to: `${baseY + 1}-05-25` },
     };
 
     return Q[q] || null;
   }
 
-  // ✅ ALL
-  if (type === "all") return { from:"2000-01-01", to:"2100-01-01" };
+  // ✅ ALL: user таңдаған диапазон (customStart → customEnd)
+  if (type === "all") {
+    const s = document.getElementById("customStart")?.value;
+    const e = document.getElementById("customEnd")?.value;
+    if (!s || !e) return null;
+    return { from: s, to: e };
+  }
 
   return null;
 }
 
+function sumTotals(report) {
+  const totals = { total: 0, katysty: 0, keshikti: 0, sebep: 0, sebsez: 0, auyrdy: 0 };
 
-function sumTotals(report){
-  const totals = { total:0, katysty:0, keshikti:0, sebep:0, sebsez:0, auyrdy:0 };
-  Object.values(report.totals || {}).forEach(t => {
-    ["katysty","keshikti","sebep","sebsez","auyrdy"].forEach(k => {
-      totals[k] += Number(t[k] || 0);
-      totals.total += Number(t[k] || 0);
+  Object.values(report?.totals || {}).forEach((t) => {
+    ["katysty", "keshikti", "sebep", "sebsez", "auyrdy"].forEach((k) => {
+      const n = Number(t?.[k] || 0);
+      totals[k] += n;
+      totals.total += n;
     });
   });
+
   return totals;
 }
 
 /* ================== TOP ================== */
-function buildTop(report, code, limit=10) {
-  return (report.students||[])
-    .map(s=>({
-      name:s.full_name,
-      cls:`${s.grade}${s.class_letter}`,
-      count:Number(report.totals?.[String(s.id)]?.[code]||0)
+function buildTop(report, code, limit = 10) {
+  const students = report?.students || [];
+  return students
+    .map((s) => ({
+      name: s.full_name,
+      cls: `${s.grade}${s.class_letter}`,
+      count: Number(report?.totals?.[String(s.id)]?.[code] || 0),
     }))
-    .filter(x=>x.count>3) // 4+ рет (3тен жогары)
-    .sort((a,b)=>b.count-a.count)
-    .slice(0,limit);
+    .filter((x) => x.count > 3) // ✅ 4+ рет (3-тен жоғары)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit);
 }
 
-function fillTable(tableId, rows){
+function escapeHtml(s) {
+  return String(s ?? "").replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  }[c]));
+}
+
+function fillTable(tableId, rows) {
   const tbody = document.querySelector(`#${tableId} tbody`);
   if (!tbody) return;
+
   tbody.innerHTML = "";
-  rows.forEach((r,i)=>{
+
+  rows.forEach((r, i) => {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${i+1}</td><td>${r.name}</td><td>${r.cls}</td><td>${r.count}</td>`;
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${escapeHtml(r.name)}</td>
+      <td>${escapeHtml(r.cls)}</td>
+      <td>${Number(r.count || 0)}</td>
+    `;
     tbody.appendChild(tr);
   });
 }
 
-function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));}
-
-// ============================
-// REPORTS
-// ============================
-
+/* ================== DAY ISSUES TABLES ================== */
 function fillSimpleTable(tableId, rows) {
   const tbody = document.querySelector(`#${tableId} tbody`);
   if (!tbody) return;
+
   tbody.innerHTML = "";
+
   rows.forEach((r, i) => {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${i + 1}</td><td>${escapeHtml(r.name)}</td><td>${escapeHtml(r.cls)}</td>`;
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${escapeHtml(r.name)}</td>
+      <td>${escapeHtml(r.cls)}</td>
+    `;
     tbody.appendChild(tr);
   });
 }
 
-  /* =========================================
+// ============================
+// REPORTS (Day issues tables)
+// ============================
+function fillSimpleTable(tableId, rows) {
+  const tbody = document.querySelector(`#${tableId} tbody`);
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  rows.forEach((r, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${escapeHtml(r.name)}</td>
+      <td>${escapeHtml(r.cls)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+/* =========================================
    Day Issues (Lists) + Update Stats (clean)
    ========================================= */
-  
-  // 1) бір ғана hideDayIssues
+
+// 1) Day Issues box жасыру (бір ғана)
 function hideDayIssues() {
   const box = document.getElementById("dayIssuesBox");
   if (box) box.style.display = "none";
@@ -763,37 +742,40 @@ function hideDayIssues() {
     if (tb) tb.innerHTML = "";
   });
 }
-  
-// 2) кестеге 3 бағанмен толтыру
+
+// 2) 3 бағанмен толтыру (қауіпсіз)
 function fill3(tableId, rows) {
-  
   const tb = document.querySelector(`#${tableId} tbody`);
   if (!tb) return;
 
   tb.innerHTML = "";
   rows.forEach((r, i) => {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${i + 1}</td><td>${r.name}</td><td>${r.cls}</td>`;
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${escapeHtml(r.name)}</td>
+      <td>${escapeHtml(r.cls)}</td>
+    `;
     tb.appendChild(tr);
   });
 }
 
-// 3) дата диапазонындағы ISO күндер тізімі (бір ғана)
+// 3) дата диапазонындағы ISO күндер тізімі (timezone safe)
 function eachDateISO(fromISO, toISO) {
   const res = [];
-  const start = new Date(fromISO + "T00:00:00");
-  const end = new Date(toISO + "T00:00:00");
+  const start = d0(fromISO);
+  const end = d0(toISO);
+
   for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    res.push(d.toISOString().slice(0, 10));
+    res.push(iso(d));
   }
   return res;
 }
 
-// 4) report.daily ішінен таңдалған мерзім бойынша (1 күн/апта/ай/жыл/барлығы)
-// кешіккен/ауырған/себепті/себепсіз тізімдерді жинау
+// 4) report.daily ішінен таңдалған мерзім бойынша тізімдерді жинау
 function buildIssuesForRange(report, range) {
-  const stById = new Map((report.students || []).map((s) => [String(s.id), s]));
-  const daily = report.daily || {};
+  const stById = new Map((report?.students || []).map((s) => [String(s.id), s]));
+  const daily = report?.daily || {};
 
   const late = [];
   const sick = [];
@@ -818,13 +800,13 @@ function buildIssuesForRange(report, range) {
       const code = st?.status_code;
       if (!code || code === "katysty") return;
 
-      const s = stById.get(String(sid));
-      const name = s ? s.full_name : String(sid);
-      const cls = s ? `${s.grade}${s.class_letter}` : "";
-
       // қайталамау: бір оқушы бір категорияға 1-ақ рет түссін
       if (seen[code] && seen[code].has(String(sid))) return;
       if (seen[code]) seen[code].add(String(sid));
+
+      const s = stById.get(String(sid));
+      const name = s ? s.full_name : String(sid);
+      const cls = s ? `${s.grade}${s.class_letter}` : "";
 
       const row = { name, cls };
 
@@ -838,14 +820,14 @@ function buildIssuesForRange(report, range) {
   return { late, sick, exc, unex };
 }
 
-// 5) dayIssuesBox көрсету (ЕНДІ: кез келген мерзімде, кез келген класс/ALL үшін)
+// 5) dayIssuesBox көрсету (кез келген мерзім, кез келген класс/ALL)
 function renderDayIssuesForRange(report, range) {
   const box = document.getElementById("dayIssuesBox");
   if (!box) return;
 
   const issues = buildIssuesForRange(report, range);
 
-  // егер бәрі бос болса — жасырамыз
+  // бәрі бос болса — жасырамыз
   if (!(issues.late.length || issues.sick.length || issues.exc.length || issues.unex.length)) {
     hideDayIssues();
     return;
@@ -855,6 +837,7 @@ function renderDayIssuesForRange(report, range) {
   fill3("tblSick", issues.sick);
   fill3("tblExcused", issues.exc);
   fill3("tblUnexcused", issues.unex);
+
   box.style.display = "block";
 }
 
@@ -883,35 +866,51 @@ async function updateStats() {
       class_letter,
     });
 
-    // ✅ МЫНА БӨЛІК ОСЫ ЖЕРДЕ БОЛУЫ КЕРЕК
+    // ✅ dayIssues
     renderDayIssuesForRange(report, range);
 
+    // ✅ KPI
     const t = sumTotals(report);
-    document.getElementById("totalLessons").textContent = t.total;
-    document.getElementById("totalPresent").textContent = t.katysty;
-    document.getElementById("totalLate").textContent = t.keshikti;
-    document.getElementById("totalSick").textContent = t.auyrdy;
-    document.getElementById("totalExcused").textContent = t.sebep;
-    document.getElementById("totalUnexcused").textContent = t.sebsez;
 
+    const elTotal = document.getElementById("totalLessons");
+    const elPres = document.getElementById("totalPresent");
+    const elLate = document.getElementById("totalLate");
+    const elSick = document.getElementById("totalSick");
+    const elExc = document.getElementById("totalExcused");
+    const elUnx = document.getElementById("totalUnexcused");
+
+    if (elTotal) elTotal.textContent = t.total;
+    if (elPres) elPres.textContent = t.katysty;
+    if (elLate) elLate.textContent = t.keshikti;
+    if (elSick) elSick.textContent = t.auyrdy;
+    if (elExc) elExc.textContent = t.sebep;
+    if (elUnx) elUnx.textContent = t.sebsez;
+
+    // ✅ TOP tables
     fillTable("topLateTable", buildTop(report, "keshikti"));
     fillTable("topUnexcusedTable", buildTop(report, "sebsez"));
   } catch (e) {
-    alert((currentLang === "ru" ? "Ошибка отчёта: " : "Есеп қатесі: ") + e.message);
+    hideDayIssues();
+    alert((currentLang === "ru" ? "Ошибка отчёта: " : "Есеп қатесі: ") + (e?.message || e));
   }
 }
 
 
- // ===== DATE HELPERS =====
-function iso(d){ return d.toISOString().slice(0,10); }
-function d0(s){ return new Date(s + "T00:00:00"); }
+// ===== DATE HELPERS (timezone-safe) =====
+function iso(d) {
+  return d.toISOString().slice(0, 10);
+}
 
-function betweenInclusive(dateISO, fromISO, toISO){
+// "YYYY-MM-DD" → local/timezone сырғып кетпейтін Date
+function d0(s) {
+  const [y, m, d] = String(s).split("-").map(Number);
+  return new Date(Date.UTC(y, (m || 1) - 1, d || 1, 0, 0, 0));
+}
+
+function betweenInclusive(dateISO, fromISO, toISO) {
   const t = d0(dateISO).getTime();
   return t >= d0(fromISO).getTime() && t <= d0(toISO).getTime();
 }
-
-
 
 function exportCsv() {
   const range = getRangeFromPeriod();
@@ -930,7 +929,7 @@ function exportCsv() {
   }
 
   apiGet("report", { from: range.from, to: range.to, grade, class_letter })
-    .then(report => {
+    .then((report) => {
       const students = report?.students || [];
       const daily = report?.daily || {};
       const totals = report?.totals || {};
@@ -944,21 +943,20 @@ function exportCsv() {
 
       const getKk = (st) => {
         const code = getCode(st);
-        return st?.status_kk || STATUS[code]?.kk || STATUS.katysty.kk;
+        return st?.status_kk || STATUS?.[code]?.kk || STATUS.katysty.kk;
       };
 
       const getRu = (st) => {
         const code = getCode(st);
-        return st?.status_ru || STATUS[code]?.ru || STATUS.katysty.ru;
+        return st?.status_ru || STATUS?.[code]?.ru || STATUS.katysty.ru;
       };
 
       // ---------- build DAILY rows ----------
-      const headerDaily = ["date","student","class","status_code","status_kk","status_ru"];
+      const headerDaily = ["date", "student", "class", "status_code", "status_kk", "status_ru"];
       const rowsDaily = [];
 
-      // daily форматы: daily[dateISO][studentId] = {status_code,...}
       Object.entries(daily).forEach(([dateISO, byId]) => {
-        students.forEach(s => {
+        students.forEach((s) => {
           const cls = getStudentClass(s);
 
           // Фильтр класс если выбран
@@ -983,29 +981,24 @@ function exportCsv() {
       let rows = rowsDaily;
 
       if (!rowsDaily.length) {
-        const headerTotals = ["student","class","katysty","keshikti","auyrdy","sebep","sebsez","total"];
+        const headerTotals = ["student", "class", "katysty", "keshikti", "auyrdy", "sebep", "sebsez", "total"];
         const rowsTotals = [];
 
-        students.forEach(s => {
+        students.forEach((s) => {
           const cls = getStudentClass(s);
-
           if (reportClass !== "ALL" && norm(cls) !== wantedClassNorm) return;
 
           const t = totals?.[String(s.id)] || {};
-          const katysty  = Number(t.katysty || 0);
+          const katysty = Number(t.katysty || 0);
           const keshikti = Number(t.keshikti || 0);
-          const auyrdy   = Number(t.auyrdy || 0);
-          const sebep    = Number(t.sebep || 0);
-          const sebsez   = Number(t.sebsez || 0);
-          const total    = katysty + keshikti + auyrdy + sebep + sebsez;
+          const auyrdy = Number(t.auyrdy || 0);
+          const sebep = Number(t.sebep || 0);
+          const sebsez = Number(t.sebsez || 0);
+          const total = katysty + keshikti + auyrdy + sebep + sebsez;
 
           if (total === 0) return;
 
-          rowsTotals.push([
-            s.full_name,
-            cls,
-            katysty, keshikti, auyrdy, sebep, sebsez, total
-          ]);
+          rowsTotals.push([s.full_name, cls, katysty, keshikti, auyrdy, sebep, sebsez, total]);
         });
 
         if (!rowsTotals.length) {
@@ -1019,16 +1012,22 @@ function exportCsv() {
         rows = rowsTotals;
       }
 
-      // ---------- CSV ----------
+      // ---------- CSV (Excel-friendly) ----------
       const sep = ";";
-      const csv = "\ufeff" + [header, ...rows]
-        .map(r => r.map(x => {
-          const v = String(x ?? "");
-          return (v.includes(sep) || v.includes('"') || v.includes("\n"))
-            ? `"${v.replace(/"/g, '""')}"`
-            : v;
-        }).join(sep))
-        .join("\n");
+      const csv =
+        "\ufeff" +
+        [header, ...rows]
+          .map((r) =>
+            r
+              .map((x) => {
+                const v = String(x ?? "");
+                return (v.includes(sep) || v.includes('"') || v.includes("\n") || v.includes("\r"))
+                  ? `"${v.replace(/"/g, '""')}"`
+                  : v;
+              })
+              .join(sep)
+          )
+          .join("\r\n");
 
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
@@ -1044,10 +1043,49 @@ function exportCsv() {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     })
-    .catch(err => alert(err.message));
+    .catch((err) => {
+      const msg = err?.message || String(err || "");
+      alert((currentLang === "ru" ? "Ошибка экспорта: " : "Экспорт қатесі: ") + msg);
+    });
 }
+
 // ============================
-// INIT (runs inside DOMContentLoaded above)
+// PERIOD CONTROLS (GLOBAL)
+// ============================
+function updatePeriodControls() {
+  const type = document.getElementById("periodType")?.value;
+
+  const monthCtrl = document.getElementById("monthControl");
+  const quarterCtrl = document.getElementById("quarterControl");
+  const yearCtrl = document.getElementById("yearControl");
+  const customCtrl = document.getElementById("customControl");
+
+  // бәрін жасырамыз
+  if (monthCtrl) monthCtrl.style.display = "none";
+  if (quarterCtrl) quarterCtrl.style.display = "none";
+  if (yearCtrl) yearCtrl.style.display = "none";
+  if (customCtrl) customCtrl.style.display = "none";
+
+  // керегін көрсетеміз
+  if (type === "month" && monthCtrl) monthCtrl.style.display = "flex";
+  if (type === "quarter" && quarterCtrl) quarterCtrl.style.display = "flex";
+  if (type === "year" && yearCtrl) yearCtrl.style.display = "flex";
+
+  // day/week/all => custom диапазон көрінсін
+  if ((type === "day" || type === "week" || type === "all") && customCtrl) {
+    customCtrl.style.display = "flex";
+  }
+
+  // day таңдағанда end=start болсын
+  if (type === "day") {
+    const s = document.getElementById("customStart");
+    const e = document.getElementById("customEnd");
+    if (s && e) e.value = s.value;
+  }
+}
+
+// ============================
+// INIT
 // ============================
 document.addEventListener("DOMContentLoaded", async () => {
 
@@ -1064,59 +1102,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Бүгінгі күнді қою
   const today = new Date();
-  const iso = today.toISOString().slice(0, 10);
+  const todayISO = today.toISOString().slice(0, 10);
 
   const attendanceDate = document.getElementById("attendanceDate");
-  if (attendanceDate) attendanceDate.value = iso;
+  if (attendanceDate) attendanceDate.value = todayISO;
 
   const customStart = document.getElementById("customStart");
   const customEnd = document.getElementById("customEnd");
-  if (customStart && !customStart.value) customStart.value = iso;
-  if (customEnd && !customEnd.value) customEnd.value = iso;
+  if (customStart && !customStart.value) customStart.value = todayISO;
+  if (customEnd && !customEnd.value) customEnd.value = todayISO;
 
   const yearInput = document.getElementById("yearInput");
   if (yearInput) yearInput.value = today.getFullYear();
 
   const quarterYearInput = document.getElementById("quarterYearInput");
   if (quarterYearInput) quarterYearInput.value = today.getFullYear();
-
-  // ==========================================================
-  // ✅ ПЕРИОД КОНТРОЛДАРЫ (ең маңызды түзету)
-  // day/week/all/custom кезінде customControl көрсетіледі
-  // day кезінде customEnd автомат = customStart
-  // ==========================================================
-  function updatePeriodControls() {
-    const type = document.getElementById("periodType")?.value;
-
-    const monthCtrl = document.getElementById("monthControl");
-    const quarterCtrl = document.getElementById("quarterControl");
-    const yearCtrl = document.getElementById("yearControl");
-    const customCtrl = document.getElementById("customControl");
-
-    // бәрін жасырамыз
-    if (monthCtrl) monthCtrl.style.display = "none";
-    if (quarterCtrl) quarterCtrl.style.display = "none";
-    if (yearCtrl) yearCtrl.style.display = "none";
-    if (customCtrl) customCtrl.style.display = "none";
-
-    // керегін көрсетеміз
-    if (type === "month" && monthCtrl) monthCtrl.style.display = "flex";
-    if (type === "quarter" && quarterCtrl) quarterCtrl.style.display = "flex";
-    if (type === "year" && yearCtrl) yearCtrl.style.display = "flex";
-
-    // ✅ Мына жерде негізгі FIX:
-    // day/week/custom/all => диапазон көрінуі керек
-    if ((type === "day" || type === "week" || type === "custom" || type === "all") && customCtrl) {
-      customCtrl.style.display = "flex";
-    }
-
-    // ✅ day таңдағанда end=start болсын
-    if (type === "day") {
-      const s = document.getElementById("customStart");
-      const e = document.getElementById("customEnd");
-      if (s && e) e.value = s.value;
-    }
-  }
 
   // periodType өзгерсе — контролдарды басқару
   document.getElementById("periodType")?.addEventListener("change", updatePeriodControls);
@@ -1137,10 +1137,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("searchInput")?.addEventListener("input", renderAttendanceTable);
 
   // ✅ Бет ашылғанда period control-дар бірден дұрыс көрінсін
-  document.getElementById("periodType")?.dispatchEvent(new Event("change"));
-
-  // Егер rep_periodType нақты жоқ болса, мына жолды алып тастаған дұрыс.
-  // document.getElementById("rep_periodType")?.dispatchEvent(new Event("change"));
+  updatePeriodControls();
 
   // API: сыныптар, оқушылар
   try {
@@ -1167,39 +1164,3 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
