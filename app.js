@@ -1,44 +1,4 @@
 // ============================
-// API HELPERS (MISSING FIX)
-// ============================
-
-async function apiGet(action, params = {}) {
-  const url = new URL(WEBAPP_URL + action);
-  Object.entries(params).forEach(([k, v]) =>
-    url.searchParams.append(k, v)
-  );
-
-  const res = await fetch(url.toString(), {
-    headers: {
-      "X-API-KEY": API_KEY,
-    },
-  });
-
-  if (!res.ok) {
-    throw new Error("API GET error");
-  }
-
-  return await res.json();
-}
-
-async function apiPost(body) {
-  const res = await fetch(WEBAPP_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-API-KEY": API_KEY,
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    throw new Error("API POST error");
-  }
-
-  return await res.json();
-}
-
-// ============================
 // LANG (global)
 // ============================
 let currentLang =
@@ -51,23 +11,29 @@ document.body.dataset.lang = currentLang;
 let __isSavingAttendance = false;
 
 // ============================
-// API HELPERS (MUST HAVE)
+// SETTINGS (SERVER / KEY)
+// ============================
+const WEBAPP_URL = "https://old-recipe-0d35eduqatysu.alga4school.workers.dev/";
+const API_KEY = "school2025";
+
+// ============================
+// API HELPERS (Worker -> Apps Script)
 // ============================
 async function apiGet(mode, params = {}) {
   const url = new URL(WEBAPP_URL);
   url.searchParams.set("mode", mode);
   url.searchParams.set("key", API_KEY);
-  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-  const r = await fetch(url);
-  return await r.json();
-}
+
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== "") url.searchParams.set(k, String(v));
+  });
 
   const resp = await fetch(url.toString(), { method: "GET" });
   const text = await resp.text();
 
   let data;
   try { data = JSON.parse(text); }
-  catch { throw new Error("API JSON емес: " + text.slice(0, 120)); }
+  catch { throw new Error("API JSON емес: " + text.slice(0, 160)); }
 
   if (!resp.ok || data?.ok === false) throw new Error(data?.error || ("HTTP " + resp.status));
   return data;
@@ -84,18 +50,11 @@ async function apiPost(body) {
 
   let data;
   try { data = JSON.parse(text); }
-  catch { throw new Error("API JSON емес: " + text.slice(0, 120)); }
+  catch { throw new Error("API JSON емес: " + text.slice(0, 160)); }
 
   if (!resp.ok || data?.ok === false) throw new Error(data?.error || ("HTTP " + resp.status));
   return data;
 }
-
-// ============================
-// SETTINGS (СЕРВЕР / KEY)
-// ============================
-const WEBAPP_URL = "https://old-recipe-0d35eduqatysu.alga4school.workers.dev/?mode=classes&key=school2025";
-const API_KEY = "school2025";
-
 // ============================
 // STATUS
 // ============================
@@ -1244,6 +1203,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
