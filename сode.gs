@@ -64,16 +64,26 @@ function doPost(e) {
  *************************/
 function header_(h) {
   const m = {};
-  h.forEach((v, i) => (m[String(v).toLowerCase()] = i));
+  h.forEach((v, i) => {
+    const key = String(v || "").trim().toLowerCase();
+    if (key) m[key] = i;
+  });
+  const pick = (name) => (Object.prototype.hasOwnProperty.call(m, name) ? m[name] : undefined);
 
   return {
-    id: m.id,
-    full_name: m.full_name,
-    grade: m.grade,
-    class_letter: m.class_letter,
-    date: m.date,
-    student_id: m.student_id,
-    status_code: m.status_code,
+    // students
+    id: pick("id"),
+    full_name: pick("full_name"),
+    grade: pick("grade"),
+    class_letter: pick("class_letter"),
+
+    // attendance
+    date: pick("date"),
+    student_id: pick("student_id"),
+    status_code: pick("status_code"),
+    status_kk: pick("status_kk"),
+    status_ru: pick("status_ru"),
+    ts: pick("ts"),
   };
 }
 
@@ -142,48 +152,53 @@ function saveAttendance_(body) {
   const records = Array.isArray(body.records) ? body.records : [];
   if (!records.length) throw new Error("Records empty");
 
-  const data = sh.getDataRange().getValues();
-  if (data.length < 2) {
-    const values = records.map((r) => [date, r.student_id, grade, letter, r.status_code || "katysty"]);
-    sh.getRange(sh.getLastRow() + 1, 1, values.length, 5).setValues(values);
-    return { saved: values.length, replaced: false };
+  // header / map
+  const lastCol = Math.max(8, sh.getLastColumn() || 8);
+  const headerRow = sh.getRange(1, 1, 1, lastCol).getValues()[0];
+  const idx = header_(headerRow);
+
+  // егер негізгі бағандар жоқ болса — қате (қазір сенде бар)
+  if (idx.date == null || idx.student_id == null || idx.status_code == null || idx.grade == null || idx.class_letter == null) {
+    throw new Error("attendance header қате. Керегі: date, student_id, status_code, grade, class_letter");
   }
 
-  const header = header_(data[0]);
+  // бар жазбаларды оқу
+  const data = sh.getDataRange().getValues();
   const rowsToDelete = [];
 
+  // duplicate (сол күн + сол класс) өшіру
   for (let i = 1; i < data.length; i++) {
-    let d = data[i][header.date];
-    if (d instanceof Date) {
-      d = Utilities.formatDate(d, Session.getScriptTimeZone(), "yyyy-MM-dd");
-    } else {
-      d = String(d || "").slice(0, 10);
-    }
+    let d = data[i][idx.date];
+    if (d instanceof Date) d = Utilities.formatDate(d, Session.getScriptTimeZone(), "yyyy-MM-dd");
+    else d = String(d || "").slice(0, 10);
 
-    const rg = normClass(data[i][header.grade]);
-    const rl = normClass(data[i][header.class_letter]);
+    const rg = normClass(data[i][idx.grade]);
+    const rl = normClass(data[i][idx.class_letter]);
 
-    if (d === date && rg === grade && rl === letter) {
-      rowsToDelete.push(i + 1);
-    }
+    if (d === date && rg === grade && rl === letter) rowsToDelete.push(i + 1);
   }
+  if (rowsToDelete.length) rowsToDelete.sort((a, b) => b - a).forEach((r) => sh.deleteRow(r));
 
-  if (rowsToDelete.length) {
-    rowsToDelete.sort((a, b) => b - a).forEach((r) => sh.deleteRow(r));
-  }
+  // жаңа жолдарды full-width қылып жазу (8+ баған)
+  const now = new Date();
+  const values = records.map((r) => {
+    const row = new Array(lastCol).fill("");
+    row[idx.date] = date;
+    row[idx.student_id] = String(r.student_id);
+    row[idx.status_code] = String(r.status_code || "katysty");
+    row[idx.grade] = grade;
+    row[idx.class_letter] = letter;
 
-  const values = records.map((r) => [
-    date,
-    r.student_id,
-    grade,
-    letter,
-    r.status_code || "katysty",
-  ]);
+    if (idx.ts != null) row[idx.ts] = now;
+    // status_kk/status_ru керек болса, кейін толтыра аламыз (қазір бос қалсын)
+    return row;
+  });
 
-  sh.getRange(sh.getLastRow() + 1, 1, values.length, 5).setValues(values);
+  sh.getRange(sh.getLastRow() + 1, 1, values.length, lastCol).setValues(values);
 
   return { saved: values.length, replaced: rowsToDelete.length > 0 };
 }
+
 
 /*************************
  * REPORT
