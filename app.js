@@ -51,6 +51,46 @@ document.body.dataset.lang = currentLang;
 let __isSavingAttendance = false;
 
 // ============================
+// API HELPERS (MUST HAVE)
+// ============================
+async function apiGet(mode, params = {}) {
+  const url = new URL(WEBAPP_URL);
+  url.searchParams.set("mode", mode);
+  url.searchParams.set("key", API_KEY);
+
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== "") url.searchParams.set(k, String(v));
+  });
+
+  const resp = await fetch(url.toString(), { method: "GET" });
+  const text = await resp.text();
+
+  let data;
+  try { data = JSON.parse(text); }
+  catch { throw new Error("API JSON емес: " + text.slice(0, 120)); }
+
+  if (!resp.ok || data?.ok === false) throw new Error(data?.error || ("HTTP " + resp.status));
+  return data;
+}
+
+async function apiPost(body) {
+  const resp = await fetch(WEBAPP_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  const text = await resp.text();
+
+  let data;
+  try { data = JSON.parse(text); }
+  catch { throw new Error("API JSON емес: " + text.slice(0, 120)); }
+
+  if (!resp.ok || data?.ok === false) throw new Error(data?.error || ("HTTP " + resp.status));
+  return data;
+}
+
+// ============================
 // SETTINGS (СЕРВЕР / KEY)
 // ============================
 const WEBAPP_URL = "https://old-recipe-0d35eduqatysu.alga4school.workers.dev/";
@@ -1204,4 +1244,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
