@@ -5,7 +5,9 @@ let currentLang =
   localStorage.getItem("lang") ||
   document.body.dataset.lang ||
   "kk";
+
 document.body.dataset.lang = currentLang;
+
 let __isSavingAttendance = false;
 
 // ============================
@@ -66,7 +68,9 @@ toLabel: "Аяқталу күні",
 
     // ===== BUTTONS =====
   btnUpdate: " 📈 Көрсету",
-  btnExport: "⬇️ CSV жүктеу",
+btnExport: "⬇️ CSV жүктеу",
+btnAdd: "➕ Қосу",
+btnClear: "🧹 Тазалау",
 saveBtn: "💾 Сақтау",
     save: "Сақтау",
 
@@ -74,7 +78,8 @@ saveBtn: "💾 Сақтау",
     note: "Ескерту",
     attendanceHint:
       "Ескерту: барлығы әдепкіде «Қатысты». Тек қажет болса ғана «Ауырды / Себепті / Себепсіз / Кешікті» таңдаңыз.",
-   dayIssuesNote: "Ескерту: “Қатысты” оқушылар көрсетілмейді.",
+    dayIssuesNote: "Ескерту: “Қатысты” оқушылар көрсетілмейді.",
+    noHolidays: "Таңдалмаған",
 
     // ===== KPI =====
    kpiTotal: "📊 Барлық белгі",
@@ -85,7 +90,7 @@ kpiExcused: "📄 Себепті",
 kpiUnexcused: "❌ Себепсіз",
 
     // ===== DAY ISSUES =====
-dayIssuesTitle: "📌 Сабақтан қалғандар",
+    dayIssuesTitle: "📌 Сабақтан қалғандар (күндік)",
  late: "⏰ Кешіккендер",
 sick: "🤒 Ауырғандар",
 excused: "📄 Себепті",
@@ -95,7 +100,8 @@ unexcused: "❌ Себепсіз",
    topLate: "🔥 Көп кешігу (TOP)",
 topUnexcused: "🚫 Көп себепсіз (TOP)",
 
-    // ===== SCHOOL DAYS =====
+    // ===== HOLIDAYS =====
+    holidaysLabel: "Оқымайтын күндер (мереке/каникул):",
     schoolDaysLabel: "Оқу күндерінің саны:",
 
     // ===== MESSAGES =====
@@ -164,8 +170,10 @@ toLabel: "Дата окончания",
     studentNamePlaceholder: "Имя ученика(цы)",
 
     // ===== BUTTONS =====
-btnUpdate: " Показать",
-    btnExport: " Экспорт CSV",
+    btnUpdate: " Показать",
+btnExport: " Экспорт CSV",
+btnAdd: "➕ Добавить",
+btnClear: "🧹 Очистить",
 saveBtn: "💾 Сохранить",
   save: "Сохранить",
     
@@ -173,7 +181,8 @@ saveBtn: "💾 Сохранить",
     note: "Примечание",
     attendanceHint:
       "Подсказка: по умолчанию все «Присутствовал(а)». Выбирайте «Болел(а) / По уважительной / Без уважительной / Опоздал(а)» только при необходимости.",
- dayIssuesNote: "Примечание: “Присутствовал(а)” не показывается.",
+    dayIssuesNote: "Примечание: “Присутствовал(а)” не показывается.",
+    noHolidays: "Не выбрано",
 
     // ===== KPI =====
    kpiTotal: "📊 Всего отметок",
@@ -184,18 +193,19 @@ kpiExcused: "📄 По уважительной",
 kpiUnexcused: "❌ Без уважительной",
 
     // ===== DAY ISSUES =====
-dayIssuesTitle: "📌 Отсутствующие за период",
+    dayIssuesTitle: "📌 Пропуски за день",
 late: "⏰ Опоздавшие",
 sick: "🤒 Болели",
 excused: "📄 По уважительной",
 unexcused: "❌ Без уважительной",
 
     // ===== TOP TABLES =====
-    topLate: "🔥 Часто опаздывают (TOP)",
-topUnexcused: "🚫 Много без причины (TOP)",
+    topLate: "Часто опаздывают (TOP)",
+    topUnexcused: "Много без причины (TOP)",
 
-   // ===== SCHOOL DAYS =====
-    schoolDaysLabel: "Количество учебных дней:",
+    // ===== HOLIDAYS =====
+   topLate: "🔥 Часто опаздывают (TOP)",
+topUnexcused: "🚫 Много без причины (TOP)",
 
     // ===== MESSAGES =====
     saveOk: "✅ Сохранено:",
@@ -237,12 +247,13 @@ function setLang(lang) {
   currentLang = (lang === "ru") ? "ru" : "kk";
   document.body.dataset.lang = currentLang;
   localStorage.setItem("lang", currentLang);
-  applyI18n();
-}
 
 /* ================== SCHOOL CALENDAR / HOLIDAYS (ONE COPY ONLY) ================== */
+
 // Сенбі/жексенбі — демалыс (5 күндік оқу)
 const WEEKEND_DAYS = new Set([0, 6]); // Sun=0, Sat=6
+
+const HOLIDAYS_KEY = "katysym_holidays_v1";
 
 // Ресми каникул (2025-2026)
 const OFFICIAL_BREAKS_2025_2026 = [
@@ -252,13 +263,9 @@ const OFFICIAL_BREAKS_2025_2026 = [
   // 1-сынып қосымша керек болса қос:
   // { from:"2026-02-09", to:"2026-02-15" },
 ];
+
 function d0(iso) { return new Date(iso + "T00:00:00"); }
-function iso(d) {
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
+function iso(d) { return d.toISOString().slice(0, 10); }
 
 function betweenInclusive(dateISO, fromISO, toISO) {
   const t = d0(dateISO).getTime();
@@ -268,10 +275,75 @@ function isOfficialBreakDay(dateISO) {
   return OFFICIAL_BREAKS_2025_2026.some(b => betweenInclusive(dateISO, b.from, b.to));
 }
 
+// ===== manual holidays (қолмен белгілеу) =====
+function loadHolidays() {
+  try { return new Set(JSON.parse(localStorage.getItem(HOLIDAYS_KEY) || "[]")); }
+  catch { return new Set(); }
+}
+function saveHolidays(set) {
+  localStorage.setItem(HOLIDAYS_KEY, JSON.stringify([...set].sort()));
+}
+let HOLIDAYS = loadHolidays();
+
+function renderHolidays() {
+  const el = document.getElementById("holidaysList");
+  if (!el) return;
+
+  if (!HOLIDAYS.size) {
+    // i18n үшін: ішіндегі мәтін data-i18n арқылы ауысуы керек
+    el.innerHTML = `<em data-i18n="noHolidays">${I18N[currentLang]?.noHolidays || ""}</em>`;
+    return;
+  }
+
+  el.innerHTML = [...HOLIDAYS].map(d => `
+    <span class="holidayTag">${d}
+      <button data-date="${d}" class="delHolidayBtn">×</button>
+    </span>
+  `).join(" ");
+
+  el.querySelectorAll(".delHolidayBtn").forEach(btn => {
+    btn.onclick = () => {
+      HOLIDAYS.delete(btn.dataset.date);
+      saveHolidays(HOLIDAYS);
+      renderHolidays();
+      updateSchoolDaysUI();
+      // тіл ауысқанда мәтін де дұрыс болсын:
+      applyI18n();
+    };
+  });
+}
+
+function initHolidayUI() {
+  const addBtn = document.getElementById("addHolidayBtn");
+  const clrBtn = document.getElementById("clearHolidaysBtn");
+  const pick = document.getElementById("holidayPick");
+
+  if (addBtn) addBtn.onclick = () => {
+    const d = pick?.value;
+    if (!d) return;
+    HOLIDAYS.add(d);
+    saveHolidays(HOLIDAYS);
+    renderHolidays();
+    updateSchoolDaysUI();
+    applyI18n();
+  };
+
+  if (clrBtn) clrBtn.onclick = () => {
+    HOLIDAYS.clear();
+    saveHolidays(HOLIDAYS);
+    renderHolidays();
+    updateSchoolDaysUI();
+    applyI18n();
+  };
+
+  renderHolidays();
+}
+
 function isSchoolDayISO(dateISO) {
   const day = d0(dateISO).getDay();
   if (WEEKEND_DAYS.has(day)) return false;
   if (isOfficialBreakDay(dateISO)) return false;
+  if (HOLIDAYS.has(dateISO)) return false;
   return true;
 }
 
@@ -330,9 +402,6 @@ function showView(id){
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
   document.getElementById(id)?.classList.add("active");
   window.scrollTo({top:0, behavior:"smooth"});
-  if (id === "viewReports" && typeof updateStats === "function") {
-    updateStats();
-  }
 }
 
 // ===== I18N =====
@@ -366,11 +435,12 @@ function applyI18n() {
   if (typeof renderAttendanceTable === "function") {
     renderAttendanceTable();
   }
-  
-  // applyI18n() соңына қос:
-  updateSchoolDaysUI();
+      // applyI18n() соңына қос:
+renderHolidays();
+updateSchoolDaysUI();
 
 }
+
 function statusLabel(code){
   const item = STATUS[code] || STATUS.katysty;
   return currentLang === "ru" ? item.ru : item.kk;
@@ -552,26 +622,6 @@ async function saveAttendance() {
     localStorage.setItem(guardKey, "1");
     const extra = res.replaced ? (I18N[currentLang].replaced || "(қайта жазылды)") : "";
     saveStatus.textContent = `${I18N[currentLang].saveOk} ${res.saved} ${extra}`;
-    // ===== 🔥 САҚТАЛҒАН КҮНГЕ ЕСЕПТІ БІРДЕН ДАЙЫНДАУ =====
-const pt = document.getElementById("periodType");
-const cs = document.getElementById("customStart");
-const ce = document.getElementById("customEnd");
-
-// Есепті "КҮН" режиміне ауыстыру
-if (pt) pt.value = "day";
-if (cs) cs.value = date;
-if (ce) ce.value = date;
-
-// UI дұрыс жаңарсын
-pt?.dispatchEvent(new Event("change"));
-
-// Есеп пен оқу күнін бірден есептеу
-updateSchoolDaysUI();
-updateStats();
-
-// ҚАЛАСАҢ — бірден есеп бетіне өткізу
-// showView("viewReports");
-
   } catch (e) {
     saveStatus.textContent = `${I18N[currentLang].saveErr} ${e.message}`;
   } finally {
@@ -579,34 +629,44 @@ updateStats();
   }
 }
 
-/* ================== ПЕРИОД ================== */
 
+/* ================== ПЕРИОД ================== */
 function getRangeFromPeriod() {
   const type = document.getElementById("periodType")?.value;
- const last = new Date(Number(y), Number(m), 0); // соңғы күн
-    return { from:`${y}-${m}-01`, to: toISO(last) };
-  }
+  const toISO = d => d.toISOString().slice(0,10);
+  const d0 = s => new Date(s + "T00:00:00");
 
-// ✅ DAY: customStart арқылы 1 күн
+  // ✅ DAY: customStart арқылы 1 күн
   if (type === "day") {
     const d = document.getElementById("customStart")?.value;
     if (!d) return null;
     return { from: d, to: d };
   }
 
-  // ✅ WEEK: берём выбранный диапазон (customStart → customEnd)
-if (type === "week") {
-  const from = document.getElementById("customStart")?.value;
-  const to = document.getElementById("customEnd")?.value;
-  if (!from || !to) return null;
-  return { from, to };
-}
+  // ✅ WEEK: соңғы 5 оқу күні (дүйсенбі–жұма), 7 күн емес
+  if (type === "week") {
+    const end = new Date();
+    // бүгіннен артқа 7 күн қарап, тек оқу күндерін жинаймыз
+    const days = [];
+    for (let i = 0; i < 14 && days.length < 5; i++) {
+      const t = new Date();
+      t.setDate(t.getDate() - i);
+      const dow = t.getDay(); // 0 Sun .. 6 Sat
+      if (dow !== 0 && dow !== 6) days.push(toISO(t));
+    }
+    const from = days[days.length - 1];
+    const to = days[0];
+    return { from, to };
+  }
 
   // ✅ MONTH
   if (type === "month") {
     const v = document.getElementById("monthInput")?.value;
     if (!v) return null;
     const [y,m] = v.split("-");
+    const last = new Date(Number(y), Number(m), 0); // соңғы күн
+    return { from:`${y}-${m}-01`, to: toISO(last) };
+  }
 
   // ✅ YEAR (календарь жыл)
   if (type === "year") {
@@ -639,24 +699,10 @@ if (type === "week") {
 
 function sumTotals(report){
   const totals = { total:0, katysty:0, keshikti:0, sebep:0, sebsez:0, auyrdy:0 };
-  const totalsByStudent = report.totals || {};
-  if (Object.keys(totalsByStudent).length) {
-    Object.values(totalsByStudent).forEach(t => {
-      ["katysty","keshikti","sebep","sebsez","auyrdy"].forEach(k => {
-        totals[k] += Number(t[k] || 0);
-        totals.total += Number(t[k] || 0);
-      });
-    });
-    return totals;
-  }
-
-  const daily = report.daily || {};
-  Object.values(daily).forEach(byStudent => {
-    Object.values(byStudent || {}).forEach(st => {
-      const code = st?.status_code || "katysty";
-      if (totals[code] == null) return;
-      totals[code] += 1;
-      totals.total += 1;
+  Object.values(report.totals || {}).forEach(t => {
+    ["katysty","keshikti","sebep","sebsez","auyrdy"].forEach(k => {
+      totals[k] += Number(t[k] || 0);
+      totals.total += Number(t[k] || 0);
     });
   });
   return totals;
@@ -670,7 +716,7 @@ function buildTop(report, code, limit=10) {
       cls:`${s.grade}${s.class_letter}`,
       count:Number(report.totals?.[String(s.id)]?.[code]||0)
     }))
-    .filter(x=>x.count>=3) // 3+ рет
+    .filter(x=>x.count>3) // 4+ рет (3тен жогары)
     .sort((a,b)=>b.count-a.count)
     .slice(0,limit);
 }
@@ -738,12 +784,10 @@ function eachDateISO(fromISO, toISO) {
   const start = new Date(fromISO + "T00:00:00");
   const end = new Date(toISO + "T00:00:00");
   for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    res.push(iso(d));
+    res.push(d.toISOString().slice(0, 10));
   }
   return res;
 }
-
-
 
 // 4) report.daily ішінен таңдалған мерзім бойынша (1 күн/апта/ай/жыл/барлығы)
 // кешіккен/ауырған/себепті/себепсіз тізімдерді жинау
@@ -856,6 +900,18 @@ async function updateStats() {
     alert((currentLang === "ru" ? "Ошибка отчёта: " : "Есеп қатесі: ") + e.message);
   }
 }
+
+
+ // ===== DATE HELPERS =====
+function iso(d){ return d.toISOString().slice(0,10); }
+function d0(s){ return new Date(s + "T00:00:00"); }
+
+function betweenInclusive(dateISO, fromISO, toISO){
+  const t = d0(dateISO).getTime();
+  return t >= d0(fromISO).getTime() && t <= d0(toISO).getTime();
+}
+
+
 
 function exportCsv() {
   const range = getRangeFromPeriod();
@@ -1005,40 +1061,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("langToggle")?.addEventListener("click", () => {
     setLang(currentLang === "kk" ? "ru" : "kk");
   });
-  
- updateSchoolDaysUI();
-  
-    document.getElementById("customStart")?.addEventListener("change", () => {
-  const type = document.getElementById("periodType")?.value;
-  const startISO = document.getElementById("customStart")?.value;
-  const endInput = document.getElementById("customEnd");
 
-  if (!startISO || !endInput) { updateSchoolDaysUI(); return; }
-
-  if (type === "day") {
-    endInput.value = startISO;
-  }
-
-  if (type === "week") {
-    const d = new Date(startISO + "T00:00:00");
-    d.setDate(d.getDate() + 6);
-    endInput.value = iso(d);
-  }
-
-  updateSchoolDaysUI();
-    updateStats();
-});
-  
   // Бүгінгі күнді қою
-const today = new Date();
-  const todayIso = iso(today);
+  const today = new Date();
+  const iso = today.toISOString().slice(0, 10);
 
-  document.getElementById("attendanceDate") && (document.getElementById("attendanceDate").value = todayIso);
-  document.getElementById("customStart") && (document.getElementById("customStart").value = todayIso);
-  document.getElementById("customEnd") && (document.getElementById("customEnd").value = todayIso);
+  document.getElementById("attendanceDate") && (document.getElementById("attendanceDate").value = iso);
+  document.getElementById("customStart") && (document.getElementById("customStart").value = iso);
+  document.getElementById("customEnd") && (document.getElementById("customEnd").value = iso);
+
   document.getElementById("yearInput") && (document.getElementById("yearInput").value = today.getFullYear());
   document.getElementById("quarterYearInput") && (document.getElementById("quarterYearInput").value = today.getFullYear());
-
 
   // Период өзгерсе — контролдарды көрсету/жасыру
  document.getElementById("periodType")?.addEventListener("change", () => {
@@ -1053,74 +1086,20 @@ const today = new Date();
   if (type === "quarter") document.getElementById("quarterControl") && (document.getElementById("quarterControl").style.display = "flex");
   if (type === "year") document.getElementById("yearControl") && (document.getElementById("yearControl").style.display = "flex");
 
-  if (type === "day" || type === "week" || type === "custom") {
-    const customControl = document.getElementById("customControl");
-    if (customControl) customControl.style.display = "flex";
+  if (type === "custom" || type === "week") {
+    document.getElementById("customControl") && (document.getElementById("customControl").style.display = "flex");
   }
-
-  const customControl = document.getElementById("customControl");
-  const toLabel = customControl?.querySelector('[data-i18n="toLabel"]');
-  const toInput = customControl?.querySelector("#customEnd");
-  if (type === "day") {
-    if (toLabel) toLabel.style.display = "none";
-    if (toInput) {
-      toInput.style.display = "none";
-      toInput.value = document.getElementById("customStart")?.value || toInput.value;
-    }
-  } else {
-    if (toLabel) toLabel.style.display = "";
-    if (toInput) toInput.style.display = "";
-  }
-
-  updateSchoolDaysUI();
-  updateStats();
 });
 
 // Батырмалар
 document.getElementById("saveAttendanceBtn")?.addEventListener("click", saveAttendance);
 document.getElementById("updateStatsBtn")?.addEventListener("click", updateStats);
 document.getElementById("exportCsvBtn")?.addEventListener("click", exportCsv);
-
-// Период ауысса — бірден есеп
-document.getElementById("periodType")?.addEventListener("change", () => {
-  updateSchoolDaysUI();
-  updateStats();
-});
-
-// Day/week таңдаған күн өзгерсе
-document.getElementById("customStart")?.addEventListener("change", () => {
-  updateSchoolDaysUI();
-  updateStats();
-});
-
-// Ай/тоқсан/жыл өзгерсе
-document.getElementById("monthInput")?.addEventListener("change", () => {
-  updateSchoolDaysUI();
-  updateStats();
-});
-document.getElementById("quarterInput")?.addEventListener("change", () => {
-  updateSchoolDaysUI();
-  updateStats();
-});
-document.getElementById("quarterYearInput")?.addEventListener("input", () => {
-  updateSchoolDaysUI();
-  updateStats();
-});
-document.getElementById("yearInput")?.addEventListener("input", () => {
-  updateSchoolDaysUI();
-  updateStats();
-});
-
-// Класс өзгерсе
-document.getElementById("reportClass")?.addEventListener("change", () => {
-  updateStats();
-});
-
-// Іздеу (attendance беті)
 document.getElementById("searchInput")?.addEventListener("input", renderAttendanceTable);
 
 // ✅ Бет ашылғанда period control-дар бірден дұрыс көрінсін
 document.getElementById("periodType")?.dispatchEvent(new Event("change"));
+document.getElementById("rep_periodType")?.dispatchEvent(new Event("change")); // егер бар болса
 
 // API: сыныптар, оқушылар
 try {
@@ -1147,6 +1126,23 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
