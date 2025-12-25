@@ -1,10 +1,3 @@
-/*************************
- * CONFIG
- *************************/
-const SPREADSHEET_ID = "1dHAvNmJXPe1F60wP9ZSw9GhVHM2eMELP90-sWnoSPCE";
-const SHEET_STUDENTS = "students";
-const SHEET_ATT = "attendance";
-const API_KEY = "school2025";
 
 /*************************
  * HELPERS
