@@ -730,11 +730,13 @@ input, select{
 .brand-logo{
   width:44px;
   height:44px;
-  border-radius:50%;
-  object-fit:cover;
-  border:2px solid #3b82f6;
+  object-fit:contain;
+  border-radius:12px;
   background:#fff;
+  border:1px solid var(--line);
+  padding:4px;
 }
+
 
 .brand-title{
   font-size:14px;
@@ -751,6 +753,7 @@ input, select{
   cursor:pointer;
 }
 .lang-btn:hover{ background:#f3f4f6; }
+
 
 
 
