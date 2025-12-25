@@ -1,4 +1,4 @@
-const CACHE_NAME = "katysym-v5";
+const CACHE_NAME = "katysym-v6";
 
 const ASSETS = [
   "/katysym/",
@@ -6,14 +6,25 @@ const ASSETS = [
   "/katysym/style.css",
   "/katysym/app.js",
   "/katysym/students.js",
-  "/katysym/manifest.json",
-  // мында төменде manifest-тағы нақты иконка жолдарын қой (2-бөлімде айтам)
-  "/katysym/favicon_io/android-chrome-192x192.png",
-  "/katysym/favicon_io/android-chrome-512x512.png",
+
+  // ✅ Біз manifest.json емес, site.webmanifest қолданамыз
+  "/katysym/favicon_io/site.webmanifest",
+
+  // ✅ Иконкалар (сенің папкаңдағы нақты аттар)
+  "/katysym/favicon_io/icon-192.png",
+  "/katysym/favicon_io/icon-512.png",
+  "/katysym/favicon_io/apple-touch-icon.png",
+
+  // ✅ favicon-дар (қаласаң қалдыр)
+  "/katysym/favicon_io/favicon-32x32.png",
+  "/katysym/favicon_io/favicon-16x16.png",
+  "/katysym/favicon_io/favicon.ico"
 ];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)));
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+  );
   self.skipWaiting();
 });
 
@@ -33,13 +44,18 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(
     caches.match(req).then((cached) => {
       if (cached) return cached;
+
       return fetch(req)
         .then((resp) => {
-          const copy = resp.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+          // тек сәтті жауаптарды ғана кэшке салайық
+          if (resp && resp.status === 200) {
+            const copy = resp.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+          }
           return resp;
         })
-        .catch(() => caches.match("/katysym/index.html"));
+        .catch(() => caches.match("/katysym/index.html"))
     })
   );
 });
+
