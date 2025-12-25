@@ -1073,31 +1073,45 @@ const today = new Date();
 document.getElementById("saveAttendanceBtn")?.addEventListener("click", saveAttendance);
 document.getElementById("updateStatsBtn")?.addEventListener("click", updateStats);
 document.getElementById("exportCsvBtn")?.addEventListener("click", exportCsv);
-  document.getElementById("monthInput")?.addEventListener("change", () => {
+
+// Период ауысса — бірден есеп
+document.getElementById("periodType")?.addEventListener("change", () => {
   updateSchoolDaysUI();
   updateStats();
 });
 
+// Day/week таңдаған күн өзгерсе
+document.getElementById("customStart")?.addEventListener("change", () => {
+  updateSchoolDaysUI();
+  updateStats();
+});
+
+// Ай/тоқсан/жыл өзгерсе
+document.getElementById("monthInput")?.addEventListener("change", () => {
+  updateSchoolDaysUI();
+  updateStats();
+});
 document.getElementById("quarterInput")?.addEventListener("change", () => {
   updateSchoolDaysUI();
   updateStats();
 });
-
 document.getElementById("quarterYearInput")?.addEventListener("input", () => {
   updateSchoolDaysUI();
   updateStats();
 });
-
 document.getElementById("yearInput")?.addEventListener("input", () => {
   updateSchoolDaysUI();
   updateStats();
 });
 
+// Класс өзгерсе
 document.getElementById("reportClass")?.addEventListener("change", () => {
   updateStats();
 });
+
+// Іздеу (attendance беті)
 document.getElementById("searchInput")?.addEventListener("input", renderAttendanceTable);
-  
+
 // ✅ Бет ашылғанда period control-дар бірден дұрыс көрінсін
 document.getElementById("periodType")?.dispatchEvent(new Event("change"));
 
@@ -1126,6 +1140,7 @@ try {
   alert("API error: " + e.message);
 }
 }); // ✅ end DOMContentLoaded
+
 
 
 
