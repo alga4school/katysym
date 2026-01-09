@@ -76,6 +76,7 @@ const I18N = {
     // ===== HEADER / UI =====
     schoolName:
       '"№4 Алға орта мектебі" КММ',
+    updateHint: "⚠️ Егер мәтін дұрыс шықпаса, «Жаңарту/Обновить» басыңыз.",
     backHome: "🏠Басты бет",
     homeBtn: "←🏠 Басты бет",
 
@@ -179,6 +180,7 @@ topUnexcused: "🚫 Көп себепсіз (TOP)",
     // ===== HEADER / UI =====
     schoolName:
       'КГУ "Алгинская средняя школа №4"',
+    updateHint: "⚠️ Если текст отображается неправильно — нажмите «Обновить».",
     backHome: "🏠Главная",
     homeBtn: "←🏠 Главная",
 
@@ -1193,7 +1195,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     setLang(currentLang === "kk" ? "ru" : "kk");
   });
 
-  // Бүгінгі күнді қою
+  // ✅ Қатты жаңарту (OPPO/VIVO сияқты телефондарда ескі кэш ұстап қалады)
+  document.getElementById("btnHardRefresh")?.addEventListener("click", async () => {
+    try {
+      // 1) Service Worker өшіру
+      if ("serviceWorker" in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((r) => r.unregister()));
+      }
+
+      // 2) Барлық Cache Storage тазалау
+      if (window.caches) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+    } catch (e) {
+      console.log("Hard refresh error:", e);
+    }
+
+    // 3) Кэшты айналып өтетін қайта жүктеу
+    const url = new URL(window.location.href);
+    url.searchParams.set("refresh", Date.now().toString());
+    window.location.href = url.toString();
+  });
+
+// Бүгінгі күнді қою
   const today = new Date();
   const todayISO = today.toISOString().slice(0, 10);
 
