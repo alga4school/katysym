@@ -8,6 +8,77 @@ let currentLang =
 
 document.body.dataset.lang = currentLang;
 
+// ============================
+// PWA UPDATE LINK (OPPO/VIVO cache fix)
+// ============================
+function getPwaUpdateTexts() {
+  if (currentLang === "ru") {
+    return {
+      label: "Проблема с отображением? Обновить",
+      updating: "⏳ Обновляю…",
+      done: "✅ Обновлено. Перезагрузка…",
+      fail: "Не удалось обновить. Откройте сайт в браузере и обновите."
+    };
+  }
+  return {
+    label: "Көрсету дұрыс емес пе? Жаңарту",
+    updating: "⏳ Жаңартып жатырмын…",
+    done: "✅ Жаңартылды. Қайта жүктелуде…",
+    fail: "Жаңарту болмады. Браузерде ашып жаңартыңыз."
+  };
+}
+
+function updatePwaUpdateLinkText(state) {
+  const link = document.getElementById("pwaUpdateLink");
+  if (!link) return;
+  const t = getPwaUpdateTexts();
+  if (state === "updating") link.textContent = t.updating;
+  else if (state === "done") link.textContent = t.done;
+  else if (state === "fail") link.textContent = t.fail;
+  else link.textContent = t.label;
+}
+
+function setupPwaUpdateLink() {
+  const link = document.getElementById("pwaUpdateLink");
+  if (!link) return;
+
+  updatePwaUpdateLinkText("idle");
+
+  link.addEventListener("click", async (e) => {
+    e.preventDefault();
+    link.classList.add("is-busy");
+    updatePwaUpdateLinkText("updating");
+
+    try {
+      // Unregister SW (if any)
+      if ("serviceWorker" in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((r) => r.unregister()));
+      }
+
+      // Clear Cache Storage
+      if (window.caches) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+
+      updatePwaUpdateLinkText("done");
+
+      // Give UI a moment to show message, then reload
+      setTimeout(() => {
+        // reload current page
+        location.reload();
+      }, 500);
+    } catch (err) {
+      console.error(err);
+      link.classList.remove("is-busy");
+      updatePwaUpdateLinkText("fail");
+      setTimeout(() => updatePwaUpdateLinkText("idle"), 2500);
+    }
+  });
+}
+
+
 let __isSavingAttendance = false;
 
 // ============================
@@ -76,7 +147,6 @@ const I18N = {
     // ===== HEADER / UI =====
     schoolName:
       '"№4 Алға орта мектебі" КММ',
-    updateHint: "⚠️ Егер мәтін дұрыс шықпаса, «Жаңарту/Обновить» басыңыз.",
     backHome: "🏠Басты бет",
     homeBtn: "←🏠 Басты бет",
 
@@ -180,7 +250,6 @@ topUnexcused: "🚫 Көп себепсіз (TOP)",
     // ===== HEADER / UI =====
     schoolName:
       'КГУ "Алгинская средняя школа №4"',
-    updateHint: "⚠️ Если текст отображается неправильно — нажмите «Обновить».",
     backHome: "🏠Главная",
     homeBtn: "←🏠 Главная",
 
@@ -291,6 +360,7 @@ function setLang(lang) {
 
   // тіл ауысқанда интерфейс мәтіндерін жаңарту
   applyI18n();
+  updatePwaUpdateLinkText("idle");
 }
 /* ================== DATE HELPERS ================== */
 /* Күнмен жұмыс істейтін функциялар (отчёт/сүзгі үшін керек болуы мүмкін) */
@@ -708,6 +778,7 @@ function updatePeriodControls() {
 
 // ✅ Listener-лер: periodType/quarter өзгерсе — күндер автомат жаңарсын
 document.addEventListener("DOMContentLoaded", () => {
+  setupPwaUpdateLink();
   document.getElementById("periodType")?.addEventListener("change", updatePeriodControls);
   document.getElementById("quarterInput")?.addEventListener("change", updatePeriodControls);
 
@@ -1195,31 +1266,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     setLang(currentLang === "kk" ? "ru" : "kk");
   });
 
-  // ✅ Қатты жаңарту (OPPO/VIVO сияқты телефондарда ескі кэш ұстап қалады)
-  document.getElementById("btnHardRefresh")?.addEventListener("click", async () => {
-    try {
-      // 1) Service Worker өшіру
-      if ("serviceWorker" in navigator) {
-        const regs = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(regs.map((r) => r.unregister()));
-      }
-
-      // 2) Барлық Cache Storage тазалау
-      if (window.caches) {
-        const keys = await caches.keys();
-        await Promise.all(keys.map((k) => caches.delete(k)));
-      }
-    } catch (e) {
-      console.log("Hard refresh error:", e);
-    }
-
-    // 3) Кэшты айналып өтетін қайта жүктеу
-    const url = new URL(window.location.href);
-    url.searchParams.set("refresh", Date.now().toString());
-    window.location.href = url.toString();
-  });
-
-// Бүгінгі күнді қою
+  // Бүгінгі күнді қою
   const today = new Date();
   const todayISO = today.toISOString().slice(0, 10);
 
