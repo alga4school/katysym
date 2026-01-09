@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="kk">
 <head>
@@ -41,15 +42,7 @@
     <button id="langToggle" class="lang-btn">🌏KK / RU</button>
   </header>
 
-  
-
-  <!-- ✅ Егер кей телефондарда әріптер/мәтін қате шықса, осыны басыңыз -->
-  <div id="updateBanner" class="update-banner" role="status">
-    <span data-i18n="updateHint">⚠️ Егер мәтін дұрыс шықпаса, «Жаңарту/Обновить» басыңыз.</span>
-    <button id="btnHardRefresh" class="update-btn" type="button">Жаңарту / Обновить</button>
-  </div>
-
-<!-- ✅ APP CONTENT -->
+  <!-- ✅ APP CONTENT -->
   <div id="app">
 
       <!-- Views -->
@@ -346,11 +339,12 @@
 
 <script>
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("/katysym/sw.js?v=7");
+    navigator.serviceWorker.register("/katysym/sw.js");
   }
 </script>
 
+  <!-- Small update link (helps OPPO/VIVO refresh cached files) -->
+  <a id="pwaUpdateLink" class="pwa-update-link" href="#">Обновить</a>
+
 </body>
 </html>
-
-
