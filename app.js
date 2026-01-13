@@ -1106,6 +1106,26 @@ Object.entries(daily).forEach(([dateISO, byId]) => {
   });
 });
 
+// ---- SORT for Excel: class -> student -> date ----
+const clsKey = (cls) => {
+  const c = String(cls || "").replace(/\s+/g, "").toUpperCase();
+  const m = c.match(/^(\d+)(.*)$/);
+  const g = m ? Number(m[1]) : 999;
+  const l = m ? (m[2] || "") : "";
+  return { g, l };
+};
+
+rowsDaily.sort((a, b) => {
+  // a = [date, student, class, ...]
+  const A = clsKey(a[2]);
+  const B = clsKey(b[2]);
+  if (A.g !== B.g) return A.g - B.g;
+  const lc = A.l.localeCompare(B.l, "ru");
+  if (lc !== 0) return lc;
+  const sc = String(a[1]).localeCompare(String(b[1]), "ru");
+  if (sc !== 0) return sc;
+  return String(a[0]).localeCompare(String(b[0]));
+});
 
       // Егер daily жоқ/бос болса — totals шығарамыз
       let header = headerDaily;
@@ -1404,6 +1424,7 @@ document.getElementById("addStudentBtn")?.addEventListener("click", addStudentFr
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
