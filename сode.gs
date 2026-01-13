@@ -13,8 +13,22 @@ function normClass(v) {
   return String(v ?? "")
     .trim()
     .replace(/\s+/g, "")
-    .toUpperCase();
+    .toUpperCase()
+    // Latin → Cyrillic (өте маңызды)
+    .replace(/Ə/g, "Ә")
+    .replace(/A/g, "А")
+    .replace(/B/g, "В")
+    .replace(/C/g, "С")
+    .replace(/E/g, "Е")
+    .replace(/H/g, "Н")
+    .replace(/K/g, "К")
+    .replace(/M/g, "М")
+    .replace(/O/g, "О")
+    .replace(/P/g, "Р")
+    .replace(/T/g, "Т")
+    .replace(/X/g, "Х");
 }
+
 
 // ✅ grade: "1", "01", "1 класс", "1-сынып" -> "1"
 function normGrade(v) {
