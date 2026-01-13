@@ -444,11 +444,17 @@ function normalizeClassValue(v) {
     .replace(/Ə/g, "Ә");   // латин Ə → қазақ Ә
 }
 
-
-
 function parseClass(cls) {
   const c = normalizeClassValue(cls);
   const m = c.match(/^(\d+)(.*)$/); // сан + әріп(тер)
+  if (!m) return { grade: "", letter: "" };
+  return { grade: m[1], letter: m[2] || "" };
+}
+
+// API-ға дәл dropdown-та тұрған мәнді жіберу үшін (нормализациясыз)
+function parseClassRaw(cls) {
+  const c = String(cls || "").replace(/\s+/g, "").toUpperCase();
+  const m = c.match(/^(\d+)(.*)$/);
   if (!m) return { grade: "", letter: "" };
   return { grade: m[1], letter: m[2] || "" };
 }
@@ -509,10 +515,12 @@ function renderAttendanceTable() {
   let filtered = allStudents.slice();
 
   if (selectedClass) {
-    const { grade, letter } = parseClass(selectedClass);
-    filtered = filtered.filter(s =>
-      String(s.grade) === grade && String(s.class_letter) === letter
-    );
+   const { grade, letter } = parseClassRaw(selectedClass);
+filtered = filtered.filter(s =>
+  String(s.grade) === String(grade) &&
+  normalizeClassValue(s.class_letter) === normalizeClassValue(letter)
+);
+
   } else {
     filtered = [];
   }
@@ -564,7 +572,7 @@ async function saveAttendance() {
   if (!cls) return alert(I18N[currentLang].needClass);
 
   // ҚАЙТАЛАНҒАН басуды тоқтатамыз (localStorage guard)
-  const { grade, letter } = parseClass(cls);
+  const { grade, letter } = parseClassRaw(cls);
   const guardKey = `att_saved:${date}:${grade}:${letter}`;
 
   if (localStorage.getItem(guardKey) === "1") {
@@ -1118,9 +1126,9 @@ function exportCsv() {
   let grade = "ALL", class_letter = "ALL";
 
   if (reportClass !== "ALL") {
-    const p = parseClass(reportClass);
-    grade = p.grade;
-    class_letter = p.letter;
+    const p = parseClassRaw(reportClass);
+grade = p.grade;
+class_letter = p.letter;
   }
 
   apiGet("report", { from: range.from, to: range.to, grade, class_letter })
@@ -1512,6 +1520,7 @@ document.getElementById("addStudentBtn")?.addEventListener("click", addStudentFr
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
