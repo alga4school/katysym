@@ -797,52 +797,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Бет ашылғанда да бір рет толтырып қоямыз
   updatePeriodControls();
 });
-const t = sumFromDaily(report, range);
-  const totals = {
-    total: 0,
-    katysty: 0,
-    keshikti: 0,
-    sebep: 0,
-    sebsez: 0,
-    auyrdy: 0,
-  };
-
-  Object.values(report?.totals || {}).forEach((t) => {
-    ["katysty", "keshikti", "sebep", "sebsez", "auyrdy"].forEach((k) => {
-      const n = Number(t?.[k] || 0);
-      totals[k] += n;
-      totals.total += n;
-    });
-  });
-
-  return totals;
-}
-function sumFromDaily(report, range) {
-  const totals = { total: 0, katysty: 0, keshikti: 0, sebep: 0, sebsez: 0, auyrdy: 0 };
-
-  const daily = report?.daily || {};
-  let dates = [];
-
-  if (!range?.from && !range?.to) {
-    dates = Object.keys(daily).sort();
-  } else {
-    dates = eachDateISO(range.from, range.to);
-  }
-
-  for (const dateISO of dates) {
-    const dailyMap = daily[dateISO];
-    if (!dailyMap) continue;
-
-    Object.values(dailyMap).forEach(st => {
-      const code = st?.status_code || "katysty";
-      if (!totals.hasOwnProperty(code)) return;
-      totals[code] += 1;
-      totals.total += 1;
-    });
-  }
-
-  return totals;
-}
 
 /* ================== TOP ================== */
 function buildTop(report, code, limit = 10) {
@@ -881,24 +835,6 @@ function fillTable(tableId, rows) {
       <td>${escapeHtml(r.name)}</td>
       <td>${escapeHtml(r.cls)}</td>
       <td>${Number(r.count || 0)}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-/* ================== DAY ISSUES TABLES ================== */
-function fillSimpleTable(tableId, rows) {
-  const tbody = document.querySelector(`#${tableId} tbody`);
-  if (!tbody) return;
-
-  tbody.innerHTML = "";
-
-  rows.forEach((r, i) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${i + 1}</td>
-      <td>${escapeHtml(r.name)}</td>
-      <td>${escapeHtml(r.cls)}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -1590,6 +1526,7 @@ document.getElementById("addStudentBtn")?.addEventListener("click", addStudentFr
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
