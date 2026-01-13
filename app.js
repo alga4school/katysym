@@ -1069,8 +1069,11 @@ async function updateStats() {
       class_letter,
     });
 
-    // ✅ dayIssues
-    renderDayIssuesForRange(report, range);
+  // ✅ dayIssues
+renderDayIssuesForRange(report, range);
+
+// ✅ Белгі қойылмаған сыныптар
+renderUnmarkedClasses(report, range);
 
     // ✅ KPI
     const t = sumTotals(report);
@@ -1114,6 +1117,73 @@ function betweenInclusive(dateISO, fromISO, toISO) {
   const t = d0(dateISO).getTime();
   return t >= d0(fromISO).getTime() && t <= d0(toISO).getTime();
 }
+function renderUnmarkedClasses(report, range) {
+  const box = document.getElementById("unmarkedBox");
+  const listEl = document.getElementById("unmarkedList");
+  const btn = document.getElementById("copyUnmarkedBtn");
+  if (!box || !listEl) return;
+
+  const periodType = document.getElementById("periodType")?.value || "day";
+  const reportClass = document.getElementById("reportClass")?.value || "ALL";
+
+  // Тек "Күні" + "Барлық сынып" кезінде көрсетеміз
+  if (!(periodType === "day" && reportClass === "ALL")) {
+    box.style.display = "none";
+    return;
+  }
+
+  // Барлық сынып тізімі students.js-тен құралады:
+  // report.students ішінде grade + class_letter бар
+  
+  const students = report?.students || [];
+  const allClassesSet = new Set();
+  students.forEach(s => {
+    const cls = normalizeClassValue(`${s.grade}${s.class_letter}`);
+    if (cls) allClassesSet.add(cls);
+  });
+  
+  const allClasses = Array.from(allClassesSet).sort((a,b)=>a.localeCompare(b, "ru"));
+
+  // Сол күнде белгі қойылған сыныптарды табамыз
+  const markedSet = new Set();
+  const daily = report?.daily || {};
+  const dayKey = range?.from; // day режимінде from=to
+  const byId = daily?.[dayKey] || {};
+
+  Object.entries(byId).forEach(([sid, st]) => {
+    if (!st) return; // тек нақты белгіленгендер
+    // report.students-тан оқушыны тауып, сыныбын аламыз
+    const s = students.find(x => String(x.id) === String(sid));
+    if (!s) return;
+    const cls = normalizeClassValue(`${s.grade}${s.class_letter}`);
+    if (cls) markedSet.add(cls);
+  });
+
+  // Белгі қойылмаған сыныптар
+  const unmarked = allClasses.filter(c => !markedSet.has(c));
+
+  if (!unmarked.length) {
+    box.style.display = "none";
+    return;
+  }
+
+  box.style.display = "block";
+  listEl.innerHTML = unmarked.map(c => `• ${c}`).join("<br>");
+
+  // Мұғалімдерге жіберетін мәтін (көшіру)
+  const msg =
+`Құрметті сынып жетекшілері!
+${dayKey} күні төмендегі сыныптар бойынша сабаққа қатысу белгіленбеген:
+${unmarked.map(c => `- ${c}`).join("\n")}
+Өтініш, бүгінгі белгіні жүйеге енгізіп жіберіңіздер.`;
+
+  if (btn) {
+    btn.onclick = async () => {
+      await navigator.clipboard.writeText(msg);
+      alert("Мәтін көшірілді ✅");
+    };
+  }
+}
 
 function exportCsv() {
   const range = getRangeFromPeriod();
@@ -1146,7 +1216,7 @@ const wantedClassNorm = (reportClass === "ALL") ? "" : norm(reportClass);
 const getStudentClass = (s, st) => {
   const g = (s?.grade ?? st?.grade ?? "");
   const l = (s?.class_letter || st?.class_letter || "");
-  return `${g}${l}`.trim();
+  return normalizeClassValue(`${g}${l}`);
 };
 
 const getCode = (st) => (st?.status_code || "katysty");
@@ -1197,7 +1267,7 @@ Object.entries(daily || {}).forEach(([dateISO, byId]) => {
 
 // ---- SORT for Excel: class -> student -> date ----
 const clsKey = (cls) => {
-  const c = String(cls || "").replace(/\s+/g, "").toUpperCase();
+  const c = normalizeClassValue(cls); // ✅ маңызды
   const m = c.match(/^(\d+)(.*)$/);
   const g = m ? Number(m[1]) : 999;
   const l = m ? (m[2] || "") : "";
@@ -1520,6 +1590,7 @@ document.getElementById("addStudentBtn")?.addEventListener("click", addStudentFr
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
