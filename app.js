@@ -1137,9 +1137,9 @@ function exportCsv() {
       const totals = report?.totals || {};
 
       // ---------- helpers ----------
-      // ---------- helpers ----------
-const norm = (s) => String(s || "").replace(/\s+/g, "").toUpperCase();
+const norm = (s) => normalizeClassValue(s);
 const wantedClassNorm = (reportClass === "ALL") ? "" : norm(reportClass);
+
 
 // ✅ class дұрыс құралуы үшін (әріп жоқ болса да қате шықпайды)
 const getStudentClass = (s, st) => {
@@ -1519,6 +1519,7 @@ document.getElementById("addStudentBtn")?.addEventListener("click", addStudentFr
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
