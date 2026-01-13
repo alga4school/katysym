@@ -14,7 +14,7 @@ function normClass(v) {
     .trim()
     .replace(/\s+/g, "")
     .toUpperCase()
-    // Latin → Cyrillic (өте маңызды)
+    // Latin → Cyrillic (ӨТЕ МАҢЫЗДЫ)
     .replace(/Ə/g, "Ә")
     .replace(/A/g, "А")
     .replace(/B/g, "В")
