@@ -52,12 +52,29 @@ function doPost(e) {
     const body = JSON.parse(e.postData.contents || "{}");
     if (body.key !== API_KEY) return err_("Invalid key");
 
-    const info = saveAttendance_(body); // {saved, replaced}
-    return ok_(info);
+    const mode = String(body.mode || "saveAttendance");
+
+    if (mode === "saveAttendance") {
+      const info = saveAttendance_(body);
+      return ok_(info);
+    }
+
+    if (mode === "addStudent") {
+      const info = addStudent_(body);
+      return ok_(info);
+    }
+
+    if (mode === "deleteStudent") {
+      const info = deleteStudent_(body);
+      return ok_(info);
+    }
+
+    return err_("Unknown POST mode: " + mode);
   } catch (ex) {
     return err_(ex.message);
   }
 }
+
 
 /*************************
  * HEADER MAP
@@ -282,4 +299,52 @@ function getReport_(p) {
 function testOpen() {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   Logger.log(ss.getName());
+}
+
+function addStudent_(body) {
+  const full_name = String(body.full_name || "").trim();
+  const grade = normClass(body.grade);
+  const class_letter = normClass(body.class_letter);
+
+  if (!full_name) throw new Error("Missing full_name");
+  if (!grade) throw new Error("Missing grade");
+  if (!class_letter) throw new Error("Missing class_letter");
+
+  const sh = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_STUDENTS);
+  const data = sh.getDataRange().getValues();
+  const idx = header_(data[0]);
+
+  // новый ID = max(id)+1
+  let maxId = 0;
+  for (let i = 1; i < data.length; i++) {
+    const v = Number(data[i][idx.id]);
+    if (!isNaN(v)) maxId = Math.max(maxId, v);
+  }
+  const newId = maxId + 1;
+
+  const row = new Array(data[0].length).fill("");
+  row[idx.id] = newId;
+  row[idx.full_name] = full_name;
+  row[idx.grade] = grade;
+  row[idx.class_letter] = class_letter;
+
+  sh.appendRow(row);
+  return { added: true, id: newId };
+}
+
+function deleteStudent_(body) {
+  const id = String(body.id || "").trim();
+  if (!id) throw new Error("Missing id");
+
+  const sh = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_STUDENTS);
+  const data = sh.getDataRange().getValues();
+  const idx = header_(data[0]);
+
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][idx.id]) === id) {
+      sh.deleteRow(i + 1);
+      return { deleted: true };
+    }
+  }
+  return { deleted: false, note: "id not found" };
 }
