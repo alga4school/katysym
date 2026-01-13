@@ -140,63 +140,7 @@
     <div class="view-head">
       <h2 class="view-title">📊 <span data-i18n="reportsTitle">Есептер мен статистика</span></h2>
       <button id="backHome2" class="btn link" data-i18n="homeBtn">← 🏠Басты бет</button>
-      <div id="viewStudents" class="view">
-  <div class="panel">
-    <div class="view-head">
-      <h2 class="view-title">👥 Ученики</h2>
-      <button id="backHome3" class="btn link">← 🏠 Главная</button>
-    </div>
-
-    <div class="controls">
-      <div class="field">
-        <label class="label">Класс</label>
-        <select id="manageClass">
-          <option value="">Выберите класс</option>
-        </select>
-      </div>
-
-      <div class="field grow">
-        <label class="label">Поиск</label>
-        <input type="text" id="manageSearch" placeholder="ФИО">
-      </div>
-    </div>
-
-    <div class="table-wrap">
-      <table class="table" id="manageTable">
-        <thead>
-          <tr><th>#</th><th>ФИО</th><th>Класс</th><th></th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <hr style="border:none;border-top:1px solid var(--line);margin:16px 0;">
-
-    <h3 style="margin:0 0 10px 0;">➕ Добавить ученика</h3>
-
-    <div class="controls">
-      <div class="field grow">
-        <label class="label">ФИО</label>
-        <input type="text" id="addFullName" placeholder="Иванов Иван">
-      </div>
-
-      <div class="field" style="min-width:120px">
-        <label class="label">Класс (цифра)</label>
-        <input type="number" id="addGrade" placeholder="5">
-      </div>
-
-      <div class="field" style="min-width:120px">
-        <label class="label">Литера</label>
-        <input type="text" id="addLetter" placeholder="А">
-      </div>
-
-      <button id="addStudentBtn" class="btn primary">Добавить</button>
-    </div>
-
-    <div class="save-status" id="manageStatus"></div>
-  </div>
-  </div>
-    </div>
+        </div>
 
     <!-- ===== CONTROLS ===== -->
     <div class="controls">
@@ -393,6 +337,63 @@
       </div>
     </div>
 
+  </div>
+</div>
+
+    <div id="viewStudents" class="view">
+  <div class="panel">
+    <div class="view-head">
+      <h2 class="view-title">👥 Ученики</h2>
+      <button id="backHome3" class="btn link">← 🏠 Главная</button>
+    </div>
+
+    <div class="controls">
+      <div class="field">
+        <label class="label">Класс</label>
+        <select id="manageClass">
+          <option value="">Выберите класс</option>
+        </select>
+      </div>
+
+      <div class="field grow">
+        <label class="label">Поиск</label>
+        <input type="text" id="manageSearch" placeholder="ФИО">
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="table" id="manageTable">
+        <thead>
+          <tr><th>#</th><th>ФИО</th><th>Класс</th><th></th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <hr style="border:none;border-top:1px solid var(--line);margin:16px 0;">
+
+    <h3 style="margin:0 0 10px 0;">➕ Добавить ученика</h3>
+
+    <div class="controls">
+      <div class="field grow">
+        <label class="label">ФИО</label>
+        <input type="text" id="addFullName" placeholder="Иванов Иван">
+      </div>
+
+      <div class="field" style="min-width:120px">
+        <label class="label">Класс (цифра)</label>
+        <input type="number" id="addGrade" placeholder="5">
+      </div>
+
+      <div class="field" style="min-width:120px">
+        <label class="label">Литера</label>
+        <input type="text" id="addLetter" placeholder="А">
+      </div>
+
+      <button id="addStudentBtn" class="btn primary">Добавить</button>
+    </div>
+
+    <div class="save-status" id="manageStatus"></div>
   </div>
 </div>
 
