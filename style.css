@@ -23,7 +23,7 @@
 *{box-sizing:border-box}
 body{
   margin:0;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-family: "Noto Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   background: var(--bg);
   color: var(--text);
 }
@@ -768,6 +768,7 @@ input, select{
   box-shadow: var(--shadow);
 }
 .fab-refresh:active{ transform: scale(0.98); }
+
 
 
 
