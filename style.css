@@ -754,6 +754,21 @@ input, select{
 }
 .lang-btn:hover{ background:#f3f4f6; }
 
+/* Floating refresh button */
+.fab-refresh{
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 9999;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 999px;
+  padding: 12px 14px;
+  font-weight: 900;
+  box-shadow: var(--shadow);
+}
+.fab-refresh:active{ transform: scale(0.98); }
+
 
 
 
