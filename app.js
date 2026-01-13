@@ -704,6 +704,37 @@ function updatePeriodControls() {
   }
 }
 
+async function refreshAppData() {
+  try {
+    // 1) обновить списки классов/учеников с сервера
+    const cls = await apiGet("classes");
+    window.__classesLoaded = true;
+    window.__classList = cls.classes || [];
+
+    renderClassesTo(document.getElementById("classSelect"), window.__classList, false);
+    renderClassesTo(document.getElementById("reportClass"), window.__classList, true);
+
+    const st = await apiGet("students");
+    allStudents = st.students || [];
+
+    // 2) сброс статусов по умолчанию
+    statusMap = new Map();
+    allStudents.forEach((s) => statusMap.set(s.id, "katysty"));
+
+    // 3) перерисовать интерфейс
+    applyI18n();
+    renderAttendanceTable();
+
+    // лёгкое уведомление
+    const el = document.getElementById("saveStatus");
+    if (el) el.textContent = "✅ Обновлено";
+    setTimeout(() => { if (el) el.textContent = ""; }, 1500);
+
+  } catch (e) {
+    alert("Ошибка обновления: " + e.message);
+  }
+}
+
 // ✅ Listener-лер: periodType/quarter өзгерсе — күндер автомат жаңарсын
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("periodType")?.addEventListener("change", updatePeriodControls);
@@ -1177,6 +1208,110 @@ function updatePeriodControls() {
   }
 }
 
+function renderManageStudents() {
+  const tbody = document.querySelector("#manageTable tbody");
+  if (!tbody) return;
+
+  const cls = document.getElementById("manageClass")?.value || "";
+  const q = (document.getElementById("manageSearch")?.value || "").trim().toLowerCase();
+
+  let list = allStudents.slice();
+
+  if (cls) {
+    const { grade, letter } = parseClass(cls);
+    list = list.filter(s => String(s.grade) === grade && String(s.class_letter) === letter);
+  }
+
+  if (q) {
+    list = list.filter(s => String(s.full_name || "").toLowerCase().includes(q));
+  }
+
+  tbody.innerHTML = "";
+  list.forEach((s, i) => {
+    const tr = document.createElement("tr");
+
+    const td1 = document.createElement("td");
+    td1.textContent = String(i + 1);
+
+    const td2 = document.createElement("td");
+    td2.textContent = s.full_name;
+
+    const td3 = document.createElement("td");
+    td3.textContent = `${s.grade}${s.class_letter}`;
+
+    const td4 = document.createElement("td");
+    const del = document.createElement("button");
+    del.className = "btn";
+    del.textContent = "🗑 Удалить";
+    del.addEventListener("click", () => deleteStudentById(s.id));
+    td4.appendChild(del);
+
+    tr.appendChild(td1);
+    tr.appendChild(td2);
+    tr.appendChild(td3);
+    tr.appendChild(td4);
+
+    tbody.appendChild(tr);
+  });
+}
+
+async function addStudentFromUI() {
+  const full_name = (document.getElementById("addFullName")?.value || "").trim();
+  const grade = (document.getElementById("addGrade")?.value || "").trim();
+  const class_letter = (document.getElementById("addLetter")?.value || "").trim();
+
+  if (!full_name || !grade || !class_letter) {
+    alert("Заполните ФИО, класс и литеру");
+    return;
+  }
+
+  try {
+    await apiPost({
+      key: API_KEY,
+      mode: "addStudent",
+      full_name,
+      grade,
+      class_letter,
+    });
+
+    await refreshAppData(); // подтянуть обновлённый список
+    renderManageStudents();
+
+    const st = document.getElementById("manageStatus");
+    if (st) st.textContent = "✅ Ученик добавлен";
+    setTimeout(() => { if (st) st.textContent = ""; }, 1500);
+
+    document.getElementById("addFullName").value = "";
+    document.getElementById("addGrade").value = "";
+    document.getElementById("addLetter").value = "";
+
+  } catch (e) {
+    alert("Ошибка добавления: " + e.message);
+  }
+}
+
+async function deleteStudentById(id) {
+  if (!confirm("Удалить ученика из базы?")) return;
+
+  try {
+    await apiPost({
+      key: API_KEY,
+      mode: "deleteStudent",
+      id: String(id),
+    });
+
+    await refreshAppData();
+    renderManageStudents();
+
+    const st = document.getElementById("manageStatus");
+    if (st) st.textContent = "✅ Ученик удалён";
+    setTimeout(() => { if (st) st.textContent = ""; }, 1500);
+
+  } catch (e) {
+    alert("Ошибка удаления: " + e.message);
+  }
+}
+
 // ============================
 // INIT
 // ============================
@@ -1227,6 +1362,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("saveAttendanceBtn")?.addEventListener("click", saveAttendance);
   document.getElementById("updateStatsBtn")?.addEventListener("click", updateStats);
   document.getElementById("exportCsvBtn")?.addEventListener("click", exportCsv);
+  document.getElementById("refreshBtn")?.addEventListener("click", refreshAppData);
   document.getElementById("searchInput")?.addEventListener("input", renderAttendanceTable);
 
   // ✅ Бет ашылғанда period control-дар бірден дұрыс көрінсін
@@ -1240,6 +1376,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     renderClassesTo(document.getElementById("classSelect"), window.__classList, false);
     renderClassesTo(document.getElementById("reportClass"), window.__classList, true);
+renderClassesTo(document.getElementById("manageClass"), window.__classList, false);
+document.getElementById("manageClass")?.addEventListener("change", renderManageStudents);
+document.getElementById("manageSearch")?.addEventListener("input", renderManageStudents);
+document.getElementById("addStudentBtn")?.addEventListener("click", addStudentFromUI);
 
     const st = await apiGet("students");
     allStudents = st.students || [];
@@ -1257,6 +1397,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
