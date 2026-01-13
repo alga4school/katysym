@@ -786,7 +786,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Бет ашылғанда да бір рет толтырып қоямыз
   updatePeriodControls();
 });
-function sumTotals(report) {
+const t = sumFromDaily(report, range);
   const totals = {
     total: 0,
     katysty: 0,
@@ -803,6 +803,32 @@ function sumTotals(report) {
       totals.total += n;
     });
   });
+
+  return totals;
+}
+function sumFromDaily(report, range) {
+  const totals = { total: 0, katysty: 0, keshikti: 0, sebep: 0, sebsez: 0, auyrdy: 0 };
+
+  const daily = report?.daily || {};
+  let dates = [];
+
+  if (!range?.from && !range?.to) {
+    dates = Object.keys(daily).sort();
+  } else {
+    dates = eachDateISO(range.from, range.to);
+  }
+
+  for (const dateISO of dates) {
+    const dailyMap = daily[dateISO];
+    if (!dailyMap) continue;
+
+    Object.values(dailyMap).forEach(st => {
+      const code = st?.status_code || "katysty";
+      if (!totals.hasOwnProperty(code)) return;
+      totals[code] += 1;
+      totals.total += 1;
+    });
+  }
 
   return totals;
 }
@@ -1483,6 +1509,7 @@ document.getElementById("addStudentBtn")?.addEventListener("click", addStudentFr
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
