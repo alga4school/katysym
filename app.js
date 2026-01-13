@@ -428,7 +428,7 @@ function normalizeClassValue(v) {
   return String(v || "")
     .replace(/\s+/g, "")
     .toUpperCase()
-    // Latin -> Cyrillic (көзге ұқсас әріптер)
+    // Latin → Cyrillic
     .replace(/A/g, "А")
     .replace(/B/g, "В")
     .replace(/C/g, "С")
@@ -439,8 +439,18 @@ function normalizeClassValue(v) {
     .replace(/O/g, "О")
     .replace(/P/g, "Р")
     .replace(/T/g, "Т")
-    .replace(/X/g, "Х");
+    .replace(/X/g, "Х")
+    // 🔥 ҚОСУ КЕРЕК
+    .replace(/Ә/g, "Ә")
+    .replace(/А/g, "А")
+    .replace(/Б/g, "Б")
+    .replace(/В/g, "В")
+    .replace(/Г/g, "Г")
+    .replace(/Д/g, "Д")
+    .replace(/Ж/g, "Ж")
+    .replace(/Е/g, "Е");
 }
+
 
 
 function parseClass(cls) {
@@ -1509,6 +1519,7 @@ document.getElementById("addStudentBtn")?.addEventListener("click", addStudentFr
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
