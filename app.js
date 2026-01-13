@@ -667,13 +667,20 @@ function getRangeFromPeriod() {
     return getQuarterRange_2025_2026(q);
   }
 
-  // ✅ ALL: user таңдаған диапазон (customStart → customEnd)
-  if (type === "all") {
-    const s = document.getElementById("customStart")?.value;
-    const e = document.getElementById("customEnd")?.value;
-    if (!s || !e) return null;
-    return { from: s, to: e };
-  }
+if (type === "all") {
+  // ✅ Барлық кезең: егер күн берілмесе — барлық уақыт
+  const s = document.getElementById("customStart")?.value || "";
+  const e = document.getElementById("customEnd")?.value || "";
+
+  // Күн таңдасаңыз — сол аралық, таңдамаған болсаңыз — толық база
+  if (!s && !e) return { from: "", to: "" };
+
+  // Бір жағы ғана толса да, екіншісін бос қалдырмау үшін:
+  if (s && !e) return { from: s, to: s };
+  if (!s && e) return { from: e, to: e };
+
+  return { from: s, to: e };
+}
 
   return null;
 }
@@ -684,7 +691,7 @@ function getRangeFromPeriod() {
 function updatePeriodControls() {
   const type = document.getElementById("periodType")?.value;
 
-  const customCtrl = document.getElementById("customCtrl");
+ const customCtrl = document.getElementById("customControl");
   const customStart = document.getElementById("customStart");
   const customEnd = document.getElementById("customEnd");
 
@@ -1397,6 +1404,7 @@ document.getElementById("addStudentBtn")?.addEventListener("click", addStudentFr
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
