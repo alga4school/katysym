@@ -16,6 +16,45 @@ function normClass(v) {
     .toUpperCase();
 }
 
+// ✅ grade: "1", "01", "1 класс", "1-сынып" -> "1"
+function normGrade(v) {
+  const m = String(v ?? "").match(/\d+/);
+  return m ? String(Number(m[0])) : "";
+}
+
+// ✅ letter: " Ә " -> "Ә", "а" -> "А"
+function normLetter(v) {
+  const s = String(v ?? "")
+    .trim()
+    .replace(/\s+/g, "")
+    .toUpperCase();
+  return s ? s[0] : "";
+}
+
+// ✅ date: Date / "2026-01-12" / "12.01.2026" / "12/01/2026" -> "yyyy-MM-dd"
+function dateToISO_(v) {
+  if (v instanceof Date) {
+    return Utilities.formatDate(v, Session.getScriptTimeZone(), "yyyy-MM-dd");
+  }
+
+  let s = String(v ?? "").trim();
+  if (!s) return "";
+
+  // already ISO
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+
+  // dd.mm.yyyy or dd/mm/yyyy
+  const m = s.match(/^(\d{1,2})[./](\d{1,2})[./](\d{4})/);
+  if (m) {
+    const dd = String(m[1]).padStart(2, "0");
+    const mm = String(m[2]).padStart(2, "0");
+    const yy = m[3];
+    return `${yy}-${mm}-${dd}`;
+  }
+
+  return s.slice(0, 10);
+}
+
 function ok_(obj) {
   return ContentService
     .createTextOutput(JSON.stringify({ ok: true, ...obj }))
@@ -220,13 +259,22 @@ function saveAttendance_(body) {
 /*************************
  * REPORT
  *************************/
+/*************************
+ * REPORT
+ *************************/
 function getReport_(p) {
-  const grade = normClass(p.grade || "ALL");
-  const letter = normClass(p.class_letter || "ALL");
+  // ✅ Параметрлерді дұрыстау
+  const gradeParam = String(p.grade || "ALL").trim();
+  const letterParam = String(p.class_letter || "ALL").trim();
 
-  const from = String(p.from || "");
-  const to = String(p.to || "");
+  const grade = (gradeParam === "ALL") ? "ALL" : normGrade(gradeParam);
+  const letter = (letterParam === "ALL") ? "ALL" : normLetter(letterParam);
 
+  // ✅ Барлық кезең: from/to бос болса — фильтр жоқ
+  const from = dateToISO_(p.from || ""); // "" болса OK
+  const to   = dateToISO_(p.to || "");   // "" болса OK
+
+  // ✅ Студенттер тізімі (класс фильтрі дұрыс)
   const students = getStudents_({ grade, class_letter: letter });
   const mapStudents = new Map(students.map((s) => [String(s.id), s]));
 
@@ -240,25 +288,26 @@ function getReport_(p) {
   for (let i = 1; i < data.length; i++) {
     const r = data[i];
 
-    let d = r[idx.date];
-    if (d instanceof Date) {
-      d = Utilities.formatDate(d, Session.getScriptTimeZone(), "yyyy-MM-dd");
-    } else {
-      d = String(d || "").slice(0, 10);
-    }
+    // ✅ дата әр форматта келсе де бірдей болады
+    const d = dateToISO_(r[idx.date]);
     if (!d) continue;
 
+    // ✅ диапазон (егер from/to бос емес болса ғана сүземіз)
     if (from && d < from) continue;
     if (to && d > to) continue;
 
-    const rg = normClass(r[idx.grade]);
-    const rl = normClass(r[idx.class_letter]);
+    // ✅ сынып мәндерін дұрыстау
+    const rg = normGrade(r[idx.grade]);
+    const rl = normLetter(r[idx.class_letter]);
 
     if (grade !== "ALL" && rg !== grade) continue;
     if (letter !== "ALL" && rl !== letter) continue;
 
     const sid = String(r[idx.student_id]);
     const code = String(r[idx.status_code] || "katysty");
+
+    // ✅ тек осы фильтрге кіретін студенттерді ғана есептеу (қауіпсіз)
+    if (students.length && !mapStudents.has(sid)) continue;
 
     if (!daily[d]) daily[d] = {};
     daily[d][sid] = { status_code: code };
@@ -347,4 +396,4 @@ function deleteStudent_(body) {
     }
   }
   return { deleted: false, note: "id not found" };
-}
+} 
