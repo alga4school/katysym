@@ -82,6 +82,15 @@ const I18N = {
     // ===== TITLES =====
     reportsTitle: "Есептер мен статистика",
     dailyControlTitle: "📚Күнделікті бақылау",
+students: "👥 Оқушылар",
+studentsTitle: "👥 Оқушылар",
+deleteBtn: "🗑 Өшіру",
+addStudent: "➕ Оқушы қосу",
+addBtn: "Қосу",
+fillAll: "ФИО, сынып және әріпті толтырыңыз",
+confirmDelete: "Оқушыны өшірейік пе?",
+addedOk: "✅ Оқушы қосылды",
+deletedOk: "✅ Оқушы өшірілді",
 
     // ===== FORMS / LABELS =====
     periodLabel: "Кезең",
@@ -185,6 +194,15 @@ topUnexcused: "🚫 Көп себепсіз (TOP)",
     // ===== TITLES =====
     reportsTitle: "Отчёты и статистика",
     dailyControlTitle: "📚 Ежедневный контроль",
+students: "👥 Ученики",
+studentsTitle: "👥 Ученики",
+deleteBtn: "🗑 Удалить",
+addStudent: "➕ Добавить ученика",
+addBtn: "Добавить",
+fillAll: "Заполните ФИО, класс и литеру",
+confirmDelete: "Удалить ученика из базы?",
+addedOk: "✅ Ученик добавлен",
+deletedOk: "✅ Ученик удалён",
 
     // ===== FORMS / LABELS =====
     periodLabel: "Период",
@@ -350,6 +368,11 @@ function applyI18n() {
   // attendance кестесін қайта салу
   if (typeof renderAttendanceTable === "function") {
     renderAttendanceTable();
+    }
+  
+    // ✅ оқушылар (Students) кестесін де қайта салу
+if (typeof renderManageStudents === "function") {
+  renderManageStudents();
   }
 
   // ❌ HOLIDAYS өшірсең — мыналарды МҮЛДЕ ҚОСУҒА БОЛМАЙДЫ:
@@ -403,9 +426,22 @@ function renderClassesTo(selectEl, classList, includeAll = false) {
 
 function normalizeClassValue(v) {
   return String(v || "")
-    .replace(/\s+/g, "")   // "0 Ә" -> "0Ә"
-    .toUpperCase();
+    .replace(/\s+/g, "")
+    .toUpperCase()
+    // Latin -> Cyrillic (көзге ұқсас әріптер)
+    .replace(/A/g, "А")
+    .replace(/B/g, "В")
+    .replace(/C/g, "С")
+    .replace(/E/g, "Е")
+    .replace(/H/g, "Н")
+    .replace(/K/g, "К")
+    .replace(/M/g, "М")
+    .replace(/O/g, "О")
+    .replace(/P/g, "Р")
+    .replace(/T/g, "Т")
+    .replace(/X/g, "Х");
 }
+
 
 function parseClass(cls) {
   const c = normalizeClassValue(cls);
@@ -904,8 +940,15 @@ function buildIssuesForRange(report, range) {
   const sick = [];
   const exc = [];
   const unex = [];
+  
+let dates = [];
+if (!range?.from && !range?.to) {
+  // "Барлығы" (күндер таңдалмаған) → бар күндердің бәрін аламыз
+  dates = Object.keys(daily || {}).sort();
+} else {
+  dates = eachDateISO(range.from, range.to);
+}
 
-  const dates = eachDateISO(range.from, range.to);
 
   // бір адам мерзім ішінде бірнеше рет кездесуі мүмкін → қайталамас үшін Set
   const seen = {
@@ -1085,12 +1128,20 @@ const getRu = (st) => {
 const headerDaily = ["date", "student", "class", "status_code", "status_kk", "status_ru"];
 const rowsDaily = [];
 
-Object.entries(daily).forEach(([dateISO, byId]) => {
-  students.forEach((s) => {
-    const st = byId?.[String(s.id)];
+const stById = new Map((students || []).map(s => [String(s.id), s]));
+
+Object.entries(daily || {}).forEach(([dateISO, byId]) => {
+  if (!byId) return;
+
+  Object.entries(byId).forEach(([sid, st]) => {
+    if (!st) return; // тек нақты белгіленгендер
+
+    const s = stById.get(String(sid));
+    if (!s) return;
+
     const cls = getStudentClass(s, st);
 
-    // Фильтр класс если выбран
+    // класс фильтрі
     if (reportClass !== "ALL" && norm(cls) !== wantedClassNorm) return;
 
     const code = getCode(st);
@@ -1105,6 +1156,7 @@ Object.entries(daily).forEach(([dateISO, byId]) => {
     ]);
   });
 });
+
 
 // ---- SORT for Excel: class -> student -> date ----
 const clsKey = (cls) => {
@@ -1269,7 +1321,7 @@ function renderManageStudents() {
     const td4 = document.createElement("td");
     const del = document.createElement("button");
     del.className = "btn";
-    del.textContent = "🗑 Удалить";
+   del.textContent = I18N[currentLang]?.deleteBtn || "🗑 Удалить";
     del.addEventListener("click", () => deleteStudentById(s.id));
     td4.appendChild(del);
 
@@ -1288,7 +1340,7 @@ async function addStudentFromUI() {
   const class_letter = (document.getElementById("addLetter")?.value || "").trim();
 
   if (!full_name || !grade || !class_letter) {
-    alert("Заполните ФИО, класс и литеру");
+    alert(I18N[currentLang]?.fillAll || "Заполните ФИО, класс и литеру");
     return;
   }
 
@@ -1318,7 +1370,7 @@ async function addStudentFromUI() {
 }
 
 async function deleteStudentById(id) {
-  if (!confirm("Удалить ученика из базы?")) return;
+  if (!confirm(I18N[currentLang]?.confirmDelete || "Удалить ученика из базы?")) return;
 
   try {
     await apiPost({
@@ -1349,6 +1401,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("goReports")?.addEventListener("click", () => showView("viewReports"));
   document.getElementById("backHome1")?.addEventListener("click", () => showView("viewHome"));
   document.getElementById("backHome2")?.addEventListener("click", () => showView("viewHome"));
+  
+document.getElementById("goStudents")?.addEventListener("click", () => {
+  showView("viewStudents");
+  if (typeof renderManageStudents === "function") renderManageStudents();
+});
+
+document.getElementById("backHome3")?.addEventListener("click", () => showView("viewHome"));
 
   // Тілді ауыстыру
   document.getElementById("langToggle")?.addEventListener("click", () => {
@@ -1424,6 +1483,7 @@ document.getElementById("addStudentBtn")?.addEventListener("click", addStudentFr
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
