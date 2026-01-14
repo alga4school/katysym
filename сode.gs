@@ -255,10 +255,6 @@ function saveAttendance_(body) {
   return { saved: values.length, replaced: rowsToDelete.length > 0 };
 }
 
-
-/*************************
- * REPORT
- *************************/
 /*************************
  * REPORT
  *************************/
