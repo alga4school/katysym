@@ -800,26 +800,6 @@ document.addEventListener("DOMContentLoaded", () => {
   updatePeriodControls();
 });
 
-const t = sumFromDaily(report, range);
-  const totals = {
-    total: 0,
-    katysty: 0,
-    keshikti: 0,
-    sebep: 0,
-    sebsez: 0,
-    auyrdy: 0,
-  };
-
-  Object.values(report?.totals || {}).forEach((t) => {
-    ["katysty", "keshikti", "sebep", "sebsez", "auyrdy"].forEach((k) => {
-      const n = Number(t?.[k] || 0);
-      totals[k] += n;
-      totals.total += n;
-    });
-  });
-
-  return totals;
-}
 
 /* ================== TOP ================== */
 function buildTop(report, code, limit = 10) {
@@ -1549,6 +1529,7 @@ document.getElementById("addStudentBtn")?.addEventListener("click", addStudentFr
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
