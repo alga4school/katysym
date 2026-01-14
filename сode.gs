@@ -14,7 +14,7 @@ function normClass(v) {
     .trim()
     .replace(/\s+/g, "")
     .toUpperCase()
-    // Latin → Cyrillic (ӨТЕ МАҢЫЗДЫ)
+    // Latin → Cyrillic
     .replace(/Ə/g, "Ә")
     .replace(/A/g, "А")
     .replace(/B/g, "В")
@@ -26,9 +26,11 @@ function normClass(v) {
     .replace(/O/g, "О")
     .replace(/P/g, "Р")
     .replace(/T/g, "Т")
-    .replace(/X/g, "Х");
+    .replace(/X/g, "Х")
+    // 🔥 ЖЕТІСПЕГЕНІ ОСЫ ЕКЕУ
+    .replace(/G/g, "Г")
+    .replace(/D/g, "Д");
 }
-
 
 // ✅ grade: "1", "01", "1 класс", "1-сынып" -> "1"
 function normGrade(v) {
