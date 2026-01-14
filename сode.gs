@@ -24,7 +24,7 @@ function ok_(obj) {
 
 function err_(msg) {
   return ContentService
-    .createTextOutput(JSON.stringify({ ok: false, error: msg }))
+    .createTextOutput(JSON.stringify({ ok: false, error: String(msg || "") }))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
@@ -32,12 +32,28 @@ function todayISO_() {
   return Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd");
 }
 
+// Любое значение → ISO YYYY-MM-DD (или "")
 function toISODate_(v) {
-  // принимает Date или строку, отдаёт YYYY-MM-DD или ""
   if (!v) return "";
-  if (v instanceof Date) return Utilities.formatDate(v, Session.getScriptTimeZone(), "yyyy-MM-dd");
+  if (v instanceof Date) {
+    return Utilities.formatDate(v, Session.getScriptTimeZone(), "yyyy-MM-dd");
+  }
   const s = String(v).trim();
   if (!s) return "";
+
+  // уже ISO
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+
+  // dd.mm.yyyy → yyyy-mm-dd (на всякий)
+  const m = s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  if (m) {
+    const dd = String(m[1]).padStart(2, "0");
+    const mm = String(m[2]).padStart(2, "0");
+    const yy = m[3];
+    return `${yy}-${mm}-${dd}`;
+  }
+
+  // иначе режем первые 10 символов как было
   return s.slice(0, 10);
 }
 
@@ -48,7 +64,7 @@ function doGet(e) {
   try {
     if (e.parameter.key !== API_KEY) return err_("Invalid key");
 
-    const mode = e.parameter.mode;
+    const mode = String(e.parameter.mode || "").trim();
 
     if (mode === "classes")  return ok_({ classes: getClasses_() });
     if (mode === "students") return ok_({ students: getStudents_(e.parameter) });
@@ -62,32 +78,32 @@ function doGet(e) {
 
 function doPost(e) {
   try {
-    const body = JSON.parse(e.postData.contents || "{}");
-    if (body.key !== API_KEY) return err_("Invalid key");
+    const body = e?.postData?.contents ? JSON.parse(e.postData.contents) : {};
+    if (String(body.key || "") !== API_KEY) return err_("Invalid key");
 
-    const mode = String(body.mode || "saveAttendance");
+    // ✅ mode нормализация (өте маңызды)
+    const rawMode = String(body.mode || "").trim();
+    const mode = rawMode ? rawMode.toLowerCase() : ""; // если пусто — потом решим
 
-    if (mode === "saveAttendance") {
-      const info = saveAttendance_(body);
-      return ok_(info);
+    // ✅ Students manage modes
+    if (mode === "addstudent") {
+      return ok_(addStudent_(body));
+    }
+    if (mode === "deletestudent") {
+      return ok_(deleteStudent_(body)); // мягкое = departure_date
+    }
+    if (mode === "restorestudent") {
+      return ok_(restoreStudent_(body));
     }
 
-    if (mode === "addStudent") {
-      const info = addStudent_(body);
-      return ok_(info);
+    // ✅ Default: attendance save
+    // (если mode не пришёл — считаем это saveAttendance)
+    // Также поддержим варианты: "saveAttendance", "saveattendance"
+    if (!mode || mode === "saveattendance" || mode === "saveattendance_") {
+      return ok_(saveAttendance_(body));
     }
 
-    if (mode === "deleteStudent") {
-      const info = deleteStudent_(body); // мягкое удаление = departure_date
-      return ok_(info);
-    }
-
-    if (mode === "restoreStudent") {
-      const info = restoreStudent_(body); // очистить departure_date
-      return ok_(info);
-    }
-
-    return err_("Unknown mode");
+    return err_("Unknown mode: " + rawMode);
   } catch (ex) {
     return err_(ex.message);
   }
@@ -121,7 +137,7 @@ function header_(h) {
     status_ru: pick("status_ru"),
     ts: pick("ts"),
 
-    // если в attendance есть grade / class_letter (обычно так и есть)
+    // attendance grade/class_letter (обычно так и есть)
     att_grade: pick("grade"),
     att_class_letter: pick("class_letter"),
   };
@@ -151,7 +167,7 @@ function getClasses_() {
 function getStudents_(p) {
   const grade = normClass(p.grade || "ALL");
   const letter = normClass(p.class_letter || "ALL");
-  const includeInactive = String(p.include_inactive || "0") === "1"; // для управления: 1
+  const includeInactive = String(p.include_inactive || "0") === "1";
 
   const sh = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_STUDENTS);
   const data = sh.getDataRange().getValues();
@@ -164,10 +180,10 @@ function getStudents_(p) {
   return data
     .slice(1)
     .map((r) => ({
-      id: r[idx.id],
-      full_name: r[idx.full_name],
-      grade: String(r[idx.grade] ?? ""),
-      class_letter: String(r[idx.class_letter] ?? ""),
+      id: String(r[idx.id] ?? "").trim(),
+      full_name: String(r[idx.full_name] ?? "").trim(),
+      grade: String(r[idx.grade] ?? "").trim(),
+      class_letter: String(r[idx.class_letter] ?? "").trim(),
       arrival_date: idx.arrival_date != null ? toISODate_(r[idx.arrival_date]) : "",
       departure_date: idx.departure_date != null ? toISODate_(r[idx.departure_date]) : "",
     }))
@@ -178,9 +194,7 @@ function getStudents_(p) {
       if (grade !== "ALL" && sg !== grade) return false;
       if (letter !== "ALL" && sl !== letter) return false;
 
-      if (!includeInactive) {
-        if (String(s.departure_date || "").trim()) return false; // скрыть выбывших
-      }
+      if (!includeInactive && String(s.departure_date || "").trim()) return false;
       return true;
     })
     .sort((a, b) => String(a.full_name).localeCompare(String(b.full_name), "ru"));
@@ -202,18 +216,18 @@ function addStudent_(body) {
   const grade = String(body.grade || "").trim();
   const class_letter = String(body.class_letter || "").trim();
 
-  // ✅ arrival_date: если не пришло — сегодня
-  const arrival_date = String(body.arrival_date || "").trim() || todayISO_();
+  // ✅ если не пришло — сегодня
+  const arrival_date = toISODate_(String(body.arrival_date || "").trim()) || todayISO_();
 
   if (!full_name) throw new Error("Missing full_name");
   if (!grade) throw new Error("Missing grade");
   if (!class_letter) throw new Error("Missing class_letter");
 
-  // id: если не пришёл — генерим короткий уникальный
+  // id generate
   let id = String(body.id || "").trim();
   if (!id) {
-    const used = new Set(data.slice(1).map(r => String(r[idx.id])));
-    for (let k = 0; k < 20; k++) {
+    const used = new Set(data.slice(1).map(r => String(r[idx.id] ?? "").trim()));
+    for (let k = 0; k < 30; k++) {
       const candidate = Utilities.getUuid().slice(0, 8);
       if (!used.has(candidate)) { id = candidate; break; }
     }
@@ -226,7 +240,6 @@ function addStudent_(body) {
   row[idx.grade] = grade;
   row[idx.class_letter] = class_letter;
 
-  // ✅ записываем даты, если колонки есть
   if (idx.arrival_date != null) row[idx.arrival_date] = arrival_date;
   if (idx.departure_date != null) row[idx.departure_date] = "";
 
@@ -235,23 +248,20 @@ function addStudent_(body) {
   return { added: true, id, arrival_date };
 }
 
-// ✅ мягкое удаление = ставим дату выбытия
+// мягкое удаление = departure_date
 function deleteStudent_(body) {
   const id = String(body.id || "").trim();
-  const departure_date = String(body.departure_date || "").trim() || todayISO_();
-
+  const departure_date = toISODate_(String(body.departure_date || "").trim()) || todayISO_();
   if (!id) throw new Error("Missing id");
 
   const sh = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_STUDENTS);
   const data = sh.getDataRange().getValues();
   const idx = header_(data[0]);
 
-  if (idx.departure_date == null) {
-    throw new Error("Column departure_date not found in students sheet");
-  }
+  if (idx.departure_date == null) throw new Error("Column departure_date not found in students sheet");
 
   for (let i = 1; i < data.length; i++) {
-    if (String(data[i][idx.id]) === id) {
+    if (String(data[i][idx.id] ?? "").trim() === id) {
       sh.getRange(i + 1, idx.departure_date + 1).setValue(departure_date);
       return { departed: true, departure_date };
     }
@@ -259,7 +269,6 @@ function deleteStudent_(body) {
   return { departed: false, note: "id not found" };
 }
 
-// ✅ вернуть ученика = очистить дату выбытия
 function restoreStudent_(body) {
   const id = String(body.id || "").trim();
   if (!id) throw new Error("Missing id");
@@ -268,12 +277,10 @@ function restoreStudent_(body) {
   const data = sh.getDataRange().getValues();
   const idx = header_(data[0]);
 
-  if (idx.departure_date == null) {
-    throw new Error("Column departure_date not found in students sheet");
-  }
+  if (idx.departure_date == null) throw new Error("Column departure_date not found in students sheet");
 
   for (let i = 1; i < data.length; i++) {
-    if (String(data[i][idx.id]) === id) {
+    if (String(data[i][idx.id] ?? "").trim() === id) {
       sh.getRange(i + 1, idx.departure_date + 1).setValue("");
       return { restored: true };
     }
@@ -282,12 +289,12 @@ function restoreStudent_(body) {
 }
 
 /*************************
- * SAVE (OVERWRITE, NO DUPLICATES)
+ * SAVE ATTENDANCE (OVERWRITE, NO DUPLICATES)
  *************************/
 function saveAttendance_(body) {
   const sh = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_ATT);
 
-  const date = String(body.date || "").slice(0, 10);
+  const date = toISODate_(body.date);
   const grade = normClass(body.grade);
   const letter = normClass(body.class_letter);
 
@@ -298,34 +305,31 @@ function saveAttendance_(body) {
   const records = Array.isArray(body.records) ? body.records : [];
   if (!records.length) throw new Error("Records empty");
 
-  // header / map
   const lastCol = Math.max(8, sh.getLastColumn() || 8);
   const headerRow = sh.getRange(1, 1, 1, lastCol).getValues()[0];
   const idx = header_(headerRow);
 
-  // attendance міндетті бағандары
   if (idx.date == null || idx.student_id == null || idx.status_code == null || idx.att_grade == null || idx.att_class_letter == null) {
     throw new Error("attendance header қате. Керегі: date, student_id, status_code, grade, class_letter");
   }
 
-  // бар жазбаларды оқу
   const data = sh.getDataRange().getValues();
   const rowsToDelete = [];
 
-  // duplicate (сол күн + сол класс) өшіру
+  // delete duplicates (same date + class)
   for (let i = 1; i < data.length; i++) {
     let d = data[i][idx.date];
-    if (d instanceof Date) d = Utilities.formatDate(d, Session.getScriptTimeZone(), "yyyy-MM-dd");
-    else d = String(d || "").slice(0, 10);
+    d = toISODate_(d);
 
     const rg = normClass(data[i][idx.att_grade]);
     const rl = normClass(data[i][idx.att_class_letter]);
 
     if (d === date && rg === grade && rl === letter) rowsToDelete.push(i + 1);
   }
-  if (rowsToDelete.length) rowsToDelete.sort((a, b) => b - a).forEach((r) => sh.deleteRow(r));
+  if (rowsToDelete.length) {
+    rowsToDelete.sort((a, b) => b - a).forEach((r) => sh.deleteRow(r));
+  }
 
-  // жаңа жолдарды full-width қылып жазу (8+ баған)
   const now = new Date();
   const values = records.map((r) => {
     const row = new Array(lastCol).fill("");
@@ -334,7 +338,6 @@ function saveAttendance_(body) {
     row[idx.status_code] = String(r.status_code || "katysty");
     row[idx.att_grade] = grade;
     row[idx.att_class_letter] = letter;
-
     if (idx.ts != null) row[idx.ts] = now;
     return row;
   });
@@ -351,10 +354,9 @@ function getReport_(p) {
   const grade = normClass(p.grade || "ALL");
   const letter = normClass(p.class_letter || "ALL");
 
-  const from = String(p.from || "");
-  const to = String(p.to || "");
+  const from = toISODate_(p.from);
+  const to = toISODate_(p.to);
 
-  // В отчёте лучше отдавать ВСЕХ (включая выбывших) — для старых отметок
   const students = getStudents_({ grade, class_letter: letter, include_inactive: "1" });
   const mapStudents = new Map(students.map((s) => [String(s.id), s]));
 
@@ -372,9 +374,7 @@ function getReport_(p) {
   for (let i = 1; i < data.length; i++) {
     const r = data[i];
 
-    let d = r[idx.date];
-    if (d instanceof Date) d = Utilities.formatDate(d, Session.getScriptTimeZone(), "yyyy-MM-dd");
-    else d = String(d || "").slice(0, 10);
+    const d = toISODate_(r[idx.date]);
     if (!d) continue;
 
     if (from && d < from) continue;
