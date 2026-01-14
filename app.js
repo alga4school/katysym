@@ -309,6 +309,16 @@ function setLang(lang) {
   applyI18n();
 }
 
+/* ================== DATE HELPERS ================== */
+/* Күнмен жұмыс істейтін функциялар (отчёт/сүзгі үшін керек болуы мүмкін) */
+
+function d0(iso) { 
+  return new Date(iso + "T00:00:00"); 
+}
+function iso(d) { 
+  return d.toISOString().slice(0, 10); 
+}
+
 // ============================
 // STATE
 // ============================
@@ -1518,6 +1528,7 @@ document.getElementById("addStudentBtn")?.addEventListener("click", addStudentFr
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
