@@ -308,7 +308,6 @@ function setLang(lang) {
   // тіл ауысқанда интерфейс мәтіндерін жаңарту
   applyI18n();
 }
-
 /* ================== DATE HELPERS ================== */
 /* Күнмен жұмыс істейтін функциялар (отчёт/сүзгі үшін керек болуы мүмкін) */
 
@@ -318,7 +317,6 @@ function d0(iso) {
 function iso(d) { 
   return d.toISOString().slice(0, 10); 
 }
-
 // ============================
 // STATE
 // ============================
@@ -430,7 +428,7 @@ function normalizeClassValue(v) {
   return String(v || "")
     .replace(/\s+/g, "")
     .toUpperCase()
-    // Latin → Cyrillic (ұқсас әріптер)
+    // Latin -> Cyrillic (көзге ұқсас әріптер)
     .replace(/A/g, "А")
     .replace(/B/g, "В")
     .replace(/C/g, "С")
@@ -441,26 +439,13 @@ function normalizeClassValue(v) {
     .replace(/O/g, "О")
     .replace(/P/g, "Р")
     .replace(/T/g, "Т")
-    .replace(/X/g, "Х")
-    // ✅ МІНЕ ОСЫ ЕКІ ЖОЛ ЖЕТІСПЕЙ ТҰР
-    .replace(/G/g, "Г")
-    .replace(/D/g, "Д")
-    // латин Ə → қазақ Ә
-    .replace(/Ə/g, "Ә");
+    .replace(/X/g, "Х");
 }
 
 
 function parseClass(cls) {
   const c = normalizeClassValue(cls);
   const m = c.match(/^(\d+)(.*)$/); // сан + әріп(тер)
-  if (!m) return { grade: "", letter: "" };
-  return { grade: m[1], letter: m[2] || "" };
-}
-
-// API-ға дәл dropdown-та тұрған мәнді жіберу үшін (нормализациясыз)
-function parseClassRaw(cls) {
-  const c = String(cls || "").replace(/\s+/g, "").toUpperCase();
-  const m = c.match(/^(\d+)(.*)$/);
   if (!m) return { grade: "", letter: "" };
   return { grade: m[1], letter: m[2] || "" };
 }
@@ -521,12 +506,10 @@ function renderAttendanceTable() {
   let filtered = allStudents.slice();
 
   if (selectedClass) {
-   const { grade, letter } = parseClassRaw(selectedClass);
-filtered = filtered.filter(s =>
-  String(s.grade) === String(grade) &&
-  normalizeClassValue(s.class_letter) === normalizeClassValue(letter)
-);
-
+    const { grade, letter } = parseClass(selectedClass);
+    filtered = filtered.filter(s =>
+      String(s.grade) === grade && String(s.class_letter) === letter
+    );
   } else {
     filtered = [];
   }
@@ -578,7 +561,7 @@ async function saveAttendance() {
   if (!cls) return alert(I18N[currentLang].needClass);
 
   // ҚАЙТАЛАНҒАН басуды тоқтатамыз (localStorage guard)
-  const { grade, letter } = parseClassRaw(cls);
+  const { grade, letter } = parseClass(cls);
   const guardKey = `att_saved:${date}:${grade}:${letter}`;
 
   if (localStorage.getItem(guardKey) === "1") {
@@ -593,11 +576,9 @@ async function saveAttendance() {
   if (saveStatus) saveStatus.textContent = "⏳ ...";
 
   try {
-const students = allStudents.filter((s) =>
-  String(s.grade) === String(grade) &&
-  normalizeClassValue(s.class_letter) === normalizeClassValue(letter)
-);
-
+    const students = allStudents.filter(
+      (s) => String(s.grade) === grade && String(s.class_letter) === letter
+    );
 
     if (!students.length) {
       throw new Error(
@@ -805,7 +786,26 @@ document.addEventListener("DOMContentLoaded", () => {
   // Бет ашылғанда да бір рет толтырып қоямыз
   updatePeriodControls();
 });
+function sumTotals(report) {
+  const totals = {
+    total: 0,
+    katysty: 0,
+    keshikti: 0,
+    sebep: 0,
+    sebsez: 0,
+    auyrdy: 0,
+  };
 
+  Object.values(report?.totals || {}).forEach((t) => {
+    ["katysty", "keshikti", "sebep", "sebsez", "auyrdy"].forEach((k) => {
+      const n = Number(t?.[k] || 0);
+      totals[k] += n;
+      totals.total += n;
+    });
+  });
+
+  return totals;
+}
 
 /* ================== TOP ================== */
 function buildTop(report, code, limit = 10) {
@@ -844,6 +844,24 @@ function fillTable(tableId, rows) {
       <td>${escapeHtml(r.name)}</td>
       <td>${escapeHtml(r.cls)}</td>
       <td>${Number(r.count || 0)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+/* ================== DAY ISSUES TABLES ================== */
+function fillSimpleTable(tableId, rows) {
+  const tbody = document.querySelector(`#${tableId} tbody`);
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  rows.forEach((r, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${escapeHtml(r.name)}</td>
+      <td>${escapeHtml(r.cls)}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -1014,11 +1032,8 @@ async function updateStats() {
       class_letter,
     });
 
-  // ✅ dayIssues
-renderDayIssuesForRange(report, range);
-
-// ✅ Белгі қойылмаған сыныптар
-renderUnmarkedClasses(report, range);
+    // ✅ dayIssues
+    renderDayIssuesForRange(report, range);
 
     // ✅ KPI
     const t = sumTotals(report);
@@ -1062,73 +1077,6 @@ function betweenInclusive(dateISO, fromISO, toISO) {
   const t = d0(dateISO).getTime();
   return t >= d0(fromISO).getTime() && t <= d0(toISO).getTime();
 }
-function renderUnmarkedClasses(report, range) {
-  const box = document.getElementById("unmarkedBox");
-  const listEl = document.getElementById("unmarkedList");
-  const btn = document.getElementById("copyUnmarkedBtn");
-  if (!box || !listEl) return;
-
-  const periodType = document.getElementById("periodType")?.value || "day";
-  const reportClass = document.getElementById("reportClass")?.value || "ALL";
-
-  // Тек "Күні" + "Барлық сынып" кезінде көрсетеміз
-  if (!(periodType === "day" && reportClass === "ALL")) {
-    box.style.display = "none";
-    return;
-  }
-
-  // Барлық сынып тізімі students.js-тен құралады:
-  // report.students ішінде grade + class_letter бар
-  
-  const students = report?.students || [];
-  const allClassesSet = new Set();
-  students.forEach(s => {
-    const cls = normalizeClassValue(`${s.grade}${s.class_letter}`);
-    if (cls) allClassesSet.add(cls);
-  });
-  
-  const allClasses = Array.from(allClassesSet).sort((a,b)=>a.localeCompare(b, "ru"));
-
-  // Сол күнде белгі қойылған сыныптарды табамыз
-  const markedSet = new Set();
-  const daily = report?.daily || {};
-  const dayKey = range?.from; // day режимінде from=to
-  const byId = daily?.[dayKey] || {};
-
-  Object.entries(byId).forEach(([sid, st]) => {
-    if (!st) return; // тек нақты белгіленгендер
-    // report.students-тан оқушыны тауып, сыныбын аламыз
-    const s = students.find(x => String(x.id) === String(sid));
-    if (!s) return;
-    const cls = normalizeClassValue(`${s.grade}${s.class_letter}`);
-    if (cls) markedSet.add(cls);
-  });
-
-  // Белгі қойылмаған сыныптар
-  const unmarked = allClasses.filter(c => !markedSet.has(c));
-
-  if (!unmarked.length) {
-    box.style.display = "none";
-    return;
-  }
-
-  box.style.display = "block";
-  listEl.innerHTML = unmarked.map(c => `• ${c}`).join("<br>");
-
-  // Мұғалімдерге жіберетін мәтін (көшіру)
-  const msg =
-`Құрметті сынып жетекшілері!
-${dayKey} күні төмендегі сыныптар бойынша сабаққа қатысу белгіленбеген:
-${unmarked.map(c => `- ${c}`).join("\n")}
-Өтініш, бүгінгі белгіні жүйеге енгізіп жіберіңіздер.`;
-
-  if (btn) {
-    btn.onclick = async () => {
-      await navigator.clipboard.writeText(msg);
-      alert("Мәтін көшірілді ✅");
-    };
-  }
-}
 
 function exportCsv() {
   const range = getRangeFromPeriod();
@@ -1141,9 +1089,9 @@ function exportCsv() {
   let grade = "ALL", class_letter = "ALL";
 
   if (reportClass !== "ALL") {
-    const p = parseClassRaw(reportClass);
-grade = p.grade;
-class_letter = p.letter;
+    const p = parseClass(reportClass);
+    grade = p.grade;
+    class_letter = p.letter;
   }
 
   apiGet("report", { from: range.from, to: range.to, grade, class_letter })
@@ -1153,15 +1101,15 @@ class_letter = p.letter;
       const totals = report?.totals || {};
 
       // ---------- helpers ----------
-const norm = (s) => normalizeClassValue(s);
+      // ---------- helpers ----------
+const norm = (s) => String(s || "").replace(/\s+/g, "").toUpperCase();
 const wantedClassNorm = (reportClass === "ALL") ? "" : norm(reportClass);
-
 
 // ✅ class дұрыс құралуы үшін (әріп жоқ болса да қате шықпайды)
 const getStudentClass = (s, st) => {
   const g = (s?.grade ?? st?.grade ?? "");
   const l = (s?.class_letter || st?.class_letter || "");
-  return normalizeClassValue(`${g}${l}`);
+  return `${g}${l}`.trim();
 };
 
 const getCode = (st) => (st?.status_code || "katysty");
@@ -1212,7 +1160,7 @@ Object.entries(daily || {}).forEach(([dateISO, byId]) => {
 
 // ---- SORT for Excel: class -> student -> date ----
 const clsKey = (cls) => {
-  const c = normalizeClassValue(cls); // ✅ маңызды
+  const c = String(cls || "").replace(/\s+/g, "").toUpperCase();
   const m = c.match(/^(\d+)(.*)$/);
   const g = m ? Number(m[1]) : 999;
   const l = m ? (m[2] || "") : "";
@@ -1349,11 +1297,8 @@ function renderManageStudents() {
   let list = allStudents.slice();
 
   if (cls) {
-  const { grade, letter } = parseClassRaw(selectedClass);
-filtered = filtered.filter(s =>
-  String(s.grade) === String(grade) &&
-  normalizeClassValue(s.class_letter) === normalizeClassValue(letter)
-);
+    const { grade, letter } = parseClass(cls);
+    list = list.filter(s => String(s.grade) === grade && String(s.class_letter) === letter);
   }
 
   if (q) {
@@ -1538,19 +1483,6 @@ document.getElementById("addStudentBtn")?.addEventListener("click", addStudentFr
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
