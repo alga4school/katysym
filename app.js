@@ -442,9 +442,13 @@ function normalizeClassValue(v) {
     .replace(/P/g, "Р")
     .replace(/T/g, "Т")
     .replace(/X/g, "Х")
-    // 🔥 ЕҢ МАҢЫЗДЫ ЖОЛ
-    .replace(/Ə/g, "Ә");   // латин Ə → қазақ Ә
+    // ✅ МІНЕ ОСЫ ЕКІ ЖОЛ ЖЕТІСПЕЙ ТҰР
+    .replace(/G/g, "Г")
+    .replace(/D/g, "Д")
+    // латин Ə → қазақ Ә
+    .replace(/Ə/g, "Ә");
 }
+
 
 function parseClass(cls) {
   const c = normalizeClassValue(cls);
@@ -1534,6 +1538,7 @@ document.getElementById("addStudentBtn")?.addEventListener("click", addStudentFr
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
