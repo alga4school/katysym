@@ -1306,23 +1306,17 @@ const rawStudents = `
 // Тізімді объектке айналдырамыз: { name, class }
 const students = rawStudents
   .trim()
-  .split("\n")
-  .map((line) => {
-    const parts = line.split("\t").map((p) => p.trim()).filter(Boolean);
-
-    // 4 баған болса: id, name, grade, letter
-    if (parts.length >= 4) {
-      const [id, name, grade, letter] = parts;
-      return { id, name, class: `${grade}${letter}` };
-    }
-
-    // 3 баған болса: name, grade, letter (кейбір жолдарда ID жоқ сияқты)
-    if (parts.length === 3) {
-      const [name, grade, letter] = parts;
-      return { id: `${name}|${grade}${letter}`, name, class: `${grade}${letter}` };
-    }
-
-    return null;
+  .split('\n')
+  .map(line => {
+    const parts = line.split('\t').map(p => p.trim()).filter(Boolean);
+    if (parts.length < 3) return null;
+    const [name, grade, letter] = parts;
+    return {
+      id: name + '|' + grade + letter,
+      name,
+      class: grade + letter
+    };
   })
   .filter(Boolean);
+
 
