@@ -512,6 +512,192 @@ function renderAttendanceTable() {
 }
 
 // ============================
+// STUDENTS MANAGE (add / depart / restore)
+// ============================
+let manageStudentsAll = []; // сюда грузим всех (включая выбывших)
+
+// DD.MM.YYYY
+function toDDMMYYYY(isoStr) {
+  const v = String(isoStr || "").trim();
+  if (!v || !v.includes("-")) return "";
+  const [y, m, d] = v.split("-");
+  return `${d}.${m}.${y}`;
+}
+
+// загрузить учеников (включая выбывших)
+async function refreshManageStudents() {
+  try {
+    // берём всех, чтобы показывать и “выбывших”
+    const res = await apiGet("students", { include_inactive: "1" });
+    manageStudentsAll = res.students || [];
+    renderManageStudents();
+
+    const st = document.getElementById("manageStatus");
+    if (st) st.textContent = "";
+  } catch (e) {
+    alert("Ошибка загрузки учеников: " + e.message);
+  }
+}
+
+function renderManageStudents() {
+  const tbody = document.querySelector("#manageTable tbody");
+  if (!tbody) return;
+
+  const cls = document.getElementById("manageClass")?.value || "ALL";
+  const q = (document.getElementById("manageSearch")?.value || "").trim().toLowerCase();
+
+  let list = manageStudentsAll.slice();
+
+  // фильтр по классу
+  if (cls !== "ALL") {
+    const { grade, letter } = parseClass(cls);
+    list = list.filter(s => String(s.grade) === grade && String(s.class_letter) === letter);
+  }
+
+  // поиск
+  if (q) {
+    list = list.filter(s => String(s.full_name || "").toLowerCase().includes(q));
+  }
+
+  // сортировка
+  list.sort((a, b) => String(a.full_name || "").localeCompare(String(b.full_name || ""), "ru"));
+
+  tbody.innerHTML = "";
+
+  list.forEach((s, i) => {
+    const tr = document.createElement("tr");
+    const isInactive = String(s.departure_date || "").trim() !== "";
+    if (isInactive) tr.style.opacity = "0.55";
+
+    const td1 = document.createElement("td");
+    td1.textContent = String(i + 1);
+
+    const td2 = document.createElement("td");
+    td2.textContent = s.full_name || "";
+
+    const td3 = document.createElement("td");
+    td3.textContent = `${s.grade || ""}${s.class_letter || ""}`;
+
+    const td4 = document.createElement("td");
+    td4.textContent = s.arrival_date ? toDDMMYYYY(s.arrival_date) : "—";
+
+    const td5 = document.createElement("td");
+    td5.textContent = s.departure_date ? toDDMMYYYY(s.departure_date) : "—";
+
+    const td6 = document.createElement("td");
+
+    if (!isInactive) {
+      const btn = document.createElement("button");
+      btn.className = "btn";
+      btn.textContent = "🚪 Выбыл";
+      btn.addEventListener("click", () => markStudentDeparted(s.id));
+      td6.appendChild(btn);
+    } else {
+      const btn = document.createElement("button");
+      btn.className = "btn";
+      btn.textContent = "↩️ Вернуть";
+      btn.addEventListener("click", () => restoreStudentById(s.id));
+      td6.appendChild(btn);
+    }
+
+    tr.appendChild(td1);
+    tr.appendChild(td2);
+    tr.appendChild(td3);
+    tr.appendChild(td4);
+    tr.appendChild(td5);
+    tr.appendChild(td6);
+
+    tbody.appendChild(tr);
+  });
+}
+
+// ✅ вот здесь и будет arrival_date
+async function addStudentFromUI() {
+  const full_name = (document.getElementById("addFullName")?.value || "").trim();
+  const grade = (document.getElementById("addGrade")?.value || "").trim();
+  const class_letter = (document.getElementById("addLetter")?.value || "").trim();
+
+  // ✅ ДАТА ПРИБЫТИЯ (если пусто — сервер поставит сегодня)
+  const arrival_date = (document.getElementById("addArrivalDate")?.value || "").trim();
+
+  if (!full_name || !grade || !class_letter) {
+    alert(currentLang === "ru" ? "Заполните ФИО, класс и литеру" : "Аты-жөні, класс, әріпті толтырыңыз");
+    return;
+  }
+
+  try {
+    await apiPost({
+      key: API_KEY,
+      mode: "addStudent",
+      full_name,
+      grade,
+      class_letter,
+      arrival_date, // ✅ отправка
+    });
+
+    // очистка
+    document.getElementById("addFullName").value = "";
+    document.getElementById("addGrade").value = "";
+    document.getElementById("addLetter").value = "";
+    const ad = document.getElementById("addArrivalDate");
+    if (ad) ad.value = "";
+
+    const st = document.getElementById("manageStatus");
+    if (st) st.textContent = "✅ Ученик добавлен";
+    setTimeout(() => { if (st) st.textContent = ""; }, 1500);
+
+    await refreshManageStudents();
+  } catch (e) {
+    alert("Ошибка добавления: " + e.message);
+  }
+}
+
+// отметить “выбыл”
+async function markStudentDeparted(id) {
+  const def = document.getElementById("attendanceDate")?.value || new Date().toISOString().slice(0, 10);
+  const d = prompt("Дата выбытия (YYYY-MM-DD):", def);
+  if (!d) return;
+
+  try {
+    await apiPost({
+      key: API_KEY,
+      mode: "deleteStudent",
+      id: String(id),
+      departure_date: d,
+    });
+
+    const st = document.getElementById("manageStatus");
+    if (st) st.textContent = "✅ Ученик отмечен как выбывший";
+    setTimeout(() => { if (st) st.textContent = ""; }, 1500);
+
+    await refreshManageStudents();
+  } catch (e) {
+    alert("Ошибка: " + e.message);
+  }
+}
+
+// вернуть ученика
+async function restoreStudentById(id) {
+  if (!confirm("Вернуть ученика в активные (очистить дату выбытия)?")) return;
+
+  try {
+    await apiPost({
+      key: API_KEY,
+      mode: "restoreStudent",
+      id: String(id),
+    });
+
+    const st = document.getElementById("manageStatus");
+    if (st) st.textContent = "✅ Ученик восстановлен";
+    setTimeout(() => { if (st) st.textContent = ""; }, 1500);
+
+    await refreshManageStudents();
+  } catch (e) {
+    alert("Ошибка: " + e.message);
+  }
+}
+
+// ============================
 // SAVE
 // ============================
 async function saveAttendance() {
@@ -1261,6 +1447,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("backHome1")?.addEventListener("click", () => showView("viewHome"));
   document.getElementById("backHome2")?.addEventListener("click", () => showView("viewHome"));
 
+    // ✅ Ученики (управление)
+  document.getElementById("goStudents")?.addEventListener("click", async () => {
+    showView("viewStudents");
+    await refreshManageStudents(); // загрузить список
+  });
+
+  document.getElementById("backHome3")?.addEventListener("click", () => showView("viewHome"));
+  document.getElementById("addStudentBtn")?.addEventListener("click", addStudentFromUI);
+  document.getElementById("refreshStudentsBtn")?.addEventListener("click", refreshManageStudents);
+  document.getElementById("manageSearch")?.addEventListener("input", renderManageStudents);
+  document.getElementById("manageClass")?.addEventListener("change", renderManageStudents);
+
   // Тілді ауыстыру
   document.getElementById("langToggle")?.addEventListener("click", () => {
     setLang(currentLang === "kk" ? "ru" : "kk");
@@ -1313,6 +1511,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     renderClassesTo(document.getElementById("classSelect"), window.__classList, false);
     renderClassesTo(document.getElementById("reportClass"), window.__classList, true);
+    renderClassesTo(document.getElementById("manageClass"), window.__classList, true);
 
     const st = await apiGet("students");
     allStudents = st.students || [];
@@ -1330,6 +1529,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
