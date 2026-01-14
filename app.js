@@ -589,9 +589,11 @@ async function saveAttendance() {
   if (saveStatus) saveStatus.textContent = "⏳ ...";
 
   try {
-    const students = allStudents.filter(
-      (s) => String(s.grade) === grade && String(s.class_letter) === letter
-    );
+const students = allStudents.filter((s) =>
+  String(s.grade) === String(grade) &&
+  normalizeClassValue(s.class_letter) === normalizeClassValue(letter)
+);
+
 
     if (!students.length) {
       throw new Error(
@@ -1343,8 +1345,11 @@ function renderManageStudents() {
   let list = allStudents.slice();
 
   if (cls) {
-    const { grade, letter } = parseClass(cls);
-    list = list.filter(s => String(s.grade) === grade && String(s.class_letter) === letter);
+  const { grade, letter } = parseClassRaw(selectedClass);
+filtered = filtered.filter(s =>
+  String(s.grade) === String(grade) &&
+  normalizeClassValue(s.class_letter) === normalizeClassValue(letter)
+);
   }
 
   if (q) {
@@ -1529,6 +1534,7 @@ document.getElementById("addStudentBtn")?.addEventListener("click", addStudentFr
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
