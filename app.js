@@ -134,6 +134,7 @@ kpiUnexcused: "❌ Себепсіз",
 sick: "🤒 Ауырғандар",
 excused: "📄 Себепті",
 unexcused: "❌ Себепсіз",
+unmarkedClasses: "📍 Белгі қойылмаған сыныптар",
 
     // ===== TOP TABLES =====
    topLate: "🔥 Көп кешігу (TOP)",
@@ -237,6 +238,7 @@ late: "⏰ Опоздавшие",
 sick: "🤒 Болели",
 excused: "📄 По уважительной",
 unexcused: "❌ Без уважительной",
+unmarkedClasses: "📍 Не отмеченные классы",
 
     // ===== TOP TABLES =====
     topLate: "Часто опаздывают (TOP)",
@@ -828,6 +830,16 @@ function hideDayIssues() {
   });
 }
 
+function hideDayIssues() {
+  const box = document.getElementById("dayIssuesBox");
+  if (box) box.style.display = "none";
+
+  ["tblLate", "tblSick", "tblExcused", "tblUnexcused", "tblUnmarkedClasses"].forEach((id) => {
+    const tb = document.querySelector(`#${id} tbody`);
+    if (tb) tb.innerHTML = "";
+  });
+}
+
 // 2) 3 бағанмен толтыру (қауіпсіз)
 function fill3(tableId, rows) {
   const tb = document.querySelector(`#${tableId} tbody`);
@@ -912,18 +924,79 @@ function renderDayIssuesForRange(report, range) {
 
   const issues = buildIssuesForRange(report, range);
 
-  // бәрі бос болса — жасырамыз
-  if (!(issues.late.length || issues.sick.length || issues.exc.length || issues.unex.length)) {
+  // ✅ если выбран один день — считаем не отмеченные классы
+  const isDay = range?.from && range?.to && range.from === range.to;
+  let unmarked = [];
+  if (isDay) {
+    unmarked = getUnmarkedClassesForDay(report, range.from);
+    fillClassTable("tblUnmarkedClasses", unmarked);
+  } else {
+    // если не day — очищаем
+    fillClassTable("tblUnmarkedClasses", []);
+  }
+
+  // ✅ если вообще ничего нет (и проблем, и неотмеченных) — скрываем блок
+  const hasIssues = (issues.late.length || issues.sick.length || issues.exc.length || issues.unex.length);
+  const hasUnmarked = isDay && unmarked.length > 0;
+
+  if (!hasIssues && !hasUnmarked) {
     hideDayIssues();
     return;
   }
 
+  // проблемы
   fill3("tblLate", issues.late);
   fill3("tblSick", issues.sick);
   fill3("tblExcused", issues.exc);
   fill3("tblUnexcused", issues.unex);
 
   box.style.display = "block";
+}
+
+// ✅ 2 колонки: # + class
+function fillClassTable(tableId, classes) {
+  const tb = document.querySelector(`#${tableId} tbody`);
+  if (!tb) return;
+
+  tb.innerHTML = "";
+  (classes || []).forEach((cls, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${escapeHtml(cls)}</td>
+    `;
+    tb.appendChild(tr);
+  });
+}
+
+// ✅ Не отмеченные классы (только для режима "day")
+function getUnmarkedClassesForDay(report, dateISO) {
+  const expected = [];
+
+  const reportClass = document.getElementById("reportClass")?.value || "ALL";
+
+  // если выбран конкретный класс — проверяем только его
+  if (reportClass !== "ALL") {
+    expected.push(reportClass);
+  } else {
+    // если ALL — берём весь список классов, который загружается в приложение
+    expected.push(...(window.__classList || []));
+  }
+
+  // какие классы реально отмечены в этот день (по student_id в daily[date])
+  const studentsById = new Map((report?.students || []).map(s => [String(s.id), s]));
+  const dailyMap = report?.daily?.[dateISO] || {};
+
+  const marked = new Set();
+  Object.keys(dailyMap || {}).forEach((sid) => {
+    const s = studentsById.get(String(sid));
+    if (!s) return;
+    const cls = `${s.grade}${s.class_letter}`.trim();
+    if (cls) marked.add(cls);
+  });
+
+  // если dailyMap пустой — значит вообще ничего не отмечали => все expected будут не отмечены
+  return expected.filter(cls => !marked.has(cls));
 }
 
 // 6) Update Stats (CLEAN)
@@ -1257,6 +1330,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
