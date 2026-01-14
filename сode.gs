@@ -13,23 +13,7 @@ function normClass(v) {
   return String(v ?? "")
     .trim()
     .replace(/\s+/g, "")
-    .toUpperCase()
-    // Latin → Cyrillic
-    .replace(/Ə/g, "Ә")
-    .replace(/A/g, "А")
-    .replace(/B/g, "В")
-    .replace(/C/g, "С")
-    .replace(/E/g, "Е")
-    .replace(/H/g, "Н")
-    .replace(/K/g, "К")
-    .replace(/M/g, "М")
-    .replace(/O/g, "О")
-    .replace(/P/g, "Р")
-    .replace(/T/g, "Т")
-    .replace(/X/g, "Х")
-    // 🔥 ЖЕТІСПЕГЕНІ ОСЫ ЕКЕУ
-    .replace(/G/g, "Г")
-    .replace(/D/g, "Д");
+    .toUpperCase();
 }
 
 // ✅ grade: "1", "01", "1 класс", "1-сынып" -> "1"
