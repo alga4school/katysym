@@ -1,4 +1,4 @@
-const CACHE_NAME = "katysym-v6";
+const CACHE_NAME = "katysym-v15";
 
 const ASSETS = [
   "/katysym/",
