@@ -55,6 +55,38 @@ async function apiPost(body) {
   if (!resp.ok || data?.ok === false) throw new Error(data?.error || ("HTTP " + resp.status));
   return data;
 }
+
+// ============================
+// HARD REFRESH (FIX CACHE / PWA)
+// ============================
+async function hardRefreshApp() {
+  try {
+    // 1) очистим локальные отметки "уже сохраняли"
+    Object.keys(localStorage).forEach((k) => {
+      if (k.startsWith("att_saved:")) localStorage.removeItem(k);
+    });
+
+    // 2) обновим Service Worker
+    if ("serviceWorker" in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for (const r of regs) {
+        try { await r.update(); } catch (_) {}
+      }
+    }
+
+    // 3) очистим Cache Storage (если есть)
+    if ("caches" in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map((k) => caches.delete(k)));
+    }
+  } catch (e) {
+    console.warn("hardRefreshApp warning:", e);
+  }
+
+  // 4) перезагрузка страницы
+  location.reload();
+}
+
 // ============================
 // STATUS
 // ============================
@@ -78,6 +110,13 @@ const I18N = {
       '"№4 Алға орта мектебі" КММ',
     backHome: "🏠Басты бет",
     homeBtn: "←🏠 Басты бет",
+addStudentTitle: "➕ Оқушы қосу",
+studentFio: "ФИО",
+studentFioExample: "Мысалы: Айдар Нұрланов",
+classLetter: "Әріп",
+arrivalDate: "Келген күні",
+studentManageHint:
+  "Кеңес: оқушы шықса — “Выбыл” батырмасын басыңыз (өшірмейді, тек шығу күнін қояды).",
 
     // ===== TITLES =====
     reportsTitle: "Есептер мен статистика",
@@ -182,6 +221,13 @@ topUnexcused: "🚫 Көп себепсіз (TOP)",
       'КГУ "Алгинская средняя школа №4"',
     backHome: "🏠Главная",
     homeBtn: "←🏠 Главная",
+addStudentTitle: "➕ Добавить ученика",
+studentFio: "ФИО",
+studentFioExample: "Например: Айдар Нурланов",
+classLetter: "Литера",
+arrivalDate: "Дата прибытия",
+studentManageHint:
+  "Подсказка: если ученик выбыл — нажмите “Выбыл” (не удаляет, только ставит дату).",
 
     // ===== TITLES =====
     reportsTitle: "Отчёты и статистика",
@@ -1463,6 +1509,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("langToggle")?.addEventListener("click", () => {
     setLang(currentLang === "kk" ? "ru" : "kk");
   });
+  
+document.getElementById("refreshAppBtn")?.addEventListener("click", () => {
+  hardRefreshApp();
+});
 
   // Бүгінгі күнді қою
   const today = new Date();
@@ -1529,6 +1579,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 }); // ✅ end DOMContentLoaded
+
 
 
 
