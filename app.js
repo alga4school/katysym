@@ -580,11 +580,16 @@ function getRangeFromPeriod() {
     return { from: d, to: d };
   }
 
-  if (type === "week" || type === "all") {
+  if (type === "week") {
     const s = document.getElementById("customStart")?.value;
     const e = document.getElementById("customEnd")?.value;
     if (!s || !e) return null;
     return { from: s, to: e };
+  }
+
+  if (type === "all") {
+    // Барлық уақыт / вся история: даты не отправляем (сервер вернет всё)
+    return null;
   }
 
   if (type === "month") {
@@ -601,17 +606,14 @@ function getRangeFromPeriod() {
   }
 
   if (type === "quarter") {
-  const q = Number(document.getElementById("quarterInput")?.value || 1);
-  const y = Number(document.getElementById("quarterYearInput")?.value || new Date().getFullYear());
+    const q = Number(document.getElementById("quarterInput")?.value || 1);
+    const y = Number(document.getElementById("quarterYearInput")?.value || new Date().getFullYear());
 
-  const qStartMonth = (q - 1) * 3; // 0,3,6,9
-  const fromDate = new Date(y, qStartMonth, 1);
-  const toDate = new Date(y, qStartMonth + 3, 0); // последний день квартала
-
-  const iso = (d) => d.toISOString().slice(0, 10);
-  return { from: iso(fromDate), to: iso(toDate) };
-}
-
+    const startMonth = (q - 1) * 3;
+    const fromDate = new Date(Date.UTC(y, startMonth, 1));
+    const toDate = new Date(Date.UTC(y, startMonth + 3, 0));
+    return { from: iso(fromDate), to: iso(toDate) };
+  }
 
   return null;
 }
@@ -634,7 +636,7 @@ function updatePeriodControls() {
   if (type === "quarter" && quarterCtrl) quarterCtrl.style.display = "flex";
   if (type === "year" && yearCtrl) yearCtrl.style.display = "flex";
 
-if ((type === "day" || type === "week" || type === "quarter") && customCtrl) {
+  if ((type === "day" || type === "week" || type === "quarter") && customCtrl) {
     customCtrl.style.display = "flex";
   }
 
@@ -645,21 +647,25 @@ if ((type === "day" || type === "week" || type === "quarter") && customCtrl) {
     if (s && e) e.value = s.value;
   }
 
-  // quarter => автокүндер
+  // quarter => авто-даты по выбранному году/кварталу
   if (type === "quarter") {
-  const q = Number(document.getElementById("quarterInput")?.value || 1);
-const y = Number(document.getElementById("quarterYearInput")?.value || new Date().getFullYear());
-const qStartMonth = (q - 1) * 3;
-const fromDate = new Date(y, qStartMonth, 1);
-const toDate = new Date(y, qStartMonth + 3, 0);
-const iso = (d) => d.toISOString().slice(0, 10);
-const r = { from: iso(fromDate), to: iso(toDate) };
+    const q = Number(document.getElementById("quarterInput")?.value || 1);
+    const y = Number(document.getElementById("quarterYearInput")?.value || new Date().getFullYear());
 
-      s.value = r.from;
-      e.value = r.to;
+    const startMonth = (q - 1) * 3;
+    const fromDate = new Date(Date.UTC(y, startMonth, 1));
+    const toDate = new Date(Date.UTC(y, startMonth + 3, 0));
+
+    const s = document.getElementById("customStart");
+    const e = document.getElementById("customEnd");
+    if (s && e) {
+      s.value = iso(fromDate);
+      e.value = iso(toDate);
     }
   }
 }
+
+
 
 // ============================
 // REPORTS (LOAD + RENDER + CSV)
@@ -670,17 +676,17 @@ function setText(id, val) {
   if (el) el.textContent = String(val ?? 0);
 }
 
-function clearTable(tid) {
-  const tb = document.querySelector(`#${tid} tbody`);
+function clearTable(tableId) {
+  const tb = document.querySelector(`#${tableId} tbody`);
   if (tb) tb.innerHTML = "";
 }
 
-function fillStudentTable(tid, rows) {
-  const tb = document.querySelector(`#${tid} tbody`);
+function fillSimpleStudentTable(tableId, rows) {
+  const tb = document.querySelector(`#${tableId} tbody`);
   if (!tb) return;
   tb.innerHTML = "";
 
-  if (!rows || rows.length === 0) {
+  if (!Array.isArray(rows) || rows.length === 0) {
     const tr = document.createElement("tr");
     tr.innerHTML = `<td colspan="3" style="text-align:center;color:#999;padding:10px;">—</td>`;
     tb.appendChild(tr);
@@ -691,19 +697,19 @@ function fillStudentTable(tid, rows) {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td style="width:44px">${i + 1}</td>
-      <td>${r.name || ""}</td>
-      <td>${r.class || ""}</td>
+      <td>${r.full_name || r.name || ""}</td>
+      <td>${r.class || `${r.grade || ""}${r.class_letter || ""}`}</td>
     `;
     tb.appendChild(tr);
   });
 }
 
-function fillTopTable(tid, rows) {
-  const tb = document.querySelector(`#${tid} tbody`);
+function fillTopTable(tableId, rows) {
+  const tb = document.querySelector(`#${tableId} tbody`);
   if (!tb) return;
   tb.innerHTML = "";
 
-  if (!rows || rows.length === 0) {
+  if (!Array.isArray(rows) || rows.length === 0) {
     const tr = document.createElement("tr");
     tr.innerHTML = `<td colspan="4" style="text-align:center;color:#999;padding:10px;">—</td>`;
     tb.appendChild(tr);
@@ -714,20 +720,20 @@ function fillTopTable(tid, rows) {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${i + 1}</td>
-      <td>${r.name || ""}</td>
-      <td>${r.class || ""}</td>
-      <td>${r.count ?? 0}</td>
+      <td>${r.full_name || r.name || ""}</td>
+      <td>${r.class || `${r.grade || ""}${r.class_letter || ""}`}</td>
+      <td>${Number(r.count ?? r.total ?? 0)}</td>
     `;
     tb.appendChild(tr);
   });
 }
 
-function fillUnmarkedClasses(rows) {
+function fillUnmarkedClassesTable(rows) {
   const tb = document.querySelector(`#tblUnmarkedClasses tbody`);
   if (!tb) return;
   tb.innerHTML = "";
 
-  if (!rows || rows.length === 0) {
+  if (!Array.isArray(rows) || rows.length === 0) {
     const tr = document.createElement("tr");
     tr.innerHTML = `<td colspan="2" style="text-align:center;color:#999;padding:10px;">—</td>`;
     tb.appendChild(tr);
@@ -744,15 +750,46 @@ function fillUnmarkedClasses(rows) {
 function normalizeReportParams() {
   const type = document.getElementById("periodType")?.value || "day";
   const cls = document.getElementById("reportClass")?.value || "ALL";
-  const { grade, letter } = (cls === "ALL") ? { grade: "ALL", letter: "ALL" } : parseClass(cls);
 
-  const range = getRangeFromPeriod(type) || {};
-  // Если type === "all" → range будет null, значит отправим без from/to
+  let grade = "ALL";
+  let class_letter = "ALL";
+  if (cls !== "ALL") {
+    const p = parseClass(cls);
+    grade = p.grade || "ALL";
+    class_letter = p.letter || "ALL";
+  }
 
-  const params = { grade, class_letter: letter };
-  if (range.from) params.from = range.from;
-  if (range.to) params.to = range.to;
+  const range = getRangeFromPeriod();
+  const params = { grade, class_letter };
+  if (range && range.from) params.from = range.from;
+  if (range && range.to) params.to = range.to;
+
   return { type, params };
+}
+
+function safeArr(v) {
+  return Array.isArray(v) ? v : [];
+}
+
+function sumTotals(totalsByStudent) {
+  let total = 0, present = 0, late = 0, sick = 0, excused = 0, unexcused = 0;
+
+  Object.values(totalsByStudent || {}).forEach((t) => {
+    const p = Number(t.katysty || 0);
+    const l = Number(t.keshikti || 0);
+    const s = Number(t.auyrdy || 0);
+    const e = Number(t.sebep || 0);
+    const u = Number(t.sebsez || t.sebepSyz || 0);
+
+    present += p;
+    late += l;
+    sick += s;
+    excused += e;
+    unexcused += u;
+    total += (p + l + s + e + u);
+  });
+
+  return { total, present, late, sick, excused, unexcused };
 }
 
 async function loadReport() {
@@ -760,63 +797,41 @@ async function loadReport() {
   if (btn) btn.disabled = true;
 
   try {
-    // чистим прошлые таблицы
-    ["tblLate", "tblSick", "tblExcused", "tblUnexcused", "tblUnmarkedClasses", "topLateTable", "topUnexcusedTable"]
-      .forEach(clearTable);
+    // очистка
+    ["tblLate", "tblSick", "tblExcused", "tblUnexcused", "tblUnmarkedClasses", "topLateTable", "topUnexcusedTable"].forEach(clearTable);
 
     const { type, params } = normalizeReportParams();
-
-    // backend у вас работает через apiGet("report", ...)
     const res = await apiGet("report", params);
 
-    // totals приходит как объект по student_id → {katysty:..., keshikti:..., ...}
-    // Чтобы KPI работали — суммируем по всем ученикам
-    const totalsByStudent = res.totals || {};
-    let total = 0, present = 0, late = 0, sick = 0, excused = 0, unexcused = 0;
+    const totals = sumTotals(res.totals || {});
+    setText("totalLessons", totals.total);
+    setText("totalPresent", totals.present);
+    setText("totalLate", totals.late);
+    setText("totalSick", totals.sick);
+    setText("totalExcused", totals.excused);
+    setText("totalUnexcused", totals.unexcused);
 
-    Object.values(totalsByStudent).forEach((t) => {
-      const p = Number(t.katysty || 0);
-      const l = Number(t.keshikti || 0);
-      const s = Number(t.auyrdy || 0);
-      const e = Number(t.sebep || 0);
-      const u = Number(t.sebepSyz || 0);
-
-      present += p;
-      late += l;
-      sick += s;
-      excused += e;
-      unexcused += u;
-      total += (p + l + s + e + u);
-    });
-
-    setText("totalLessons", total);
-    setText("totalPresent", present);
-    setText("totalLate", late);
-    setText("totalSick", sick);
-    setText("totalExcused", excused);
-    setText("totalUnexcused", unexcused);
-
-    // День: показываем dayIssuesBox (у вас он скрыт по умолчанию)
+    // дневной блок
     const dayBox = document.getElementById("dayIssuesBox");
     if (dayBox) dayBox.style.display = (type === "day") ? "block" : "none";
 
-    // daily у сервера обычно массив записей по дням;
-    // для типа day берём первый день и наполняем таблицы
+    // Если сервер отдаёт дневные массивы — используем
+    // Ожидаемый формат: res.daily[0] = { late:[], sick:[], excused:[], unexcused:[], unmarkedClasses:[] }
     if (type === "day" && Array.isArray(res.daily) && res.daily.length > 0) {
-      const day = res.daily[0]; // { late:[], sick:[], excused:[], unexcused:[], unmarkedClasses:[] } (ожидаемо)
-      fillStudentTable("tblLate", day.late || []);
-      fillStudentTable("tblSick", day.sick || []);
-      fillStudentTable("tblExcused", day.excused || []);
-      fillStudentTable("tblUnexcused", day.unexcused || []);
-      fillUnmarkedClasses(day.unmarkedClasses || []);
+      const d = res.daily[0] || {};
+      fillSimpleStudentTable("tblLate", safeArr(d.late));
+      fillSimpleStudentTable("tblSick", safeArr(d.sick));
+      fillSimpleStudentTable("tblExcused", safeArr(d.excused));
+      fillSimpleStudentTable("tblUnexcused", safeArr(d.unexcused));
+      fillUnmarkedClassesTable(safeArr(d.unmarkedClasses));
     }
 
-    // TOP таблицы
-    fillTopTable("topLateTable", res.topLate || []);
-    fillTopTable("topUnexcusedTable", res.topUnexcused || []);
+    // TOP блоки
+    fillTopTable("topLateTable", safeArr(res.topLate));
+    fillTopTable("topUnexcusedTable", safeArr(res.topUnexcused));
 
   } catch (e) {
-    alert("Ошибка отчёта: " + e.message);
+    alert((currentLang === "ru" ? "Ошибка отчёта: " : "Есеп қатесі: ") + e.message);
   } finally {
     if (btn) btn.disabled = false;
   }
@@ -831,24 +846,27 @@ async function exportReportCsv() {
     const students = res.students || [];
     const map = new Map(students.map(s => [String(s.id), s]));
 
-    const lines = [];
-    lines.push(["student_id", "fio", "class", "katysty", "keshikti", "auyrdy", "sebep", "sebepSyz"].join(","));
+    const header = ["student_id", "fio", "class", "katysty", "keshikti", "auyrdy", "sebep", "sebsez"].join(",");
+    const lines = [header];
 
-    Object.entries(totalsByStudent).forEach(([sid, t]) => {
+    for (const [sid, t] of Object.entries(totalsByStudent)) {
       const s = map.get(String(sid)) || {};
       const cls = `${s.grade || ""}${s.class_letter || ""}`;
+      const fio = String(s.full_name || "").replace(/"/g, '""');
+
       const row = [
         sid,
-        `"${String(s.full_name || "").replace(/"/g, '""')}"`,
+        `"${fio}"`,
         `"${cls}"`,
-        t.katysty || 0,
-        t.keshikti || 0,
-        t.auyrdy || 0,
-        t.sebep || 0,
-        t.sebepSyz || 0
-      ];
-      lines.push(row.join(","));
-    });
+        Number(t.katysty || 0),
+        Number(t.keshikti || 0),
+        Number(t.auyrdy || 0),
+        Number(t.sebep || 0),
+        Number(t.sebsez || t.sebepSyz || 0),
+      ].join(",");
+
+      lines.push(row);
+    }
 
     const blob = new Blob(["\ufeff" + lines.join("\n")], { type: "text/csv;charset=utf-8" });
     const a = document.createElement("a");
@@ -857,16 +875,15 @@ async function exportReportCsv() {
     document.body.appendChild(a);
     a.click();
     a.remove();
+
   } catch (e) {
-    alert("CSV ошибка: " + e.message);
+    alert((currentLang === "ru" ? "CSV ошибка: " : "CSV қатесі: ") + e.message);
   }
 }
-
 
 // ============================
 // STUDENTS MANAGE
 // ============================
-
 let manageStudentsAll = [];
 
 function toDDMMYYYY(isoStr) {
@@ -1079,18 +1096,21 @@ document.addEventListener("DOMContentLoaded", async () => {
   const customEnd = document.getElementById("customEnd");
   if (customStart && !customStart.value) customStart.value = todayISO;
   if (customEnd && !customEnd.value) customEnd.value = todayISO;
-  
-const monthInput = document.getElementById("monthInput");
-if (monthInput && !monthInput.value) monthInput.value = todayISO.slice(0, 7); // YYYY-MM
 
-const yearInput = document.getElementById("yearInput");
-if (yearInput && !yearInput.value) yearInput.value = String(new Date().getFullYear());
 
-const qYear = document.getElementById("quarterYearInput");
-if (qYear && !qYear.value) qYear.value = String(new Date().getFullYear());
+  // Defaults for report period inputs
+  const monthInput = document.getElementById("monthInput");
+  if (monthInput && !monthInput.value) monthInput.value = todayISO.slice(0, 7);
+
+  const yearInput = document.getElementById("yearInput");
+  if (yearInput && !yearInput.value) yearInput.value = String(new Date().getFullYear());
+
+  const qYear = document.getElementById("quarterYearInput");
+  if (qYear && !qYear.value) qYear.value = String(new Date().getFullYear());
 
   document.getElementById("periodType")?.addEventListener("change", updatePeriodControls);
   document.getElementById("quarterInput")?.addEventListener("change", updatePeriodControls);
+  document.getElementById("quarterYearInput")?.addEventListener("change", updatePeriodControls);
   document.getElementById("customStart")?.addEventListener("change", () => {
     if (document.getElementById("periodType")?.value === "day") {
       const e = document.getElementById("customEnd");
@@ -1099,10 +1119,10 @@ if (qYear && !qYear.value) qYear.value = String(new Date().getFullYear());
   });
 
   document.getElementById("saveAttendanceBtn")?.addEventListener("click", saveAttendance);
-  // Reports buttons
-document.getElementById("updateStatsBtn")?.addEventListener("click", loadReport);
-document.getElementById("exportCsvBtn")?.addEventListener("click", exportReportCsv);
 
+  // Reports buttons
+  document.getElementById("updateStatsBtn")?.addEventListener("click", loadReport);
+  document.getElementById("exportCsvBtn")?.addEventListener("click", exportReportCsv);
   document.getElementById("searchInput")?.addEventListener("input", renderAttendanceTable);
 
   updatePeriodControls();
@@ -1132,4 +1152,3 @@ document.getElementById("exportCsvBtn")?.addEventListener("click", exportReportC
     alert("API error: " + e.message);
   }
 });
-
