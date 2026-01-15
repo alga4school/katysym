@@ -601,9 +601,17 @@ function getRangeFromPeriod() {
   }
 
   if (type === "quarter") {
-    const q = Number(document.getElementById("quarterInput")?.value || 1);
-    return getQuarterRange_2025_2026(q);
-  }
+  const q = Number(document.getElementById("quarterInput")?.value || 1);
+  const y = Number(document.getElementById("quarterYearInput")?.value || new Date().getFullYear());
+
+  const qStartMonth = (q - 1) * 3; // 0,3,6,9
+  const fromDate = new Date(y, qStartMonth, 1);
+  const toDate = new Date(y, qStartMonth + 3, 0); // последний день квартала
+
+  const iso = (d) => d.toISOString().slice(0, 10);
+  return { from: iso(fromDate), to: iso(toDate) };
+}
+
 
   return null;
 }
@@ -626,7 +634,7 @@ function updatePeriodControls() {
   if (type === "quarter" && quarterCtrl) quarterCtrl.style.display = "flex";
   if (type === "year" && yearCtrl) yearCtrl.style.display = "flex";
 
-  if ((type === "day" || type === "week" || type === "all" || type === "quarter") && customCtrl) {
+if ((type === "day" || type === "week" || type === "quarter") && customCtrl) {
     customCtrl.style.display = "flex";
   }
 
@@ -639,11 +647,14 @@ function updatePeriodControls() {
 
   // quarter => автокүндер
   if (type === "quarter") {
-    const q = Number(document.getElementById("quarterInput")?.value || 1);
-    const r = getQuarterRange_2025_2026(q);
-    const s = document.getElementById("customStart");
-    const e = document.getElementById("customEnd");
-    if (s && e) {
+  const q = Number(document.getElementById("quarterInput")?.value || 1);
+const y = Number(document.getElementById("quarterYearInput")?.value || new Date().getFullYear());
+const qStartMonth = (q - 1) * 3;
+const fromDate = new Date(y, qStartMonth, 1);
+const toDate = new Date(y, qStartMonth + 3, 0);
+const iso = (d) => d.toISOString().slice(0, 10);
+const r = { from: iso(fromDate), to: iso(toDate) };
+
       s.value = r.from;
       e.value = r.to;
     }
@@ -651,8 +662,211 @@ function updatePeriodControls() {
 }
 
 // ============================
+// REPORTS (LOAD + RENDER + CSV)
+// ============================
+
+function setText(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = String(val ?? 0);
+}
+
+function clearTable(tid) {
+  const tb = document.querySelector(`#${tid} tbody`);
+  if (tb) tb.innerHTML = "";
+}
+
+function fillStudentTable(tid, rows) {
+  const tb = document.querySelector(`#${tid} tbody`);
+  if (!tb) return;
+  tb.innerHTML = "";
+
+  if (!rows || rows.length === 0) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td colspan="3" style="text-align:center;color:#999;padding:10px;">—</td>`;
+    tb.appendChild(tr);
+    return;
+  }
+
+  rows.forEach((r, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="width:44px">${i + 1}</td>
+      <td>${r.name || ""}</td>
+      <td>${r.class || ""}</td>
+    `;
+    tb.appendChild(tr);
+  });
+}
+
+function fillTopTable(tid, rows) {
+  const tb = document.querySelector(`#${tid} tbody`);
+  if (!tb) return;
+  tb.innerHTML = "";
+
+  if (!rows || rows.length === 0) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td colspan="4" style="text-align:center;color:#999;padding:10px;">—</td>`;
+    tb.appendChild(tr);
+    return;
+  }
+
+  rows.forEach((r, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${r.name || ""}</td>
+      <td>${r.class || ""}</td>
+      <td>${r.count ?? 0}</td>
+    `;
+    tb.appendChild(tr);
+  });
+}
+
+function fillUnmarkedClasses(rows) {
+  const tb = document.querySelector(`#tblUnmarkedClasses tbody`);
+  if (!tb) return;
+  tb.innerHTML = "";
+
+  if (!rows || rows.length === 0) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td colspan="2" style="text-align:center;color:#999;padding:10px;">—</td>`;
+    tb.appendChild(tr);
+    return;
+  }
+
+  rows.forEach((cls, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td style="width:44px">${i + 1}</td><td>${cls}</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+function normalizeReportParams() {
+  const type = document.getElementById("periodType")?.value || "day";
+  const cls = document.getElementById("reportClass")?.value || "ALL";
+  const { grade, letter } = (cls === "ALL") ? { grade: "ALL", letter: "ALL" } : parseClass(cls);
+
+  const range = getRangeFromPeriod(type) || {};
+  // Если type === "all" → range будет null, значит отправим без from/to
+
+  const params = { grade, class_letter: letter };
+  if (range.from) params.from = range.from;
+  if (range.to) params.to = range.to;
+  return { type, params };
+}
+
+async function loadReport() {
+  const btn = document.getElementById("updateStatsBtn");
+  if (btn) btn.disabled = true;
+
+  try {
+    // чистим прошлые таблицы
+    ["tblLate", "tblSick", "tblExcused", "tblUnexcused", "tblUnmarkedClasses", "topLateTable", "topUnexcusedTable"]
+      .forEach(clearTable);
+
+    const { type, params } = normalizeReportParams();
+
+    // backend у вас работает через apiGet("report", ...)
+    const res = await apiGet("report", params);
+
+    // totals приходит как объект по student_id → {katysty:..., keshikti:..., ...}
+    // Чтобы KPI работали — суммируем по всем ученикам
+    const totalsByStudent = res.totals || {};
+    let total = 0, present = 0, late = 0, sick = 0, excused = 0, unexcused = 0;
+
+    Object.values(totalsByStudent).forEach((t) => {
+      const p = Number(t.katysty || 0);
+      const l = Number(t.keshikti || 0);
+      const s = Number(t.auyrdy || 0);
+      const e = Number(t.sebep || 0);
+      const u = Number(t.sebepSyz || 0);
+
+      present += p;
+      late += l;
+      sick += s;
+      excused += e;
+      unexcused += u;
+      total += (p + l + s + e + u);
+    });
+
+    setText("totalLessons", total);
+    setText("totalPresent", present);
+    setText("totalLate", late);
+    setText("totalSick", sick);
+    setText("totalExcused", excused);
+    setText("totalUnexcused", unexcused);
+
+    // День: показываем dayIssuesBox (у вас он скрыт по умолчанию)
+    const dayBox = document.getElementById("dayIssuesBox");
+    if (dayBox) dayBox.style.display = (type === "day") ? "block" : "none";
+
+    // daily у сервера обычно массив записей по дням;
+    // для типа day берём первый день и наполняем таблицы
+    if (type === "day" && Array.isArray(res.daily) && res.daily.length > 0) {
+      const day = res.daily[0]; // { late:[], sick:[], excused:[], unexcused:[], unmarkedClasses:[] } (ожидаемо)
+      fillStudentTable("tblLate", day.late || []);
+      fillStudentTable("tblSick", day.sick || []);
+      fillStudentTable("tblExcused", day.excused || []);
+      fillStudentTable("tblUnexcused", day.unexcused || []);
+      fillUnmarkedClasses(day.unmarkedClasses || []);
+    }
+
+    // TOP таблицы
+    fillTopTable("topLateTable", res.topLate || []);
+    fillTopTable("topUnexcusedTable", res.topUnexcused || []);
+
+  } catch (e) {
+    alert("Ошибка отчёта: " + e.message);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function exportReportCsv() {
+  try {
+    const { params } = normalizeReportParams();
+    const res = await apiGet("report", params);
+
+    const totalsByStudent = res.totals || {};
+    const students = res.students || [];
+    const map = new Map(students.map(s => [String(s.id), s]));
+
+    const lines = [];
+    lines.push(["student_id", "fio", "class", "katysty", "keshikti", "auyrdy", "sebep", "sebepSyz"].join(","));
+
+    Object.entries(totalsByStudent).forEach(([sid, t]) => {
+      const s = map.get(String(sid)) || {};
+      const cls = `${s.grade || ""}${s.class_letter || ""}`;
+      const row = [
+        sid,
+        `"${String(s.full_name || "").replace(/"/g, '""')}"`,
+        `"${cls}"`,
+        t.katysty || 0,
+        t.keshikti || 0,
+        t.auyrdy || 0,
+        t.sebep || 0,
+        t.sebepSyz || 0
+      ];
+      lines.push(row.join(","));
+    });
+
+    const blob = new Blob(["\ufeff" + lines.join("\n")], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "report.csv";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  } catch (e) {
+    alert("CSV ошибка: " + e.message);
+  }
+}
+
+
+// ============================
 // STUDENTS MANAGE
 // ============================
+
 let manageStudentsAll = [];
 
 function toDDMMYYYY(isoStr) {
@@ -865,6 +1079,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   const customEnd = document.getElementById("customEnd");
   if (customStart && !customStart.value) customStart.value = todayISO;
   if (customEnd && !customEnd.value) customEnd.value = todayISO;
+  
+const monthInput = document.getElementById("monthInput");
+if (monthInput && !monthInput.value) monthInput.value = todayISO.slice(0, 7); // YYYY-MM
+
+const yearInput = document.getElementById("yearInput");
+if (yearInput && !yearInput.value) yearInput.value = String(new Date().getFullYear());
+
+const qYear = document.getElementById("quarterYearInput");
+if (qYear && !qYear.value) qYear.value = String(new Date().getFullYear());
 
   document.getElementById("periodType")?.addEventListener("change", updatePeriodControls);
   document.getElementById("quarterInput")?.addEventListener("change", updatePeriodControls);
@@ -876,6 +1099,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   document.getElementById("saveAttendanceBtn")?.addEventListener("click", saveAttendance);
+  // Reports buttons
+document.getElementById("updateStatsBtn")?.addEventListener("click", loadReport);
+document.getElementById("exportCsvBtn")?.addEventListener("click", exportReportCsv);
+
   document.getElementById("searchInput")?.addEventListener("input", renderAttendanceTable);
 
   updatePeriodControls();
@@ -905,3 +1132,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
