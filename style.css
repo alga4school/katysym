@@ -151,6 +151,10 @@ body{
   white-space: pre-line;
 }
 
+.install-steps {
+  white-space: pre-line;
+}
+
 .btn{
   border:1px solid var(--line);
   background:#fff;
@@ -753,6 +757,7 @@ input, select{
   cursor:pointer;
 }
 .lang-btn:hover{ background:#f3f4f6; }
+
 
 
 
