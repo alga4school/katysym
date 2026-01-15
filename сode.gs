@@ -79,10 +79,13 @@ function doGet(e) {
 function doPost(e) {
   try {
     const body = e?.postData?.contents ? JSON.parse(e.postData.contents) : {};
-    if (String(body.key || "") !== API_KEY) return err_("Invalid key");
 
-    // ✅ mode нормализация (өте маңызды)
-    const rawMode = String(body.mode || "").trim();
+    // ✅ key: body-дан да, URL параметрден де оқимыз
+    const key = String(body.key || e?.parameter?.key || "").trim();
+    if (key !== API_KEY) return err_("Invalid key");
+
+    // ✅ mode: body-дан да, URL параметрден де оқимыз
+    const rawMode = String(body.mode || e?.parameter?.mode || "").trim();
     const mode = rawMode ? rawMode.toLowerCase() : ""; // если пусто — потом решим
 
     // ✅ Students manage modes
@@ -90,16 +93,14 @@ function doPost(e) {
       return ok_(addStudent_(body));
     }
     if (mode === "deletestudent") {
-      return ok_(deleteStudent_(body)); // мягкое = departure_date
+      return ok_(deleteStudent_(body));
     }
     if (mode === "restorestudent") {
       return ok_(restoreStudent_(body));
     }
 
     // ✅ Default: attendance save
-    // (если mode не пришёл — считаем это saveAttendance)
-    // Также поддержим варианты: "saveAttendance", "saveattendance"
-    if (!mode || mode === "saveattendance" || mode === "saveattendance_") {
+    if (!mode || mode === "saveattendance") {
       return ok_(saveAttendance_(body));
     }
 
@@ -108,6 +109,7 @@ function doPost(e) {
     return err_(ex.message);
   }
 }
+
 
 /*************************
  * HEADER MAP
