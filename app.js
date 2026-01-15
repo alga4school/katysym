@@ -36,13 +36,28 @@ async function apiGet(mode, params = {}) {
   if (!resp.ok || data?.ok === false) throw new Error(data?.error || ("HTTP " + resp.status));
   return data;
 }
-
 async function apiPost(body) {
-  const resp = await fetch(WEBAPP_URL, {
+  // ✅ Дублируем key/mode в URL, потому что workers.dev может не читать mode из JSON body
+  const url = new URL(WEBAPP_URL);
+  if (body?.key) url.searchParams.set("key", String(body.key));
+  if (body?.mode) url.searchParams.set("mode", String(body.mode));
+
+  const resp = await fetch(url.toString(), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
+
+  const text = await resp.text();
+
+  let data;
+  try { data = JSON.parse(text); }
+  catch { throw new Error("API JSON емес: " + text.slice(0, 160)); }
+
+  if (!resp.ok || data?.ok === false) throw new Error(data?.error || ("HTTP " + resp.status));
+  return data;
+}
+
 
   const text = await resp.text();
 
@@ -104,6 +119,20 @@ const I18N = {
   kk: {
     schoolName: '"№4 Алға орта мектебі" КММ',
     homeBtn: "← 🏠Басты бет",
+    
+installPWA: "📱 Қосымша ретінде орнату",
+installAndroid: "📱 Android (Samsung және т.б.)",
+installIOS: "🍎 iPhone (iOS)",
+installPC: "💻 Компьютер",
+
+installAndroidSteps:
+"1) Chrome ашыңыз\n2) ⋮ мәзір → \"Басты экранға қосу\" / \"Install app\"\n3) \"Орнату\" таңдаңыз",
+
+installIOSSteps:
+"1) Safari ашыңыз\n2) Төмендегі \"Бөлісу\" (⬆️) → \"Басты экранға қосу\"\n3) \"Қосу\" таңдаңыз",
+
+installPCSteps:
+"1) Chrome/Edge ашыңыз\n2) Адрес жолағындағы \"Install\" (қосу) белгісін басыңыз\n3) \"Орнату\" таңдаңыз",
 
     reportsTitle: "Есептер мен статистика",
     dailyControlTitle: "📚 Күнделікті бақылау",
@@ -178,6 +207,10 @@ const I18N = {
     studentsBtn: "👥 Оқушылар (басқару)",
     studentsTitle: "Оқушыларды басқару",
     refreshStudents: "🔄 Жаңарту",
+    
+departBtn: "🚪 Шықты",
+restoreBtn: "↩️ Қайтару",
+departPrompt: "Шығу күні (YYYY-MM-DD):",
 
     addStudentTitle: "➕ Оқушы қосу",
     studentFio: "ФИО",
@@ -185,12 +218,26 @@ const I18N = {
     classLetter: "Әріп",
     arrivalDate: "Келген күні",
     studentManageHint:
-      "Кеңес: оқушы шықса — “Выбыл” батырмасын басыңыз (өшірмейді, тек шығу күнін қояды).",
+"Кеңес: оқушы шықса — “Шықты” батырмасын басыңыз (өшірмейді, тек шығу күнін қояды).",
   },
 
   ru: {
     schoolName: 'КГУ "Алгинская средняя школа №4"',
     homeBtn: "← 🏠 Главная",
+    
+installPWA: "📱 Установить как приложение",
+installAndroid: "📱 Android (Samsung и др.)",
+installIOS: "🍎 iPhone (iOS)",
+installPC: "💻 Компьютер",
+
+installAndroidSteps:
+"1) Откройте Chrome\n2) Меню ⋮ → \"Установить приложение\" / \"Добавить на главный экран\"\n3) Нажмите \"Установить\"",
+
+installIOSSteps:
+"1) Откройте Safari\n2) Поделиться (⬆️) → \"На экран Домой\"\n3) Нажмите \"Добавить\"",
+
+installPCSteps:
+"1) Откройте Chrome/Edge\n2) Нажмите значок установки (Install) в адресной строке\n3) Нажмите \"Установить\"",
 
     reportsTitle: "Отчёты и статистика",
     dailyControlTitle: "📚 Ежедневный контроль",
@@ -265,6 +312,10 @@ const I18N = {
     studentsBtn: "👥 Ученики (управление)",
     studentsTitle: "Управление учениками",
     refreshStudents: "🔄 Обновить",
+    
+departBtn: "🚪 Выбыл",
+restoreBtn: "↩️ Вернуть",
+departPrompt: "Дата выбытия (YYYY-MM-DD):",
 
     addStudentTitle: "➕ Добавить ученика",
     studentFio: "ФИО",
@@ -938,13 +989,13 @@ function renderManageStudents() {
     if (!isInactive) {
       const btn = document.createElement("button");
       btn.className = "btn";
-      btn.textContent = "🚪 Выбыл";
+     btn.textContent = I18N[currentLang].departBtn;
       btn.addEventListener("click", () => markStudentDeparted(s.id));
       td6.appendChild(btn);
     } else {
       const btn = document.createElement("button");
       btn.className = "btn";
-      btn.textContent = "↩️ Вернуть";
+     btn.textContent = I18N[currentLang].restoreBtn;
       btn.addEventListener("click", () => restoreStudentById(s.id));
       td6.appendChild(btn);
     }
@@ -973,7 +1024,7 @@ async function addStudentFromUI() {
   try {
     await apiPost({
       key: API_KEY,
-      mode: "addStudent",
+      mode: "addstudent",
       full_name,
       grade,
       class_letter,
@@ -998,13 +1049,13 @@ async function addStudentFromUI() {
 
 async function markStudentDeparted(id) {
   const def = document.getElementById("attendanceDate")?.value || new Date().toISOString().slice(0, 10);
-  const d = prompt("Дата выбытия (YYYY-MM-DD):", def);
+ const d = prompt(I18N[currentLang].departPrompt, def);
   if (!d) return;
 
   try {
     await apiPost({
       key: API_KEY,
-      mode: "deleteStudent",
+      mode: "deletestudent",
       id: String(id),
       departure_date: d,
     });
@@ -1025,7 +1076,7 @@ async function restoreStudentById(id) {
   try {
     await apiPost({
       key: API_KEY,
-      mode: "restoreStudent",
+      mode: "restorestudent",
       id: String(id),
     });
 
@@ -1133,3 +1184,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
