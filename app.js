@@ -23,21 +23,29 @@ async function apiGet(mode, params = {}) {
   url.searchParams.set("key", API_KEY);
 
   Object.entries(params).forEach(([k, v]) => {
-    if (v !== undefined && v !== null && v !== "") url.searchParams.set(k, String(v));
+    if (v !== undefined && v !== null && v !== "") {
+      url.searchParams.set(k, String(v));
+    }
   });
 
   const resp = await fetch(url.toString(), { method: "GET" });
   const text = await resp.text();
 
   let data;
-  try { data = JSON.parse(text); }
-  catch { throw new Error("API JSON емес: " + text.slice(0, 160)); }
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error("API JSON емес: " + text.slice(0, 160));
+  }
 
-  if (!resp.ok || data?.ok === false) throw new Error(data?.error || ("HTTP " + resp.status));
+  if (!resp.ok || data?.ok === false) {
+    throw new Error(data?.error || ("HTTP " + resp.status));
+  }
+
   return data;
 }
+
 async function apiPost(body) {
-  // ✅ Дублируем key/mode в URL, потому что workers.dev может не читать mode из JSON body
   const url = new URL(WEBAPP_URL);
   if (body?.key) url.searchParams.set("key", String(body.key));
   if (body?.mode) url.searchParams.set("mode", String(body.mode));
@@ -51,21 +59,16 @@ async function apiPost(body) {
   const text = await resp.text();
 
   let data;
-  try { data = JSON.parse(text); }
-  catch { throw new Error("API JSON емес: " + text.slice(0, 160)); }
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error("API JSON емес: " + text.slice(0, 160));
+  }
 
-  if (!resp.ok || data?.ok === false) throw new Error(data?.error || ("HTTP " + resp.status));
-  return data;
-}
+  if (!resp.ok || data?.ok === false) {
+    throw new Error(data?.error || ("HTTP " + resp.status));
+  }
 
-
-  const text = await resp.text();
-
-  let data;
-  try { data = JSON.parse(text); }
-  catch { throw new Error("API JSON емес: " + text.slice(0, 160)); }
-
-  if (!resp.ok || data?.ok === false) throw new Error(data?.error || ("HTTP " + resp.status));
   return data;
 }
 
@@ -1184,4 +1187,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
