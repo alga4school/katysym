@@ -45,15 +45,21 @@ async function apiGet(mode, params = {}) {
   return data;
 }
 
-async function apiPost(body) {
+async function apiPost(body = {}) {
+  const payload = { ...body };
+
+  // key әрқашан болсын
+  if (!payload.key) payload.key = API_KEY;
+
+  // mode-ты URL-ға да, body-ға да міндетті түрде жібереміз
   const url = new URL(WEBAPP_URL);
-  if (body?.key) url.searchParams.set("key", String(body.key));
-  if (body?.mode) url.searchParams.set("mode", String(body.mode));
+  url.searchParams.set("key", String(payload.key));
+  if (payload.mode) url.searchParams.set("mode", String(payload.mode));
 
   const resp = await fetch(url.toString(), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    body: JSON.stringify(payload),
   });
 
   const text = await resp.text();
@@ -68,7 +74,6 @@ async function apiPost(body) {
   if (!resp.ok || data?.ok === false) {
     throw new Error(data?.error || ("HTTP " + resp.status));
   }
-
   return data;
 }
 
@@ -1187,5 +1192,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
