@@ -48,10 +48,8 @@ async function apiGet(mode, params = {}) {
 async function apiPost(body = {}) {
   const payload = { ...body };
 
-  // key әрқашан болсын
   if (!payload.key) payload.key = API_KEY;
 
-  // mode-ты URL-ға да, body-ға да міндетті түрде жібереміз
   const url = new URL(WEBAPP_URL);
   url.searchParams.set("key", String(payload.key));
   if (payload.mode) url.searchParams.set("mode", String(payload.mode));
@@ -65,17 +63,13 @@ async function apiPost(body = {}) {
   const text = await resp.text();
 
   let data;
-  try {
-    data = JSON.parse(text);
-  } catch {
-    throw new Error("API JSON емес: " + text.slice(0, 160));
-  }
+  try { data = JSON.parse(text); }
+  catch { throw new Error("API JSON емес: " + text.slice(0, 160)); }
 
-  if (!resp.ok || data?.ok === false) {
-    throw new Error(data?.error || ("HTTP " + resp.status));
-  }
+  if (!resp.ok || data?.ok === false) throw new Error(data?.error || ("HTTP " + resp.status));
   return data;
 }
+
 
 // ============================
 // HARD REFRESH (FIX CACHE / PWA)
@@ -1192,6 +1186,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
