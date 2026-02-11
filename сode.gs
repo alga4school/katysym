@@ -80,6 +80,21 @@ function doPost(e) {
   try {
     const body = e?.postData?.contents ? JSON.parse(e.postData.contents) : {};
 
+const lastRow = sheet.getLastRow();
+if (lastRow < 2) return [];
+
+let data = sheet
+  .getRange(2, 1, lastRow - 1, sheet.getLastColumn())
+  .getValues()
+  .filter(r => {
+    const d = r[0]; // колонка ДАТЫ
+    return d >= from && d <= to;
+  });
+
+if (cls !== "ALL") {
+  data = data.filter(r => r[1] === cls); // колонка класса
+}
+
     // ✅ key: body-дан да, URL параметрден де оқимыз
     const key = String(body.key || e?.parameter?.key || "").trim();
     if (key !== API_KEY) return err_("Invalid key");
