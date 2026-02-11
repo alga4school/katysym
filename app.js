@@ -647,14 +647,19 @@ function iso(d) {
   return d.toISOString().slice(0, 10);
 }
 
-function getQuarterRangeByYear(q, year) {
-  const y = Number(year);
-  const qq = Math.min(4, Math.max(1, Number(q)));
-  const startMonth = (qq - 1) * 3;
-  const from = new Date(y, startMonth, 1);
-  const to = new Date(y, startMonth + 3, 0);
-  return { from: iso(from), to: iso(to) };
+// ============================
+// SCHOOL QUARTERS (2025–2026)
+// ============================
+function getSchoolQuarterRange(q) {
+  const map = {
+    1: { from: "2025-09-01", to: "2025-10-26" },
+    2: { from: "2025-11-03", to: "2025-12-28" },
+    3: { from: "2026-01-08", to: "2026-03-18" },
+    4: { from: "2026-03-30", to: "2026-05-25" },
+  };
+  return map[q] || null;
 }
+
 
 function getRangeFromPeriod() {
   const type = document.getElementById("periodType")?.value;
@@ -686,12 +691,12 @@ function getRangeFromPeriod() {
 
   if (type === "quarter") {
     const q = Number(document.getElementById("quarterInput")?.value);
-    const y = Number(document.getElementById("quarterYearInput")?.value);
-    return q && y ? getQuarterRangeByYear(q, y) : null;
+    return q ? getSchoolQuarterRange(q) : null;
   }
 
   return null;
 }
+
 
 // ============================
 // UPDATE PERIOD CONTROLS
@@ -723,21 +728,20 @@ function updatePeriodControls() {
     if (s && e) e.value = s.value;
   }
 
-  // quarter → авто диапазон
-  if (type === "quarter") {
-    const q = document.getElementById("quarterInput")?.value;
-    const y = document.getElementById("quarterYearInput")?.value;
-    if (q && y) {
-      const r = getQuarterRangeByYear(q, y);
-      const s = document.getElementById("customStart");
-      const e = document.getElementById("customEnd");
-      if (s && e) {
-        s.value = r.from;
-        e.value = r.to;
-      }
+// quarter → авто диапазон (школьные четверти)
+if (type === "quarter") {
+  const q = Number(document.getElementById("quarterInput")?.value);
+  if (q) {
+    const r = getSchoolQuarterRange(q);
+    const s = document.getElementById("customStart");
+    const e = document.getElementById("customEnd");
+    if (r && s && e) {
+      s.value = r.from;
+      e.value = r.to;
     }
   }
 }
+
 
 
 // ============================
@@ -1285,6 +1289,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
