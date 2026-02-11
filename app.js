@@ -458,6 +458,29 @@ function parseClass(cls) {
 }
 
 // ============================
+// PERIOD HELPERS
+// ============================
+function getQuarterRange(q, y) {
+  const map = {
+    1: ["01-01", "03-31"],
+    2: ["04-01", "06-30"],
+    3: ["09-01", "10-31"],
+    4: ["11-01", "12-31"],
+  };
+  return {
+    from: `${y}-${map[q][0]}`,
+    to: `${y}-${map[q][1]}`,
+  };
+}
+
+function getYearRange(y) {
+  return {
+    from: `${y}-01-01`,
+    to: `${y}-12-31`,
+  };
+}
+
+// ============================
 // ATTENDANCE TABLE
 // ============================
 function buildStatusCell(studentId) {
@@ -1262,6 +1285,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
