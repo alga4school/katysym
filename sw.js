@@ -7,24 +7,18 @@ const ASSETS = [
   "/katysym/app.js",
   "/katysym/students.js",
 
-  // ✅ Біз manifest.json емес, site.webmanifest қолданамыз
   "/katysym/favicon_io/site.webmanifest",
-
-  // ✅ Иконкалар (сенің папкаңдағы нақты аттар)
   "/katysym/favicon_io/icon-192.png",
   "/katysym/favicon_io/icon-512.png",
   "/katysym/favicon_io/apple-touch-icon.png",
 
-  // ✅ favicon-дар (қаласаң қалдыр)
   "/katysym/favicon_io/favicon-32x32.png",
   "/katysym/favicon_io/favicon-16x16.png",
-  "/katysym/favicon_io/favicon.ico"
+  "/katysym/favicon_io/favicon.ico",
 ];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
-  );
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)));
   self.skipWaiting();
 });
 
@@ -40,7 +34,7 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const req = event.request;
 
-  // ❌ НЕ кэшируем API-запросы (ОЧЕНЬ ВАЖНО)
+  // ❌ НЕ кэшируем API-запросы (иначе отчёты и список учеников "залипают")
   if (req.url.includes("workers.dev")) {
     return;
   }
@@ -54,5 +48,3 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
-
-
