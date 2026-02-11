@@ -570,10 +570,6 @@ async function saveAttendance() {
   const { grade, letter } = parseClass(cls);
   const guardKey = `att_saved:${date}:${grade}:${letter}`;
 
-  if (localStorage.getItem(guardKey) === "1") {
-    if (saveStatus) saveStatus.textContent = I18N[currentLang].alreadySaved;
-    return;
-  }
 
   if (btn) btn.disabled = true;
   if (saveStatus) saveStatus.textContent = "⏳ ...";
@@ -1186,6 +1182,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("API error: " + e.message);
   }
 });
+
 
 
 
