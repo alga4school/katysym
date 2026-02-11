@@ -728,21 +728,20 @@ function updatePeriodControls() {
     if (s && e) e.value = s.value;
   }
 
-// quarter → авто диапазон (школьные четверти)
-if (type === "quarter") {
-  const q = Number(document.getElementById("quarterInput")?.value);
-  if (q) {
-    const r = getSchoolQuarterRange(q);
-    const s = document.getElementById("customStart");
-    const e = document.getElementById("customEnd");
-    if (r && s && e) {
-      s.value = r.from;
-      e.value = r.to;
+  // quarter → авто диапазон (школьные четверти)
+  if (type === "quarter") {
+    const q = Number(document.getElementById("quarterInput")?.value);
+    if (q) {
+      const r = getSchoolQuarterRange(q);
+      const s = document.getElementById("customStart");
+      const e = document.getElementById("customEnd");
+      if (r && s && e) {
+        s.value = r.from;
+        e.value = r.to;
+      }
     }
   }
 }
-
-
 
 // ============================
 // REPORTS (LOAD + RENDER + CSV)
