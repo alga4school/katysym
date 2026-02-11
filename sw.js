@@ -39,23 +39,20 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   const req = event.request;
+
+  // ❌ НЕ кэшируем API-запросы (ОЧЕНЬ ВАЖНО)
+  if (req.url.includes("workers.dev")) {
+    return;
+  }
+
   if (req.method !== "GET") return;
 
   event.respondWith(
     caches.match(req).then((cached) => {
       if (cached) return cached;
-
-      return fetch(req)
-        .then((resp) => {
-          // тек сәтті жауаптарды ғана кэшке салайық
-          if (resp && resp.status === 200) {
-            const copy = resp.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
-          }
-          return resp;
-        })
-        .catch(() => caches.match("/katysym/index.html"))
+      return fetch(req);
     })
   );
 });
+
 
